@@ -2,15 +2,16 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>旅遊分帳 🏝️</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #FFFDF5; font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background: #FFFDF5; font-family: 'Noto Sans TC', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
     input, select, button, textarea { font-family: inherit; }
+    ::-webkit-scrollbar { display: none; }
   </style>
 </head>
 <body>
@@ -209,8 +210,8 @@ function CategoryPicker({value,onChange,cats}) {
   },[]);
   const cur = getCat(value, cats);
   return (
-    <div ref={ref} style={{position:"relative",marginBottom:8}}>
-      <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
+    <div ref={ref} style={{position:"relative",marginBottom:0}}>
+      <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,height:42,display:"flex",alignItems:"center",gap:8,cursor:"pointer",boxSizing:"border-box"}}>
         <span style={{fontSize:18}}>{cur.icon}</span>
         <span style={{flex:1,color:T.text}}>{cur.label}</span>
         <span style={{fontSize:10,color:T.textMute}}>{open?"▲":"▼"}</span>
@@ -326,24 +327,50 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
     onSave({name,total:pt,date,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
+  // Auto-fill single payer when total changes
+  const handleTotalChange = (val) => {
+    setTotal(val);
+    if(payers.length===1) {
+      setPayers([{...payers[0], amount:val}]);
+    }
+  };
+
   return (
-    <div style={{background:T.bg,border:`1.5px solid ${T.yellowLt}`,borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
-      <div style={{display:"flex",gap:8}}>
-        <input placeholder="項目名稱" value={name} onChange={e=>setName(e.target.value)} style={{...iStyle,flex:1}}/>
-        <input type="number" placeholder="總金額" value={total} onChange={e=>setTotal(e.target.value)} style={{...iStyle,width:100}}/>
+    <div style={{background:"#fff",borderRadius:20,padding:"16px 14px 12px",marginBottom:12,boxShadow:"0 4px 20px rgba(180,130,40,0.13)"}}>
+      {/* Header label */}
+      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"✏️ 編輯消費":"🧾 新增消費"}</div>
+
+      {/* Section 1: 名稱 + 金額 — equal size, centered */}
+      <div style={{display:"flex",gap:8,marginBottom:8}}>
+        <input placeholder="項目名稱" value={name} onChange={e=>setName(e.target.value)}
+          style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:700,textAlign:"center",height:42}}/>
+        <input type="number" placeholder="總金額" value={total} onChange={e=>handleTotalChange(e.target.value)}
+          style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
       </div>
-      <div style={{display:"flex",gap:8}}>
-        <div style={{flex:1}}><div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>分類</div><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
-        <div style={{flex:1}}><div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>日期</div><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0}}/></div>
+
+      {/* Section 2: 分類 + 日期 — equal size */}
+      <div style={{display:"flex",gap:8,marginBottom:8}}>
+        <div style={{flex:1}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
+        <div style={{flex:1,display:"flex"}}><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/></div>
       </div>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600,marginTop:4}}>付款人</div>
-      <PayersEditor payers={payers} setPayers={setPayers} members={members} total={total}/>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600,marginTop:6}}>分帳方式</div>
-      <SplitEditor mode={splitMode} setMode={setSplitMode} data={splitData} setData={setSplitData} members={members} colors={colors} total={total}/>
-      <div style={{display:"flex",gap:8,marginTop:8}}>
-        <Btn onClick={handleSave} style={{flex:1}}>{onDelete?"💾 儲存":"✅ 新增"}</Btn>
-        <Btn onClick={onCancel} variant="secondary" style={{flex:1}}>取消</Btn>
-        {onDelete && <Btn onClick={onDelete} variant="danger">🗑️</Btn>}
+
+      {/* Section 3a: 付款人 */}
+      <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
+        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>付款人</div>
+        <PayersEditor payers={payers} setPayers={setPayers} members={members} total={total}/>
+      </div>
+
+      {/* Section 3b: 分帳方式 */}
+      <div style={{background:"#F3F8FF",border:"1.5px solid #BBDEFB",borderRadius:12,padding:"10px 12px",marginBottom:10}}>
+        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>分帳方式</div>
+        <SplitEditor mode={splitMode} setMode={setSplitMode} data={splitData} setData={setSplitData} members={members} colors={colors} total={total}/>
+      </div>
+
+      {/* Action buttons - compact */}
+      <div style={{display:"flex",gap:6,justifyContent:"flex-end",alignItems:"center"}}>
+        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>🗑️</button>}
+        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>取消</button>
+        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"💾":"✅"}</button>
       </div>
     </div>
   );
@@ -523,7 +550,7 @@ function ConfigTab({group,setGroups,bal,me}) {
 
       {/* Export CSV */}
       <div style={{display:"flex",gap:8,marginBottom:16}}>
-        <button onClick={()=>{const r=exportGroupCSV(group);if(r)setExportModal({title:`${group.name} 明細`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📥 匯出明細 CSV</button>
+        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} 明細`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📥 匯出明細 CSV</button>
       </div>
 
       {section==="members" && (
@@ -635,14 +662,15 @@ function downloadFile(filename, content, type) {
   return false;
 }
 
-function exportGroupCSV(group) {
+function exportGroupCSV(group, me) {
   const cats = group.categories || DEFAULT_CATS;
   const getCatLabel = id => (cats.find(c=>c.id===id)||cats[cats.length-1]).label;
   const rows = [["日期","項目","分類","總金額","付款人","分帳成員","我的分攤"]];
   [...group.expenses].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e => {
     const payers = e.payers.map(p=>`${p.name}(NT$${p.amount})`).join("+");
     const splitMembers = Object.keys(e.splits).join("、");
-    rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, ""]);
+    const myShare = me ? (e.splits[me]||0).toFixed(2) : "";
+    rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, myShare]);
   });
   const payments = group.payments || [];
   [...payments].sort((a,b)=>a.date.localeCompare(b.date)).forEach(p => {
@@ -722,7 +750,8 @@ function App() {
           if(username) { setCurrentUser(username); setUsernameInput(username); setScreen("home"); return; }
         }
         // Fallback: shared storage
-        const u = localStorage.getItem("splitapp:user"); if(u) { const {username}=JSON.parse(u); if(username){setCurrentUser(username);setUsernameInput(username);setScreen("home");return;} }
+        const _u = localStorage.getItem("splitapp:user");
+        if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setUsernameInput(username);setScreen("home");return;}}
 
       } catch {}
       setScreen("login");
@@ -961,10 +990,6 @@ function App() {
 
           {activeTab==="expenses" && (
             <div>
-              <div style={{display:"flex",gap:8,marginBottom:12}}>
-                <Btn onClick={()=>{setShowAdd(!showAdd);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}} style={{flex:1,padding:11,fontSize:13}}>＋ 新增消費</Btn>
-                <Btn onClick={()=>{setShowPayment(!showPayment);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}} variant="secondary" style={{flex:1,padding:11,fontSize:13}}>💸 記錄轉帳</Btn>
-              </div>
               {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
               {showPayment && <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
               {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>還沒有任何消費 🌴</div>}
@@ -1019,7 +1044,11 @@ function App() {
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${T.border}`,paddingTop:6}}>
                           <div style={{display:"flex",gap:3,flexWrap:"wrap",flex:1}}>
-                            {participants.map(m => <span key={m} style={{display:"inline-flex",alignItems:"center",gap:3,background:T.bg,border:`1px solid ${T.border}`,borderRadius:20,padding:"2px 7px 2px 4px",fontSize:10}}><span style={{width:10,height:10,borderRadius:"50%",background:colors[m]||"#aaa",display:"inline-block",flexShrink:0}}/>{m}</span>)}
+                            {participants.map(m => (
+                              <div key={m} title={m} style={{width:22,height:22,borderRadius:"50%",background:colors[m]||"#aaa",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 1px 3px rgba(0,0,0,0.15)"}}>
+                                {m[0]}
+                              </div>
+                            ))}
                           </div>
                           <div style={{fontSize:11,color:T.textSub,flexShrink:0,marginLeft:6}}>
                             {e.payers.length===1?`${e.payers[0].name} 付 NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
@@ -1038,7 +1067,7 @@ function App() {
             <div>
               {/* Balance cards - 2 per row to stay compact */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-                {members.map(m => {
+                {[me,...members.filter(m=>m!==me)].map(m => {
                   const {paid,owes}=bal[m]||{paid:0,owes:0}, net=paid-owes, col=colors[m]||"#aaa", isMe=m===me;
                   const cleared=Math.abs(net)<0.5;
                   return (
@@ -1151,6 +1180,33 @@ function App() {
               : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me}/>
           )}
         </div>
+
+      {/* FAB */}
+      {activeTab==="expenses" && (
+        <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+          {(showAdd||showPayment) && (
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
+              <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
+                <span>💸</span> 記錄轉帳
+              </button>
+              <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
+                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
+                <span>🧾</span> 新增消費
+              </button>
+            </div>
+          )}
+          <button
+            onClick={()=>{
+              const isOpen=showAdd||showPayment;
+              if(isOpen){setShowAdd(false);setShowPayment(false);}
+              else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
+            }}
+            style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
+            {(showAdd||showPayment) ? "✕" : "＋"}
+          </button>
+        </div>
+      )}
       </div>
     );
   }
@@ -1225,7 +1281,6 @@ function App() {
     </div>
   );
 }
-
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
   </script>
