@@ -2,22 +2,24 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>旅遊分帳 🏝️</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: #FFFDF5; font-family: 'Noto Sans TC', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #FFFDF5; font-family: 'Noto Sans TC', 'Segoe UI', sans-serif; }
     input, select, button, textarea { font-family: inherit; }
-    ::-webkit-scrollbar { display: none; }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
+
+const { useState, useEffect, useRef } = React;
 
 const T = {
   bg:"#FFFDF5", bgCard:"#FFFFFF", yellow:"#FFE566", yellowDk:"#D4A017",
@@ -27,9 +29,9 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
-  {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
+  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
+  {id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
   {id:"medical",icon:"💊",label:"醫藥"},{id:"misc",icon:"📦",label:"雜支"},
@@ -210,8 +212,8 @@ function CategoryPicker({value,onChange,cats}) {
   },[]);
   const cur = getCat(value, cats);
   return (
-    <div ref={ref} style={{position:"relative",marginBottom:0}}>
-      <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,height:42,display:"flex",alignItems:"center",gap:8,cursor:"pointer",boxSizing:"border-box"}}>
+    <div ref={ref} style={{position:"relative",marginBottom:8}}>
+      <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,display:"flex",alignItems:"center",gap:8,cursor:"pointer"}}>
         <span style={{fontSize:18}}>{cur.icon}</span>
         <span style={{flex:1,color:T.text}}>{cur.label}</span>
         <span style={{fontSize:10,color:T.textMute}}>{open?"▲":"▼"}</span>
@@ -327,50 +329,29 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
     onSave({name,total:pt,date,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
-  // Auto-fill single payer when total changes
-  const handleTotalChange = (val) => {
-    setTotal(val);
-    if(payers.length===1) {
-      setPayers([{...payers[0], amount:val}]);
-    }
-  };
-
   return (
-    <div style={{background:"#fff",borderRadius:20,padding:"16px 14px 12px",marginBottom:12,boxShadow:"0 4px 20px rgba(180,130,40,0.13)"}}>
-      {/* Header label */}
-      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"✏️ 編輯消費":"🧾 新增消費"}</div>
-
-      {/* Section 1: 名稱 + 金額 — equal size, centered */}
+    <div>
+      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:8}}>🧾 新增消費</div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
-        <input placeholder="項目名稱" value={name} onChange={e=>setName(e.target.value)}
-          style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:700,textAlign:"center",height:42}}/>
-        <input type="number" placeholder="總金額" value={total} onChange={e=>handleTotalChange(e.target.value)}
-          style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
+        <input placeholder="項目名稱" value={name} onChange={e=>setName(e.target.value)} style={{...iStyle,flex:1,fontSize:16,fontWeight:600,height:46,marginBottom:0}}/>
+        <input type="number" placeholder="總金額" value={total} onChange={e=>setTotal(e.target.value)} style={{...iStyle,width:100,fontSize:16,fontWeight:600,height:46,marginBottom:0}}/>
       </div>
-
-      {/* Section 2: 分類 + 日期 — equal size */}
       <div style={{display:"flex",gap:8,marginBottom:8}}>
-        <div style={{flex:1}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
-        <div style={{flex:1,display:"flex"}}><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/></div>
+        <div style={{flex:1}}><div style={{fontSize:10,color:T.textMute,marginBottom:3}}>分類</div><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
+        <div style={{flex:1}}><div style={{fontSize:10,color:T.textMute,marginBottom:3}}>日期</div><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,height:42,minHeight:42}}/></div>
       </div>
-
-      {/* Section 3a: 付款人 */}
-      <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
-        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>付款人</div>
+      <div style={{background:"#FFF8E1",border:`1.5px solid #FFE082`,borderRadius:12,padding:"10px 12px",marginBottom:8}}>
+        <div style={{fontSize:11,color:"#E65100",fontWeight:700,marginBottom:6}}>💛 付款人</div>
         <PayersEditor payers={payers} setPayers={setPayers} members={members} total={total}/>
       </div>
-
-      {/* Section 3b: 分帳方式 */}
-      <div style={{background:"#F3F8FF",border:"1.5px solid #BBDEFB",borderRadius:12,padding:"10px 12px",marginBottom:10}}>
-        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>分帳方式</div>
+      <div style={{background:"#F0F7FF",border:"1.5px solid #BBDEFB",borderRadius:12,padding:"10px 12px",marginBottom:8}}>
+        <div style={{fontSize:11,color:"#1565C0",fontWeight:700,marginBottom:6}}>分帳方式</div>
         <SplitEditor mode={splitMode} setMode={setSplitMode} data={splitData} setData={setSplitData} members={members} colors={colors} total={total}/>
       </div>
-
-      {/* Action buttons - compact */}
       <div style={{display:"flex",gap:6,justifyContent:"flex-end",alignItems:"center"}}>
-        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>🗑️</button>}
-        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>取消</button>
-        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"💾":"✅"}</button>
+        {onDelete && <Btn onClick={onDelete} variant="danger" style={{padding:"7px 10px",fontSize:13}}>🗑️</Btn>}
+        <Btn onClick={onCancel} variant="secondary" style={{padding:"7px 14px",fontSize:12}}>✕</Btn>
+        <Btn onClick={handleSave} style={{padding:"7px 16px",fontSize:13}}>{onDelete?"💾":"✅"}</Btn>
       </div>
     </div>
   );
@@ -497,7 +478,7 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
 }
 
 // ── Config Tab ────────────────────────────────────────────────────────
-function ConfigTab({group,setGroups,bal,me}) {
+function ConfigTab({group,setGroups,bal,me,onDeleteGroup}) {
   const cats = group.categories||DEFAULT_CATS;
   const [section,setSection] = useState("members");
   const [editing,setEditing] = useState(null);
@@ -669,8 +650,7 @@ function exportGroupCSV(group, me) {
   [...group.expenses].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e => {
     const payers = e.payers.map(p=>`${p.name}(NT$${p.amount})`).join("+");
     const splitMembers = Object.keys(e.splits).join("、");
-    const myShare = me ? (e.splits[me]||0).toFixed(2) : "";
-    rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, myShare]);
+    rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, ""]);
   });
   const payments = group.payments || [];
   [...payments].sort((a,b)=>a.date.localeCompare(b.date)).forEach(p => {
@@ -711,6 +691,7 @@ function App() {
   const [exportModal,setExportModal] = useState(null); // {title, content}
   const [error,setError] = useState("");
   const [claimScreen,setClaimScreen] = useState(null);
+  const [pendingGroupCode,setPendingGroupCode] = useState(null);
   const importFileRef = useRef(null);
 
   function handleImportBackup(e) {
@@ -737,34 +718,49 @@ function App() {
     e.target.value = "";
   }
 
-  useEffect(() => {
-    (async () => {
-      const saved = await loadData("splitapp:data");
+  useEffect(()=>{
+    (async()=>{
+      const saved=await loadData("splitapp:data");
       if(saved&&saved.groups&&saved.groups.length>0) setGroups(saved.groups);
       else setGroups([buildInitialGroup()]);
       try {
-        // Read username from URL hash - persists in bookmarks
-        const hash = window.location.hash.slice(1);
-        if(hash) {
-          const username = decodeURIComponent(hash);
-          if(username) { setCurrentUser(username); setUsernameInput(username); setScreen("home"); return; }
+        const hash=window.location.hash.slice(1);
+        if(hash){
+          const [eu,gc]=hash.split(":");
+          const u=decodeURIComponent(eu||"");
+          if(u){setCurrentUser(u);setUsernameInput(u);if(gc)setPendingGroupCode(gc.toUpperCase());setScreen("home");return;}
         }
-        // Fallback: shared storage
-        const _u = localStorage.getItem("splitapp:user");
-        if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setUsernameInput(username);setScreen("home");return;}}
-
+        const uv={value:localStorage.getItem("splitapp:user")};
+        if(uv?.value){const {username}=JSON.parse(uv.value);if(username){setCurrentUser(username);setUsernameInput(username);setScreen("home");return;}}
       } catch {}
       setScreen("login");
     })();
   },[]);
 
-  useEffect(() => { if(screen!=="loading") saveData("splitapp:data",{groups}); },[groups]);
-  useEffect(() => {
-    if(currentUser) {
-      try { localStorage.setItem("splitapp:user",JSON.stringify({username:currentUser})); } catch {}
-      try { window.location.hash = encodeURIComponent(currentUser); } catch {}
-    }
+  useEffect(()=>{ if(screen!=="loading") saveData("splitapp:data",{groups}); },[groups]);
+
+  useEffect(()=>{
+    if(!currentUser) return;
+    try{localStorage.setItem("splitapp:user",JSON.stringify({username:currentUser}));}catch{}
   },[currentUser]);
+
+  // (auto-sync not needed for localStorage version)
+
+  // Auto-join from URL pending group code
+  useEffect(()=>{
+    if(screen==="home"&&pendingGroupCode&&currentUser){
+      setPendingGroupCode(null);
+      setTimeout(async()=>{
+        const code=pendingGroupCode;
+        let g=groups.find(x=>x.code===code);
+        if(!g){const saved=await loadData("splitapp:data");const remote=saved?.groups||[];g=remote.find(x=>x.code===code);if(g)setGroups(prev=>{const ids=new Set(prev.map(x=>x.id));const toAdd=remote.filter(x=>!ids.has(x.id));return toAdd.length>0?[...prev,...toAdd]:prev;});}
+        if(!g){setError("找不到此群組 🔍");return;}
+        const ac=Object.values(g.claimedBy||{}).includes(currentUser);
+        if(g.members.includes(currentUser)||ac){setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");return;}
+        setClaimScreen({groupId:g.id,code});
+      },300);
+    }
+  },[screen,pendingGroupCode,currentUser]);
 
   const currentGroup = groups.find(g=>g.id===currentGroupId);
 
@@ -778,6 +774,11 @@ function App() {
     if(!name){setError("請輸入名字 😊");return;}
     setCurrentUser(name); setScreen("home"); setError("");
   }
+  function handleDeleteGroup(groupId){
+    setGroups(prev=>prev.filter(x=>x.id!==groupId));
+    setCurrentGroupId(null); setScreen("home");
+  }
+
   function handleCreateGroup() {
     const name=newGroupName.trim();
     const pin=newGroupPin.trim();
@@ -785,7 +786,7 @@ function App() {
     if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
     const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
     setGroups(prev=>[...prev,g]);
-    setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
+    setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("config"); setScreen("group"); setError("");
   }
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
@@ -956,6 +957,7 @@ function App() {
               <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
               <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdmin?" · 👑":""}</div>
             </div>
+            <button onClick={()=>{ const url=window.location.href.split("#")[0]+"#"+encodeURIComponent(me)+":"+g.code; try{navigator.clipboard.writeText(url).then(()=>alert("群組連結已複製！📋"));}catch{alert("連結："+url);} }} style={{background:"rgba(255,255,255,0.8)",border:`1.5px solid ${T.yellowMd}`,borderRadius:10,width:32,height:32,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>🔗</button>
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
           </div>
           <div style={{background:"rgba(255,255,255,0.75)",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
@@ -989,9 +991,17 @@ function App() {
           {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>✕</button></div>}
 
           {activeTab==="expenses" && (
-            <div>
-              {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
-              {showPayment && <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
+            <div style={{paddingBottom:80}}>
+              {showAdd && (
+                <div style={{background:T.bgCard,border:`1.5px solid ${T.yellowLt}`,borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
+                  <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={e=>{handleAddExpense(e);setShowAdd(false);}} onCancel={()=>setShowAdd(false)}/>
+                </div>
+              )}
+              {showPayment && (
+                <div style={{background:"#F1FBF4",border:"1.5px solid #A5D6A7",borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
+                  <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>
+                </div>
+              )}
               {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>還沒有任何消費 🌴</div>}
               {sortedDates.map(date => (
                 <div key={date}>
@@ -1044,11 +1054,7 @@ function App() {
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${T.border}`,paddingTop:6}}>
                           <div style={{display:"flex",gap:3,flexWrap:"wrap",flex:1}}>
-                            {participants.map(m => (
-                              <div key={m} title={m} style={{width:22,height:22,borderRadius:"50%",background:colors[m]||"#aaa",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 1px 3px rgba(0,0,0,0.15)"}}>
-                                {m[0]}
-                              </div>
-                            ))}
+                            {participants.map(m => <span key={m} title={m} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:22,height:22,borderRadius:"50%",background:colors[m]||"#aaa",fontSize:10,fontWeight:700,color:"#fff",flexShrink:0}}>{m[0]}</span>)}
                           </div>
                           <div style={{fontSize:11,color:T.textSub,flexShrink:0,marginLeft:6}}>
                             {e.payers.length===1?`${e.payers[0].name} 付 NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
@@ -1177,33 +1183,21 @@ function App() {
                   }} style={{width:"100%",maxWidth:200,padding:10}}>確認</Btn>
                 </div>
               )
-              : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me}/>
+              : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me} onDeleteGroup={handleDeleteGroup}/>
           )}
         </div>
 
       {/* FAB */}
       {activeTab==="expenses" && (
-        <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+        <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:10}}>
           {(showAdd||showPayment) && (
-            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
-              <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>💸</span> 記錄轉帳
-              </button>
-              <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>🧾</span> 新增消費
-              </button>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+              <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}><span>💸</span> 記錄轉帳</button>
+              <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}><span>🧾</span> 新增消費</button>
             </div>
           )}
-          <button
-            onClick={()=>{
-              const isOpen=showAdd||showPayment;
-              if(isOpen){setShowAdd(false);setShowPayment(false);}
-              else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
-            }}
-            style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
-            {(showAdd||showPayment) ? "✕" : "＋"}
+          <button onClick={()=>{const o=showAdd||showPayment;if(o){setShowAdd(false);setShowPayment(false);}else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}} style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?20:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
+            {(showAdd||showPayment)?"✕":"＋"}
           </button>
         </div>
       )}
@@ -1281,6 +1275,7 @@ function App() {
     </div>
   );
 }
+
 
     ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
   </script>
