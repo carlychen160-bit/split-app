@@ -602,7 +602,7 @@ function ConfigTab({group, setGroups}){
 }
 
 // ── Main App ──────────────────────────────────────────────────────────
-export default export default function App(){
+export default function App(){
   const [screen,setScreen]=useState("loading");
   const [groups,setGroups]=useState([]);
   const [currentUser,setCurrentUser]=useState("");
