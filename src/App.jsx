@@ -671,9 +671,14 @@ export default function App(){
 
   function handleJoinGroup(){
     const code=joinCode.trim().toUpperCase();
-    let g=groups.find(x=>x.code===code);
-    if(!g){
+    const g=groups.find(x=>x.code===code);
     if(!g){setError("找不到此群組代碼 🔍");return;}
+    const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
+    if(g.members.includes(currentUser)||alreadyClaimed){
+      setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setJoinCode(""); setError(""); return;
+    }
+    setClaimScreen({groupId:g.id,code});
+    setJoinCode(""); setError("");
     // Already a member or already claimed
     const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
     if(g.members.includes(currentUser)||alreadyClaimed){
