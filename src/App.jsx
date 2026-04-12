@@ -732,18 +732,35 @@ export default function App() {
   }
 
   async function handleLogin() {
-    const name=usernameInput.trim();
-    if(!name){setError("�8e
-W =O");return;}
-    // Reload groups from Firestore to get cross-device data
-    try {
-      const q = query(collection(db, "groups"));
-      const snapshot = await getDocs(q);
-      const firestoreGroups = snapshot.docs.map(d => d.data());
-      if(firestoreGroups.length > 0) setGroups(firestoreGroups);
-    } catch(e) { console.error("Firestore reload error:", e); }
-    setCurrentUser(name); setScreen("home"); setError("");
+  const name = usernameInput.trim();
+
+  // 1. 檢查名稱是否為空
+  if (!name) {
+    setError("請輸入使用者名稱"); // 修正亂碼與斷行問題
+    return;
   }
+
+  // 2. 從 Firestore 重新讀取群組資料
+  try {
+    const q = query(collection(db, "groups"));
+    const snapshot = await getDocs(q);
+    const firestoreGroups = snapshot.docs.map(d => d.data());
+    
+    if (firestoreGroups.length > 0) {
+      setGroups(firestoreGroups);
+    }
+  } catch (e) {
+    console.error("Firestore reload error:", e);
+    // 選擇性：如果讀取失敗，也可以提示使用者
+    setError("同步資料時發生錯誤，請稍後再試");
+    return; // 若資料讀取失敗不希望登入，可在此 return
+  }
+
+  // 3. 登入成功處理
+  setCurrentUser(name);
+  setScreen("home");
+  setError(""); // 清除錯誤訊息
+}
 
   function handleCreateGroup() {
     const name=newGroupName.trim();
