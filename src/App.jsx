@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { db } from "./firebase";
+import { doc as fsDoc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs } from "firebase/firestore";
 
 const T = {
   bg:"#FFFDF5", bgCard:"#FFFFFF", yellow:"#FFE566", yellowDk:"#D4A017",
@@ -77,10 +79,12 @@ function minimizeTransfers(balances) {
 }
 
 async function loadData(key) {
+  // Firebase Firestore-based load - kept for backward compat
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
 }
 
 async function saveData(key, val) {
+  // Firebase Firestore-based save - kept for backward compat
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.error(e); }
 }
 
@@ -693,8 +697,11 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const saved = await loadData("splitapp:data");
-      if(saved&&saved.groups&&saved.groups.length>0) setGroups(saved.groups);
+      // Load groups from Firestore
+      const q = query(collection(db, "groups"));
+      const snapshot = await getDocs(q);
+      const firestoreGroups = snapshot.docs.map(d => d.data());
+      if(firestoreGroups.length > 0) setGroups(firestoreGroups);
       else setGroups([buildInitialGroup()]);
       try {
         const hash = window.location.hash.slice(1);
@@ -709,7 +716,13 @@ export default function App() {
     })();
   },[]);
 
-  useEffect(() => { if(screen!=="loading") saveData("splitapp:data",{groups}); },[groups]);
+  useEffect(() => {
+    if(screen==="loading") return;
+    // Save each group to Firestore as its own document (by group ID)
+    groups.forEach(g => {
+      setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
+    });
+  },[groups, screen]);
 
   useEffect(() => {
     if(currentUser) {
@@ -737,20 +750,34 @@ export default function App() {
     if(!name){setError("請輸入群組名稱");return;}
     if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
     const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
+    // Save to Firestore (cross-device sync)
+    setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
   }
 
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
+    if(!code){setError("請輸入群組代碼");return;}
+    // First check locally
     let g=groups.find(x=>x.code===code);
     if(!g){
-      const saved=await loadData("splitapp:data");
-      const remote=saved?.groups||[];
-      g=remote.find(x=>x.code===code);
-      if(g) setGroups(prev=>{const ids=new Set(prev.map(x=>x.id)); const toAdd=remote.filter(x=>!ids.has(x.id)); return toAdd.length>0?[...prev,...toAdd]:prev;});
+      // Query Firestore by group code
+      try {
+        const q = query(collection(db, "groups"), where("code", "==", code));
+        const snapshot = await getDocs(q);
+        if(!snapshot.empty) {
+          const remoteGroup = snapshot.docs[0].data();
+          g = remoteGroup;
+          // Add to local state if not already present
+          setGroups(prev=>{
+            const ids=new Set(prev.map(x=>x.id));
+            return ids.has(remoteGroup.id) ? prev : [...prev, remoteGroup];
+          });
+        }
+      } catch(e) { console.error(e); }
     }
-    if(!g){setError("找不到此群組代碼 🔍");return;}
+    if(!g){setError("找不到此群組 🔍");return;}
     const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
     if(g.members.includes(currentUser)||alreadyClaimed){setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");setJoinCode("");setError("");return;}
     setClaimScreen({groupId:g.id,code});
