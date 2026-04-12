@@ -10,12 +10,12 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
-  {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
-  {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
-  {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
-  {id:"medical",icon:"💊",label:"醫藥"},{id:"misc",icon:"📦",label:"雜支"},
+  {id:"food",icon:"ð",label:"é¤é£²"},{id:"snack",icon:"ð§",label:"é£²æå°é£"},
+  {id:"transport",icon:"ð",label:"äº¤é"},{id:"hotel",icon:"ð¨",label:"ä½å®¿"},
+  {id:"spot",icon:"ð¡",label:"æ¯é»"},{id:"shop",icon:"ðï¸",label:"è³¼ç©"},
+  {id:"grocery",icon:"ð",label:"è¶å¸"},{id:"fuel",icon:"â½",label:"æ²¹é¢"},
+  {id:"parking",icon:"ð¿ï¸",label:"åè»"},{id:"ticket",icon:"ðï¸",label:"ç¥¨å¸"},
+  {id:"medical",icon:"ð",label:"é«è¥"},{id:"misc",icon:"ð¦",label:"éæ¯"},
 ];
 
 const getCat = (id, cats) => {
@@ -27,7 +27,7 @@ const MEMBER_COLORS = ["#E57373","#64B5F6","#81C784","#FFB74D","#BA68C8","#4DB6A
 
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function now() { return new Date().toISOString(); }
-function fmtDate(d) { const dt=new Date(d+"T00:00:00"); return `${dt.getMonth()+1}月${dt.getDate()}日`; }
+function fmtDate(d) { const dt=new Date(d+"T00:00:00"); return `${dt.getMonth()+1}æ${dt.getDate()}æ¥`; }
 function fmtTs(ts) {
   const d=new Date(ts);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -78,56 +78,48 @@ function minimizeTransfers(balances) {
   return transfers;
 }
 
-async function loadData(key) {
-  // Firebase Firestore-based load - kept for backward compat
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
-}
-
-async function saveData(key, val) {
-  // Firebase Firestore-based save - kept for backward compat
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.error(e); }
 }
 
 function buildInitialGroup() {
-  const ALL = ["安安","Carly","Michael","Chien","陳霆宇","邱于瑄"];
-  const SG = ["Carly","陳霆宇","Michael","邱于瑄"];
-  const colors = {"安安":MEMBER_COLORS[0],"Carly":MEMBER_COLORS[1],"Michael":MEMBER_COLORS[2],"Chien":MEMBER_COLORS[3],"陳霆宇":MEMBER_COLORS[4],"邱于瑄":MEMBER_COLORS[5]};
+  const ALL = ["å®å®","Carly","Michael","Chien","é³éå®","é±äºç"];
+  const SG = ["Carly","é³éå®","Michael","é±äºç"];
+  const colors = {"å®å®":MEMBER_COLORS[0],"Carly":MEMBER_COLORS[1],"Michael":MEMBER_COLORS[2],"Chien":MEMBER_COLORS[3],"é³éå®":MEMBER_COLORS[4],"é±äºç":MEMBER_COLORS[5]};
   const yu = (()=>{ const f=180,rem=1716-f,oth=ALL.filter(m=>m!=="Michael"),sh=rem/oth.length,s={}; oth.forEach(m=>s[m]=sh); s["Michael"]=f; return s; })();
-  const am = {"Carly":95/6,"陳霆宇":95/6,"Chien":95/3,"Michael":95/3};
+  const am = {"Carly":95/6,"é³éå®":95/6,"Chien":95/3,"Michael":95/3};
   return {
-    id:"clearing2026", name:"2026清明節還1/4島", code:"CLEAR1",
+    id:"clearing2026", name:"2026æ¸æç¯é1/4å³¶", code:"CLEAR1",
     adminUser:"Carly", adminPin:"1234", members:ALL, colors, claimedBy:{},
     categories:[...DEFAULT_CATS], payments:[],
     expenses:[
-      {id:"e1",name:"全聯",category:"grocery",payers:[{name:"安安",amount:3476}],total:3476,date:"2026-04-02",splits:makeEqual(ALL,3476)},
-      {id:"e2",name:"棺材板",category:"food",payers:[{name:"Carly",amount:155}],total:155,date:"2026-04-02",splits:makeEqual(ALL,155)},
-      {id:"e3",name:"強蛋餅",category:"food",payers:[{name:"Carly",amount:320}],total:320,date:"2026-04-02",splits:makeEqual(ALL,320)},
-      {id:"e4",name:"有A漫的咖啡店",category:"snack",payers:[{name:"Michael",amount:750}],total:750,date:"2026-04-02",splits:makeEqual(SG,750)},
-      {id:"e5",name:"一碗小",category:"food",payers:[{name:"Michael",amount:1255}],total:1255,date:"2026-04-02",splits:makeEqual(ALL,1255)},
-      {id:"e6",name:"檸檬汁",category:"snack",payers:[{name:"Michael",amount:60}],total:60,date:"2026-04-02",splits:makeEqual(SG,60)},
-      {id:"e7",name:"佳興冰果室",category:"snack",payers:[{name:"Michael",amount:1350}],total:1350,date:"2026-04-02",splits:makeEqual(SG,1350)},
-      {id:"e8",name:"住宿",category:"hotel",payers:[{name:"Carly",amount:9585}],total:9585,date:"2026-04-02",splits:makeEqual(ALL,9585)},
-      {id:"e9",name:"緬甸料理",category:"food",payers:[{name:"Chien",amount:2320}],total:2320,date:"2026-04-03",splits:makeEqual(ALL,2320)},
-      {id:"e10",name:"油錢",category:"fuel",payers:[{name:"Michael",amount:3416}],total:3416,date:"2026-04-03",splits:makeEqual(SG,3416)},
-      {id:"e11",name:"全家冰塊",category:"grocery",payers:[{name:"陳霆宇",amount:118}],total:118,date:"2026-04-03",splits:makeEqual(ALL,118)},
-      {id:"e12",name:"花生糖",category:"snack",payers:[{name:"Carly",amount:310}],total:310,date:"2026-04-04",splits:makeEqual(["Carly","陳霆宇"],310)},
-      {id:"e13",name:"超市",category:"grocery",payers:[{name:"安安",amount:485}],total:485,date:"2026-04-04",splits:makeEqual(ALL,485)},
-      {id:"e14",name:"滷味",category:"food",payers:[{name:"陳霆宇",amount:645}],total:645,date:"2026-04-04",splits:makeEqual(ALL,645)},
-      {id:"e15",name:"花蓮扁食",category:"food",payers:[{name:"Carly",amount:890}],total:890,date:"2026-04-04",splits:makeEqual(ALL,890)},
-      {id:"e16",name:"原野牧場",category:"spot",payers:[{name:"陳霆宇",amount:1716}],total:1716,date:"2026-04-04",splits:yu,isCustom:true},
-      {id:"e17",name:"午餐蜆",category:"food",payers:[{name:"Michael",amount:3009}],total:3009,date:"2026-04-04",splits:makeEqual(ALL,3009)},
-      {id:"e18",name:"咖哩麵包",category:"snack",payers:[{name:"陳霆宇",amount:135}],total:135,date:"2026-04-05",splits:makeEqual(ALL,135)},
-      {id:"e19",name:"海鮮餐廳",category:"food",payers:[{name:"Chien",amount:2150}],total:2150,date:"2026-04-05",splits:makeEqual(ALL,2150)},
-      {id:"e20",name:"曾記麻糬",category:"shop",payers:[{name:"Chien",amount:243}],total:243,date:"2026-04-05",splits:makeEqual(ALL,243)},
-      {id:"e21",name:"711美式",category:"snack",payers:[{name:"Carly",amount:95}],total:95,date:"2026-04-05",splits:am,isCustom:true},
-      {id:"e22",name:"停車費",category:"parking",payers:[{name:"Michael",amount:120}],total:120,date:"2026-04-06",splits:makeEqual(SG,120)},
-      {id:"e23",name:"7-11飯糰",category:"snack",payers:[{name:"邱于瑄",amount:55}],total:55,date:"2026-04-06",splits:makeEqual(["陳霆宇","邱于瑄"],55)},
-      {id:"e24",name:"梅子名產",category:"shop",payers:[{name:"Chien",amount:400}],total:400,date:"2026-04-04",splits:makeEqual(["Chien","邱于瑄"],400)},
+      {id:"e1",name:"å¨è¯",category:"grocery",payers:[{name:"å®å®",amount:3476}],total:3476,date:"2026-04-02",splits:makeEqual(ALL,3476)},
+      {id:"e2",name:"æ£ºææ¿",category:"food",payers:[{name:"Carly",amount:155}],total:155,date:"2026-04-02",splits:makeEqual(ALL,155)},
+      {id:"e3",name:"å¼·èé¤",category:"food",payers:[{name:"Carly",amount:320}],total:320,date:"2026-04-02",splits:makeEqual(ALL,320)},
+      {id:"e4",name:"æAæ¼«çåå¡åº",category:"snack",payers:[{name:"Michael",amount:750}],total:750,date:"2026-04-02",splits:makeEqual(SG,750)},
+      {id:"e5",name:"ä¸ç¢å°",category:"food",payers:[{name:"Michael",amount:1255}],total:1255,date:"2026-04-02",splits:makeEqual(ALL,1255)},
+      {id:"e6",name:"æª¸æª¬æ±",category:"snack",payers:[{name:"Michael",amount:60}],total:60,date:"2026-04-02",splits:makeEqual(SG,60)},
+      {id:"e7",name:"ä½³èå°æå®¤",category:"snack",payers:[{name:"Michael",amount:1350}],total:1350,date:"2026-04-02",splits:makeEqual(SG,1350)},
+      {id:"e8",name:"ä½å®¿",category:"hotel",payers:[{name:"Carly",amount:9585}],total:9585,date:"2026-04-02",splits:makeEqual(ALL,9585)},
+      {id:"e9",name:"ç·¬ç¸æç",category:"food",payers:[{name:"Chien",amount:2320}],total:2320,date:"2026-04-03",splits:makeEqual(ALL,2320)},
+      {id:"e10",name:"æ²¹é¢",category:"fuel",payers:[{name:"Michael",amount:3416}],total:3416,date:"2026-04-03",splits:makeEqual(SG,3416)},
+      {id:"e11",name:"å¨å®¶å°å¡",category:"grocery",payers:[{name:"é³éå®",amount:118}],total:118,date:"2026-04-03",splits:makeEqual(ALL,118)},
+      {id:"e12",name:"è±çç³",category:"snack",payers:[{name:"Carly",amount:310}],total:310,date:"2026-04-04",splits:makeEqual(["Carly","é³éå®"],310)},
+      {id:"e13",name:"è¶å¸",category:"grocery",payers:[{name:"å®å®",amount:485}],total:485,date:"2026-04-04",splits:makeEqual(ALL,485)},
+      {id:"e14",name:"æ»·å³",category:"food",payers:[{name:"é³éå®",amount:645}],total:645,date:"2026-04-04",splits:makeEqual(ALL,645)},
+      {id:"e15",name:"è±è®æé£",category:"food",payers:[{name:"Carly",amount:890}],total:890,date:"2026-04-04",splits:makeEqual(ALL,890)},
+      {id:"e16",name:"åéç§å ´",category:"spot",payers:[{name:"é³éå®",amount:1716}],total:1716,date:"2026-04-04",splits:yu,isCustom:true},
+      {id:"e17",name:"åé¤è",category:"food",payers:[{name:"Michael",amount:3009}],total:3009,date:"2026-04-04",splits:makeEqual(ALL,3009)},
+      {id:"e18",name:"åå©éºµå",category:"snack",payers:[{name:"é³éå®",amount:135}],total:135,date:"2026-04-05",splits:makeEqual(ALL,135)},
+      {id:"e19",name:"æµ·é®®é¤å»³",category:"food",payers:[{name:"Chien",amount:2150}],total:2150,date:"2026-04-05",splits:makeEqual(ALL,2150)},
+      {id:"e20",name:"æ¾è¨éº»ç³¬",category:"shop",payers:[{name:"Chien",amount:243}],total:243,date:"2026-04-05",splits:makeEqual(ALL,243)},
+      {id:"e21",name:"711ç¾å¼",category:"snack",payers:[{name:"Carly",amount:95}],total:95,date:"2026-04-05",splits:am,isCustom:true},
+      {id:"e22",name:"åè»è²»",category:"parking",payers:[{name:"Michael",amount:120}],total:120,date:"2026-04-06",splits:makeEqual(SG,120)},
+      {id:"e23",name:"7-11é£¯ç³°",category:"snack",payers:[{name:"é±äºç",amount:55}],total:55,date:"2026-04-06",splits:makeEqual(["é³éå®","é±äºç"],55)},
+      {id:"e24",name:"æ¢å­åç¢",category:"shop",payers:[{name:"Chien",amount:400}],total:400,date:"2026-04-04",splits:makeEqual(["Chien","é±äºç"],400)},
     ],
-    logs:[{id:"l0",ts:new Date("2026-04-02").toISOString(),user:"Carly",action:"建立群組",detail:"建立了群組「2026清明節還1/4島」"}]
+    logs:[{id:"l0",ts:new Date("2026-04-02").toISOString(),user:"Carly",action:"å»ºç«ç¾¤çµ",detail:"å»ºç«äºç¾¤çµã2026æ¸æç¯é1/4å³¶ã"}]
   };
 }
-// ── Primitives ────────────────────────────────────────────────────────
+// ââ Primitives ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function Avatar({name,color,size=26}) {
   return <div style={{width:size,height:size,borderRadius:"50%",background:color||"#ddd",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.38,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 1px 4px rgba(0,0,0,0.12)"}}>{name[0]}</div>;
 }
@@ -149,7 +141,7 @@ function Btn({children,onClick,variant="primary",style={},disabled=false}) {
   return <button onClick={disabled?undefined:onClick} style={{padding:"10px 16px",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:disabled?"not-allowed":"pointer",fontFamily:"inherit",opacity:disabled?0.5:1,...v[variant],...style}}>{children}</button>;
 }
 
-// ── MultiSelect ───────────────────────────────────────────────────────
+// ââ MultiSelect âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function MultiSelect({value,onChange,members,colors}) {
   const [open,setOpen] = useState(false);
   const ref = useRef(null);
@@ -159,24 +151,24 @@ function MultiSelect({value,onChange,members,colors}) {
   },[]);
   const toggle = m => { if(value.includes(m)){if(value.length>1)onChange(value.filter(x=>x!==m));}else onChange([...value,m]); };
   const allSel = value.length===members.length;
-  const label = allSel ? "全部成員" : value.length===0 ? "請選擇" : value.join("、");
+  const label = allSel ? "å¨é¨æå¡" : value.length===0 ? "è«é¸æ" : value.join("ã");
   return (
     <div ref={ref} style={{position:"relative",marginBottom:8}}>
       <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
         <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{label}</span>
-        <span style={{marginLeft:8,fontSize:10,color:T.textMute}}>{open?"▲":"▼"}</span>
+        <span style={{marginLeft:8,fontSize:10,color:T.textMute}}>{open?"â²":"â¼"}</span>
       </div>
       {open && (
         <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,zIndex:300,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:12,overflow:"hidden",boxShadow:T.shadowMd}}>
           <div onClick={()=>onChange(allSel?[members[0]]:[...members])} style={{padding:"9px 12px",fontSize:12,color:T.textSub,cursor:"pointer",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",background:allSel?T.yellowLt:"#fff"}}>
-            <span>全部成員</span><span style={{color:T.yellowDk}}>{allSel?"✓":""}</span>
+            <span>å¨é¨æå¡</span><span style={{color:T.yellowDk}}>{allSel?"â":""}</span>
           </div>
           {members.map(m => {
             const sel = value.includes(m); const col = colors[m]||"#aaa";
             return (
               <div key={m} onClick={()=>toggle(m)} style={{padding:"8px 12px",display:"flex",alignItems:"center",gap:10,cursor:"pointer",background:sel?T.yellowLt+"88":"#fff",borderBottom:`1px solid ${T.border}44`}}>
                 <div style={{width:16,height:16,borderRadius:5,border:`2px solid ${sel?T.yellowDk:T.border}`,background:sel?T.yellowMd:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {sel && <span style={{fontSize:9,color:T.text,fontWeight:900}}>✓</span>}
+                  {sel && <span style={{fontSize:9,color:T.text,fontWeight:900}}>â</span>}
                 </div>
                 <Avatar name={m} color={col} size={22}/>
                 <span style={{fontSize:13,color:T.text,fontWeight:sel?700:400}}>{m}</span>
@@ -189,7 +181,7 @@ function MultiSelect({value,onChange,members,colors}) {
   );
 }
 
-// ── Category Picker ───────────────────────────────────────────────────
+// ââ Category Picker âââââââââââââââââââââââââââââââââââââââââââââââââââ
 function CategoryPicker({value,onChange,cats}) {
   const [open,setOpen] = useState(false);
   const ref = useRef(null);
@@ -203,7 +195,7 @@ function CategoryPicker({value,onChange,cats}) {
       <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,height:42,display:"flex",alignItems:"center",gap:8,cursor:"pointer",boxSizing:"border-box"}}>
         <span style={{fontSize:18}}>{cur.icon}</span>
         <span style={{flex:1,color:T.text}}>{cur.label}</span>
-        <span style={{fontSize:10,color:T.textMute}}>{open?"▲":"▼"}</span>
+        <span style={{fontSize:10,color:T.textMute}}>{open?"â²":"â¼"}</span>
       </div>
       {open && (
         <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,zIndex:300,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:12,padding:8,boxShadow:T.shadowMd,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4}}>
@@ -218,7 +210,7 @@ function CategoryPicker({value,onChange,cats}) {
     </div>
   );
 }
-// ── Split Editor ──────────────────────────────────────────────────────
+// ââ Split Editor ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   const pt = parseFloat(total)||0;
   const fixedSum = Object.values(data).reduce((s,v)=>s+(parseFloat(v)||0),0);
@@ -228,7 +220,7 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   return (
     <div style={{marginBottom:8}}>
       <div style={{display:"flex",gap:6,marginBottom:10}}>
-        {[["equal","均分"],["amount","金額"],["ratio","比例"]].map(([k,l]) => (
+        {[["equal","åå"],["amount","éé¡"],["ratio","æ¯ä¾"]].map(([k,l]) => (
           <button key={k} onClick={()=>{setMode(k);setData({});}} style={{flex:1,padding:"7px 0",borderRadius:10,border:`1.5px solid ${mode===k?T.yellowDk:T.border}`,background:mode===k?T.yellowLt:"#fff",color:mode===k?T.text:T.textSub,fontSize:12,fontWeight:mode===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
         ))}
       </div>
@@ -237,20 +229,20 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
       )}
       {mode==="amount" && (
         <div>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>輸入固定金額，留空則均分剩餘</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>è¼¸å¥åºå®éé¡ï¼çç©ºåååå©é¤</div>
           {members.map(m => (
             <div key={m} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
               <Avatar name={m} color={colors[m]||"#aaa"} size={24}/>
               <span style={{fontSize:13,color:T.text,flex:1}}>{m}</span>
-              <input type="number" placeholder={sharePerEqual>0&&!(data[m])?`≈${sharePerEqual.toFixed(0)}`:"0"} value={data[m]||""} onChange={e=>setData({...data,[m]:e.target.value})} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
+              <input type="number" placeholder={sharePerEqual>0&&!(data[m])?`â${sharePerEqual.toFixed(0)}`:"0"} value={data[m]||""} onChange={e=>setData({...data,[m]:e.target.value})} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
             </div>
           ))}
-          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>{remainder<-0.01?`⚠️ 超出 NT$${Math.abs(remainder).toFixed(0)}`:`剩餘 NT$${remainder.toFixed(0)} 由 ${equalCount} 人均分`}</div>}
+          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>{remainder<-0.01?`â ï¸ è¶åº NT$${Math.abs(remainder).toFixed(0)}`:`å©é¤ NT$${remainder.toFixed(0)} ç± ${equalCount} äººåå`}</div>}
         </div>
       )}
       {mode==="ratio" && (
         <div>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>輸入比例（留空預設1）</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>è¼¸å¥æ¯ä¾ï¼çç©ºé è¨­1ï¼</div>
           {members.map(m => {
             const ratio = parseFloat(data[m])||1;
             const ratioTotal = members.reduce((s,x)=>s+(parseFloat(data[x])||1),0);
@@ -270,7 +262,7 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   );
 }
 
-// ── Payers Editor ─────────────────────────────────────────────────────
+// ââ Payers Editor âââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function PayersEditor({payers,setPayers,members,total}) {
   const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
   const pt = parseFloat(total)||0;
@@ -285,18 +277,18 @@ function PayersEditor({payers,setPayers,members,total}) {
           <select value={p.name} onChange={e=>updatePayer(i,"name",e.target.value)} style={{...iStyle,flex:1,marginBottom:0,padding:"7px 8px"}}>
             {members.map(m=><option key={m} value={m}>{m}</option>)}
           </select>
-          <input type="number" placeholder="金額" value={p.amount} onChange={e=>updatePayer(i,"amount",e.target.value)} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
-          {payers.length>1 && <button onClick={()=>removePayer(i)} style={{background:"none",border:"none",color:T.textMute,cursor:"pointer",fontSize:16,padding:"0 2px"}}>✕</button>}
+          <input type="number" placeholder="éé¡" value={p.amount} onChange={e=>updatePayer(i,"amount",e.target.value)} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
+          {payers.length>1 && <button onClick={()=>removePayer(i)} style={{background:"none",border:"none",color:T.textMute,cursor:"pointer",fontSize:16,padding:"0 2px"}}>â</button>}
         </div>
       ))}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
-        <button onClick={addPayer} style={{background:"none",border:`1.5px dashed ${T.border}`,borderRadius:8,padding:"5px 10px",fontSize:12,color:T.textSub,cursor:"pointer"}}>＋ 加付款人</button>
-        <span style={{fontSize:11,color:Math.abs(diff)>0.01?T.accent:T.green}}>{pt>0&&(Math.abs(diff)>0.01?`⚠️ 差 NT$${Math.abs(diff).toFixed(0)}`:"✓ 金額正確")}</span>
+        <button onClick={addPayer} style={{background:"none",border:`1.5px dashed ${T.border}`,borderRadius:8,padding:"5px 10px",fontSize:12,color:T.textSub,cursor:"pointer"}}>ï¼ å ä»æ¬¾äºº</button>
+        <span style={{fontSize:11,color:Math.abs(diff)>0.01?T.accent:T.green}}>{pt>0&&(Math.abs(diff)>0.01?`â ï¸ å·® NT$${Math.abs(diff).toFixed(0)}`:"â éé¡æ­£ç¢º")}</span>
       </div>
     </div>
   );
 }
-// ── Expense Form ──────────────────────────────────────────────────────
+// ââ Expense Form ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [name,setName] = useState(initial.name||"");
   const [total,setTotal] = useState(initial.total||"");
@@ -311,7 +303,7 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     const splitMembers = splitMode==="equal" ? (Object.keys(splitData).length?Object.keys(splitData):members) : members;
     const splits = calcSplits(splitMode, splitMode==="equal"?splitMembers:splitData, splitMembers, pt);
     const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-    if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
+    if(Math.abs(paidSum-pt)>0.1){alert(`ä»æ¬¾éé¡å ç¸½ NT$${paidSum} èç¸½éé¡ NT$${pt} ä¸ç¬¦`);return;}
     onSave({name,total:pt,date,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
   const handleTotalChange = (val) => {
@@ -320,11 +312,11 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   };
   return (
     <div style={{background:"#fff",borderRadius:20,padding:"16px 14px 12px",marginBottom:12,boxShadow:"0 4px 20px rgba(180,130,40,0.13)"}}>
-      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"✏️ 編輯消費":"🧾 新增消費"}</div>
+      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"âï¸ ç·¨è¼¯æ¶è²»":"ð§¾ æ°å¢æ¶è²»"}</div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
-        <input placeholder="項目名稱" value={name} onChange={e=>setName(e.target.value)}
+        <input placeholder="é ç®åç¨±" value={name} onChange={e=>setName(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:700,textAlign:"center",height:42}}/>
-        <input type="number" placeholder="總金額" value={total} onChange={e=>handleTotalChange(e.target.value)}
+        <input type="number" placeholder="ç¸½éé¡" value={total} onChange={e=>handleTotalChange(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
       </div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
@@ -332,58 +324,58 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
         <div style={{flex:1,display:"flex"}}><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/></div>
       </div>
       <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
-        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>付款人</div>
+        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>ä»æ¬¾äºº</div>
         <PayersEditor payers={payers} setPayers={setPayers} members={members} total={total}/>
       </div>
       <div style={{background:"#F3F8FF",border:"1.5px solid #BBDEFB",borderRadius:12,padding:"10px 12px",marginBottom:10}}>
-        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>分帳方式</div>
+        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>åå¸³æ¹å¼</div>
         <SplitEditor mode={splitMode} setMode={setSplitMode} data={splitData} setData={setSplitData} members={members} colors={colors} total={total}/>
       </div>
       <div style={{display:"flex",gap:6,justifyContent:"flex-end",alignItems:"center"}}>
-        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>🗑️</button>}
-        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>取消</button>
-        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"💾":"✅"}</button>
+        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>ðï¸</button>}
+        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>åæ¶</button>
+        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"ð¾":"â"}</button>
       </div>
     </div>
   );
 }
 
-// ── Payment Form ──────────────────────────────────────────────────────
+// ââ Payment Form ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
   const [form,setForm] = useState(initial||{from:me,to:members.find(m=>m!==me)||members[0],amount:"",date:new Date().toISOString().slice(0,10),note:""});
   function handleSave() {
-    if(!form.amount||parseFloat(form.amount)<=0){alert("請輸入轉帳金額");return;}
-    if(form.from===form.to){alert("轉出和收款不能是同一人");return;}
+    if(!form.amount||parseFloat(form.amount)<=0){alert("è«è¼¸å¥è½å¸³éé¡");return;}
+    if(form.from===form.to){alert("è½åºåæ¶æ¬¾ä¸è½æ¯åä¸äºº");return;}
     onSave({...form,amount:parseFloat(form.amount)});
   }
   return (
     <div style={{background:"#F1FBF4",border:"1.5px solid #A5D6A7",borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
-      <div style={{fontSize:12,color:"#2E7D32",fontWeight:700,marginBottom:10}}>{isEdit?"✏️ 編輯轉帳":"💸 記錄轉帳"}</div>
+      <div style={{fontSize:12,color:"#2E7D32",fontWeight:700,marginBottom:10}}>{isEdit?"âï¸ ç·¨è¼¯è½å¸³":"ð¸ è¨éè½å¸³"}</div>
       <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>轉出</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>è½åº</div>
           <select value={form.from} onChange={e=>setForm({...form,from:e.target.value})} style={iStyle}>{members.map(m=><option key={m} value={m}>{m}</option>)}</select>
         </div>
-        <div style={{fontSize:20,color:T.textMute,paddingTop:16}}>→</div>
+        <div style={{fontSize:20,color:T.textMute,paddingTop:16}}>â</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>收款</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>æ¶æ¬¾</div>
           <select value={form.to} onChange={e=>setForm({...form,to:e.target.value})} style={iStyle}>{members.map(m=><option key={m} value={m}>{m}</option>)}</select>
         </div>
       </div>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>金額</div>
+      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>éé¡</div>
       <input type="number" placeholder="NT$" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} style={iStyle}/>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>日期</div>
+      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>æ¥æ</div>
       <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={iStyle}/>
-      <input placeholder="備註（選填）" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} style={iStyle}/>
+      <input placeholder="åè¨»ï¼é¸å¡«ï¼" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} style={iStyle}/>
       <div style={{display:"flex",gap:8,marginTop:4}}>
-        <Btn onClick={handleSave} variant="green" style={{flex:1}}>{isEdit?"💾 儲存":"✅ 確認"}</Btn>
-        <Btn onClick={onCancel} variant="secondary" style={{flex:1}}>取消</Btn>
-        {onDelete && <Btn onClick={onDelete} variant="danger">🗑️</Btn>}
+        <Btn onClick={handleSave} variant="green" style={{flex:1}}>{isEdit?"ð¾ å²å­":"â ç¢ºèª"}</Btn>
+        <Btn onClick={onCancel} variant="secondary" style={{flex:1}}>åæ¶</Btn>
+        {onDelete && <Btn onClick={onDelete} variant="danger">ðï¸</Btn>}
       </div>
     </div>
   );
 }
-// ── Analytics Tab ─────────────────────────────────────────────────────
+// ââ Analytics Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function AnalyticsTab({expenses,members,colors,cats,me}) {
   const [viewMode,setViewMode] = useState("personal");
   const [viewMember,setViewMember] = useState(me);
@@ -416,17 +408,17 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
     <div>
       <div style={{marginBottom:14}}>
         <div style={{display:"flex",gap:6,marginBottom:10}}>
-          {[["personal","👤 個人"],["group","👥 群組"]].map(([k,l]) => (
+          {[["personal","ð¤ åäºº"],["group","ð¥ ç¾¤çµ"]].map(([k,l]) => (
             <button key={k} onClick={()=>{setViewMode(k);setSelectedCat(null);}} style={{flex:1,padding:"8px 0",borderRadius:10,border:`1.5px solid ${viewMode===k?T.yellowDk:T.border}`,background:viewMode===k?T.yellowLt:"#fff",color:viewMode===k?T.text:T.textSub,fontSize:13,fontWeight:viewMode===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
           ))}
         </div>
         {viewMode==="personal" && (
           <select value={viewMember} onChange={e=>{setViewMember(e.target.value);setSelectedCat(null);}} style={{width:"100%",background:col+"18",border:`1.5px solid ${col}44`,color:col,borderRadius:10,padding:"7px 12px",fontSize:13,fontWeight:700,cursor:"pointer",outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}>
-            {members.map(m=><option key={m} value={m} style={{background:"#fff",color:T.text}}>{m}{m===me?" （我）":""}</option>)}
+            {members.map(m=><option key={m} value={m} style={{background:"#fff",color:T.text}}>{m}{m===me?" ï¼æï¼":""}</option>)}
           </select>
         )}
       </div>
-      {total===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>尚無消費資料</div>}
+      {total===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>å°ç¡æ¶è²»è³æ</div>}
       {total>0 && (
         <>
           <div style={{display:"flex",justifyContent:"center",marginBottom:14}}>
@@ -435,14 +427,14 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
                 <path key={i} d={s.path} fill={s.color} stroke="#fff" strokeWidth={2} style={{cursor:"pointer",opacity:selectedCat&&selectedCat!==s.cat.id?0.35:1,transition:"opacity 0.2s"}} onClick={()=>setSelectedCat(selectedCat===s.cat.id?null:s.cat.id)}/>
               ))}
               <circle cx={cx} cy={cy} r={ir-2} fill={viewMode==="group"?T.yellowMd:col} opacity={0.15}/>
-              <text x={cx} y={cy-10} textAnchor="middle" fontSize={20}>{viewMode==="group"?"👥":viewMember[0]}</text>
+              <text x={cx} y={cy-10} textAnchor="middle" fontSize={20}>{viewMode==="group"?"ð¥":viewMember[0]}</text>
               <text x={cx} y={cy+6} textAnchor="middle" fontSize={12} fontWeight={700} fill={T.text}>NT${dispTotal.toFixed(0)}</text>
-              <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill={T.textMute}>{selCat?selCat.label:viewMode==="group"?"群組總消費":"總消費"}</text>
+              <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill={T.textMute}>{selCat?selCat.label:viewMode==="group"?"ç¾¤çµç¸½æ¶è²»":"ç¸½æ¶è²»"}</text>
             </svg>
           </div>
           <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>
-            {selCat?`${selCat.icon} ${selCat.label}`:"各分類明細"}
-            {selCat && <button onClick={()=>setSelectedCat(null)} style={{marginLeft:8,background:"none",border:"none",color:T.textMute,fontSize:11,cursor:"pointer"}}>✕ 清除</button>}
+            {selCat?`${selCat.icon} ${selCat.label}`:"ååé¡æç´°"}
+            {selCat && <button onClick={()=>setSelectedCat(null)} style={{marginLeft:8,background:"none",border:"none",color:T.textMute,fontSize:11,cursor:"pointer"}}>â æ¸é¤</button>}
           </div>
           {(selCat?[selCat]:active).map((c,i) => {
             const amt=catSpend[c.id], pct=total>0?amt/total:0;
@@ -466,7 +458,7 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
     </div>
   );
 }
-// ── Config Tab ────────────────────────────────────────────────────────
+// ââ Config Tab ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ConfigTab({group,setGroups,bal,me,setExportModal}) {
   const cats = group.categories||DEFAULT_CATS;
   const [section,setSection] = useState("members");
@@ -478,20 +470,20 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     setGroups(prev=>prev.map(g=>{
       if(g.id!==group.id) return g;
       const updated=updater(g);
-      return {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"設定變更",detail},...(updated.logs||[])]};
+      return {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"è¨­å®è®æ´",detail},...(updated.logs||[])]};
     }));
   }
   function handleEditCat(cat) {
-    saveGroup(g=>({...g,categories:g.categories.map(c=>c.id===cat.id?{...c,icon:editing.icon,label:editing.label}:c)}),`分類「${cat.label}」改為「${editing.icon} ${editing.label}」`);
+    saveGroup(g=>({...g,categories:g.categories.map(c=>c.id===cat.id?{...c,icon:editing.icon,label:editing.label}:c)}),`åé¡ã${cat.label}ãæ¹çºã${editing.icon} ${editing.label}ã`);
     setEditing(null);
   }
   function handleDeleteCat(cat) {
-    if(cats.length<=3){alert("至少保留 3 個分類");return;}
-    saveGroup(g=>({...g,categories:g.categories.filter(c=>c.id!==cat.id)}),`刪除分類「${cat.label}」`);
+    if(cats.length<=3){alert("è³å°ä¿ç 3 ååé¡");return;}
+    saveGroup(g=>({...g,categories:g.categories.filter(c=>c.id!==cat.id)}),`åªé¤åé¡ã${cat.label}ã`);
   }
   function handleAddCat() {
     if(!newCat.icon||!newCat.label) return;
-    saveGroup(g=>({...g,categories:[...(g.categories||DEFAULT_CATS),{id:uid(),...newCat}]}),`新增分類「${newCat.icon} ${newCat.label}」`);
+    saveGroup(g=>({...g,categories:[...(g.categories||DEFAULT_CATS),{id:uid(),...newCat}]}),`æ°å¢åé¡ã${newCat.icon} ${newCat.label}ã`);
     setNewCat({icon:"",label:""}); setShowAddCat(false);
   }
   function handleAddMember() {
@@ -499,24 +491,24 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     if(!name||group.members.includes(name)) return;
     const used=Object.values(group.colors||{});
     const color=MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
-    saveGroup(g=>({...g,members:[...g.members,name],colors:{...g.colors,[name]:color}}),`新增成員「${name}」`);
+    saveGroup(g=>({...g,members:[...g.members,name],colors:{...g.colors,[name]:color}}),`æ°å¢æå¡ã${name}ã`);
     setNewMemberName("");
   }
   function handleRemoveMember(name) {
     const net=(bal[name]?.paid||0)-(bal[name]?.owes||0);
-    if(Math.abs(net)>0.01){alert(`${name} 還有未結清帳款，無法移除`);return;}
-    if(group.members.length<=2){alert("群組至少需要 2 位成員");return;}
-    saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`移除成員「${name}」`);
+    if(Math.abs(net)>0.01){alert(`${name} éææªçµæ¸å¸³æ¬¾ï¼ç¡æ³ç§»é¤`);return;}
+    if(group.members.length<=2){alert("ç¾¤çµè³å°éè¦ 2 ä½æå¡");return;}
+    saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`ç§»é¤æå¡ã${name}ã`);
   }
   return (
     <div>
       <div style={{display:"flex",gap:6,marginBottom:16}}>
-        {[["members","👥 成員"],["categories","🏷️ 分類"]].map(([k,l]) => (
+        {[["members","ð¥ æå¡"],["categories","ð·ï¸ åé¡"]].map(([k,l]) => (
           <button key={k} onClick={()=>setSection(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${section===k?T.yellowDk:T.border}`,background:section===k?T.yellowLt:"#fff",color:section===k?T.text:T.textSub,fontSize:13,fontWeight:section===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
         ))}
       </div>
       <div style={{display:"flex",gap:8,marginBottom:16}}>
-        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} 明細`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📥 匯出明細 CSV</button>
+        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} æç´°`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð¥ å¯åºæç´° CSV</button>
       </div>
       {section==="members" && (
         <div>
@@ -530,22 +522,22 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                       <span style={{fontSize:14,fontWeight:700}}>{m}</span>
-                      {m===group.adminUser && <span>👑</span>}
-                      {m===me && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>我</span>}
+                      {m===group.adminUser && <span>ð</span>}
+                      {m===me && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>æ</span>}
                     </div>
-                    <div style={{fontSize:11,color:T.textMute}}>消費 NT${(bal[m]?.owes||0).toFixed(0)} · 墊付 NT${(bal[m]?.paid||0).toLocaleString()}</div>
-                    {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01 && <div style={{fontSize:10,color:T.accent,marginTop:2}}>💸 有未結清帳款，無法移除</div>}
+                    <div style={{fontSize:11,color:T.textMute}}>æ¶è²» NT${(bal[m]?.owes||0).toFixed(0)} Â· å¢ä» NT${(bal[m]?.paid||0).toLocaleString()}</div>
+                    {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01 && <div style={{fontSize:10,color:T.accent,marginTop:2}}>ð¸ ææªçµæ¸å¸³æ¬¾ï¼ç¡æ³ç§»é¤</div>}
                   </div>
-                  {canRemove && <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"5px 10px",fontSize:12}}>移除</Btn>}
+                  {canRemove && <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"5px 10px",fontSize:12}}>ç§»é¤</Btn>}
                 </div>
               </Card>
             );
           })}
           <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:14,marginTop:6}}>
-            <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>➕ 新增旅伴</div>
+            <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>â æ°å¢æä¼´</div>
             <div style={{display:"flex",gap:8}}>
-              <input placeholder="輸入名字" value={newMemberName} onChange={e=>setNewMemberName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddMember()} style={{...iStyle,flex:1,marginBottom:0}}/>
-              <Btn onClick={handleAddMember} style={{flexShrink:0,padding:"9px 14px"}}>新增</Btn>
+              <input placeholder="è¼¸å¥åå­" value={newMemberName} onChange={e=>setNewMemberName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddMember()} style={{...iStyle,flex:1,marginBottom:0}}/>
+              <Btn onClick={handleAddMember} style={{flexShrink:0,padding:"9px 14px"}}>æ°å¢</Btn>
             </div>
           </div>
         </div>
@@ -556,49 +548,49 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
             <div key={cat.id} style={{marginBottom:8}}>
               {editing?.id===cat.id ? (
                 <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12}}>
-                  <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>圖示（輸入任意 emoji）</div>
+                  <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>åç¤ºï¼è¼¸å¥ä»»æ emojiï¼</div>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <div style={{width:44,height:44,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{editing.icon||"?"}</div>
-                    <input value={editing.icon} onChange={e=>setEditing({...editing,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="輸入 emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
+                    <input value={editing.icon} onChange={e=>setEditing({...editing,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="è¼¸å¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
                   </div>
-                  <input value={editing.label} onChange={e=>setEditing({...editing,label:e.target.value})} placeholder="分類名稱" style={{...iStyle,marginBottom:8}}/>
+                  <input value={editing.label} onChange={e=>setEditing({...editing,label:e.target.value})} placeholder="åé¡åç¨±" style={{...iStyle,marginBottom:8}}/>
                   <div style={{display:"flex",gap:6}}>
-                    <Btn onClick={()=>handleEditCat(cat)} style={{flex:1,padding:"8px 0"}}>儲存</Btn>
-                    <Btn onClick={()=>setEditing(null)} variant="secondary" style={{flex:1,padding:"8px 0"}}>取消</Btn>
+                    <Btn onClick={()=>handleEditCat(cat)} style={{flex:1,padding:"8px 0"}}>å²å­</Btn>
+                    <Btn onClick={()=>setEditing(null)} variant="secondary" style={{flex:1,padding:"8px 0"}}>åæ¶</Btn>
                   </div>
                 </div>
               ) : (
                 <div style={{background:T.bgCard,border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
                   <div style={{width:36,height:36,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{cat.icon}</div>
                   <span style={{flex:1,fontSize:14,fontWeight:600,color:T.text}}>{cat.label}</span>
-                  <Btn onClick={()=>setEditing({id:cat.id,icon:cat.icon,label:cat.label})} variant="ghost" style={{padding:"4px 8px",fontSize:12}}>✏️</Btn>
-                  <Btn onClick={()=>handleDeleteCat(cat)} variant="danger" style={{padding:"4px 8px",fontSize:12}}>🗑️</Btn>
+                  <Btn onClick={()=>setEditing({id:cat.id,icon:cat.icon,label:cat.label})} variant="ghost" style={{padding:"4px 8px",fontSize:12}}>âï¸</Btn>
+                  <Btn onClick={()=>handleDeleteCat(cat)} variant="danger" style={{padding:"4px 8px",fontSize:12}}>ðï¸</Btn>
                 </div>
               )}
             </div>
           ))}
           {showAddCat ? (
             <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12,marginTop:8}}>
-              <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>圖示（輸入任意 emoji）</div>
+              <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>åç¤ºï¼è¼¸å¥ä»»æ emojiï¼</div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                 <div style={{width:44,height:44,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{newCat.icon||"?"}</div>
-                <input value={newCat.icon} onChange={e=>setNewCat({...newCat,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="輸入 emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
+                <input value={newCat.icon} onChange={e=>setNewCat({...newCat,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="è¼¸å¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
               </div>
-              <input value={newCat.label} onChange={e=>setNewCat({...newCat,label:e.target.value})} placeholder="分類名稱" style={{...iStyle,marginBottom:8}}/>
+              <input value={newCat.label} onChange={e=>setNewCat({...newCat,label:e.target.value})} placeholder="åé¡åç¨±" style={{...iStyle,marginBottom:8}}/>
               <div style={{display:"flex",gap:6}}>
-                <Btn onClick={handleAddCat} style={{flex:1,padding:"8px 0"}}>新增</Btn>
-                <Btn onClick={()=>setShowAddCat(false)} variant="secondary" style={{flex:1,padding:"8px 0"}}>取消</Btn>
+                <Btn onClick={handleAddCat} style={{flex:1,padding:"8px 0"}}>æ°å¢</Btn>
+                <Btn onClick={()=>setShowAddCat(false)} variant="secondary" style={{flex:1,padding:"8px 0"}}>åæ¶</Btn>
               </div>
             </div>
           ) : (
-            <button onClick={()=>setShowAddCat(true)} style={{width:"100%",marginTop:8,padding:"10px 0",background:"none",border:`2px dashed ${T.border}`,borderRadius:12,color:T.textSub,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>＋ 新增分類</button>
+            <button onClick={()=>setShowAddCat(true)} style={{width:"100%",marginTop:8,padding:"10px 0",background:"none",border:`2px dashed ${T.border}`,borderRadius:12,color:T.textSub,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>ï¼ æ°å¢åé¡</button>
           )}
         </div>
       )}
     </div>
   );
 }
-// ── Export helpers ────────────────────────────────────────────────────
+// ââ Export helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function downloadFile(filename, content, type) {
   try {
     const blob = new Blob([content], {type});
@@ -626,16 +618,16 @@ function downloadFile(filename, content, type) {
 function exportGroupCSV(group, me) {
   const cats = group.categories || DEFAULT_CATS;
   const getCatLabel = id => (cats.find(c=>c.id===id)||cats[cats.length-1]).label;
-  const rows = [["日期","項目","分類","總金額","付款人","分帳成員","我的分攤"]];
+  const rows = [["æ¥æ","é ç®","åé¡","ç¸½éé¡","ä»æ¬¾äºº","åå¸³æå¡","æçåæ¤"]];
   [...group.expenses].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e => {
     const payers = e.payers.map(p=>`${p.name}(NT$${p.amount})`).join("+");
-    const splitMembers = Object.keys(e.splits).join("、");
+    const splitMembers = Object.keys(e.splits).join("ã");
     const myShare = me ? (e.splits[me]||0).toFixed(2) : "";
     rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, myShare]);
   });
   const payments = group.payments || [];
   [...payments].sort((a,b)=>a.date.localeCompare(b.date)).forEach(p => {
-    rows.push([p.date, `[轉帳] ${p.from}→${p.to}`, "轉帳", p.amount, p.from, p.to, ""]);
+    rows.push([p.date, `[è½å¸³] ${p.from}â${p.to}`, "è½å¸³", p.amount, p.from, p.to, ""]);
   });
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
   const ok = downloadFile(`${group.name}_${new Date().toISOString().slice(0,10)}.csv`, "\uFEFF"+csv, "text/csv;charset=utf-8");
@@ -645,11 +637,11 @@ function exportGroupCSV(group, me) {
 
 function exportBackupJSON(groups) {
   const json = JSON.stringify({version:1, exportedAt:new Date().toISOString(), groups}, null, 2);
-  const ok = downloadFile(`旅遊分帳備份_${new Date().toISOString().slice(0,10)}.json`, json, "application/json");
+  const ok = downloadFile(`æéåå¸³åä»½_${new Date().toISOString().slice(0,10)}.json`, json, "application/json");
   if(!ok) return json;
   return null;
 }
-// ── Main App ──────────────────────────────────────────────────────────
+// ââ Main App ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export default function App() {
   const [screen,setScreen] = useState("loading");
   const [groups,setGroups] = useState([]);
@@ -678,8 +670,8 @@ export default function App() {
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        if(!data.groups) { alert("備份格式不正確"); return; }
-        if(window.confirm(`確定要匯入 ${data.groups.length} 個群組嗎？\n現有資料會被合併（不會刪除）`)) {
+        if(!data.groups) { alert("åä»½æ ¼å¼ä¸æ­£ç¢º"); return; }
+        if(window.confirm(`ç¢ºå®è¦å¯å¥ ${data.groups.length} åç¾¤çµåï¼\nç¾æè³ææè¢«åä½µï¼ä¸æåªé¤ï¼`)) {
           setGroups(prev => {
             const existingIds = new Set(prev.map(g=>g.id));
             const toAdd = data.groups.filter(g=>!existingIds.has(g.id));
@@ -687,9 +679,9 @@ export default function App() {
             const merged = prev.map(g => { const u=toUpdate.find(x=>x.id===g.id); return u||g; });
             return [...merged, ...toAdd];
           });
-          alert("匯入成功！");
+          alert("å¯å¥æåï¼");
         }
-      } catch { alert("備份檔案無法讀取"); }
+      } catch { alert("åä»½æªæ¡ç¡æ³è®å"); }
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -698,11 +690,13 @@ export default function App() {
   useEffect(() => {
     (async () => {
       // Load groups from Firestore
-      const q = query(collection(db, "groups"));
-      const snapshot = await getDocs(q);
-      const firestoreGroups = snapshot.docs.map(d => d.data());
-      if(firestoreGroups.length > 0) setGroups(firestoreGroups);
-      else setGroups([buildInitialGroup()]);
+      try {
+        const q = query(collection(db, "groups"));
+        const snapshot = await getDocs(q);
+        const firestoreGroups = snapshot.docs.map(d => d.data());
+        if(firestoreGroups.length > 0) setGroups(firestoreGroups);
+        else setGroups([buildInitialGroup()]);
+      } catch(e) { console.error("Firestore load error:", e); setGroups([buildInitialGroup()]); }
       try {
         const hash = window.location.hash.slice(1);
         if(hash) {
@@ -718,6 +712,7 @@ export default function App() {
 
   useEffect(() => {
     if(screen==="loading") return;
+    if(groups.length === 0) return; // Avoid saving empty state
     // Save each group to Firestore as its own document (by group ID)
     groups.forEach(g => {
       setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
@@ -738,18 +733,25 @@ export default function App() {
     return MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
   }
 
-  function handleLogin() {
+  async function handleLogin() {
     const name=usernameInput.trim();
-    if(!name){setError("請輸入名字 😊");return;}
+    if(!name){setError("請輸入名字 🙏");return;}
+    // Reload groups from Firestore to get cross-device data
+    try {
+      const q = query(collection(db, "groups"));
+      const snapshot = await getDocs(q);
+      const firestoreGroups = snapshot.docs.map(d => d.data());
+      if(firestoreGroups.length > 0) setGroups(firestoreGroups);
+    } catch(e) { console.error("Firestore reload error:", e); }
     setCurrentUser(name); setScreen("home"); setError("");
   }
 
   function handleCreateGroup() {
     const name=newGroupName.trim();
     const pin=newGroupPin.trim();
-    if(!name){setError("請輸入群組名稱");return;}
-    if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
-    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
+    if(!name){setError("è«è¼¸å¥ç¾¤çµåç¨±");return;}
+    if(!pin||pin.length<4){setError("è«è¨­å®è³å° 4 ä½æ¸çç®¡çå¡ PIN ç¢¼");return;}
+    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"å»ºç«ç¾¤çµ",detail:`å»ºç«äºç¾¤çµã${name}ã`}]};
     // Save to Firestore (cross-device sync)
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
@@ -758,7 +760,7 @@ export default function App() {
 
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
-    if(!code){setError("請輸入群組代碼");return;}
+    if(!code){setError("è«è¼¸å¥ç¾¤çµä»£ç¢¼");return;}
     // First check locally
     let g=groups.find(x=>x.code===code);
     if(!g){
@@ -777,7 +779,7 @@ export default function App() {
         }
       } catch(e) { console.error(e); }
     }
-    if(!g){setError("找不到此群組 🔍");return;}
+    if(!g){setError("æ¾ä¸å°æ­¤ç¾¤çµ ð");return;}
     const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
     if(g.members.includes(currentUser)||alreadyClaimed){setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");setJoinCode("");setError("");return;}
     setClaimScreen({groupId:g.id,code});
@@ -789,7 +791,7 @@ export default function App() {
     if(!g) return;
     if(memberName==="__new__") {
       const color=getNextColor(g.colors);
-      setGroups(prev=>prev.map(x=>x.id!==g.id?x:{...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"加入群組",detail:`${currentUser} 以新成員身分加入`},...(x.logs||[])]}));
+      setGroups(prev=>prev.map(x=>x.id!==g.id?x:{...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"å å¥ç¾¤çµ",detail:`${currentUser} ä»¥æ°æå¡èº«åå å¥`},...(x.logs||[])]}));
     } else {
       const oldName=memberName;
       setGroups(prev=>prev.map(x=>{
@@ -803,13 +805,13 @@ export default function App() {
         });
         const payments=(x.payments||[]).map(p=>({...p,from:p.from===oldName?currentUser:p.from,to:p.to===oldName?currentUser:p.to}));
         const adminUser=x.adminUser===oldName?currentUser:x.adminUser;
-        const logs=[{id:uid(),ts:now(),user:currentUser,action:"認領身分",detail:`${currentUser} 認領了「${oldName}」的身分`},...(x.logs||[])];
+        const logs=[{id:uid(),ts:now(),user:currentUser,action:"èªé èº«å",detail:`${currentUser} èªé äºã${oldName}ãçèº«å`},...(x.logs||[])];
         return {...x,members,colors,claimedBy:{...x.claimedBy,[oldName]:currentUser},expenses,payments,adminUser,logs};
       }));
     }
     setCurrentGroupId(claimScreen.groupId); setActiveTab("expenses"); setScreen("group"); setClaimScreen(null);
   }
-  // ── Claim Screen ──────────────────────────────────────────────────
+  // ââ Claim Screen ââââââââââââââââââââââââââââââââââââââââââââââââââ
   if(claimScreen) {
     const g=groups.find(x=>x.id===claimScreen.groupId);
     if(!g) return null;
@@ -817,29 +819,29 @@ export default function App() {
     const unclaimed=g.members.filter(m=>!claimed.includes(m)&&m!==currentUser);
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,padding:24,display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <div style={{fontSize:32,marginBottom:8}}>👤</div>
-        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>選擇你的身分</div>
-        <div style={{fontSize:13,color:T.textMute,marginBottom:4,textAlign:"center"}}>群組：{g.name}</div>
-        <div style={{fontSize:12,color:T.textSub,marginBottom:24,textAlign:"center"}}>選擇你在群組中的身分，或以新成員加入</div>
+        <div style={{fontSize:32,marginBottom:8}}>ð¤</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>é¸æä½ çèº«å</div>
+        <div style={{fontSize:13,color:T.textMute,marginBottom:4,textAlign:"center"}}>ç¾¤çµï¼{g.name}</div>
+        <div style={{fontSize:12,color:T.textSub,marginBottom:24,textAlign:"center"}}>é¸æä½ å¨ç¾¤çµä¸­çèº«åï¼æä»¥æ°æå¡å å¥</div>
         <div style={{width:"100%",maxWidth:360}}>
           {unclaimed.map(m => (
             <Card key={m} onClick={()=>handleClaimIdentity(m)} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",marginBottom:8}}>
               <Avatar name={m} color={g.colors[m]||"#aaa"} size={38}/>
-              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{m}</div><div style={{fontSize:11,color:T.textMute}}>點選認領此身分</div></div>
-              <span style={{fontSize:18,color:T.textMute}}>›</span>
+              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{m}</div><div style={{fontSize:11,color:T.textMute}}>é»é¸èªé æ­¤èº«å</div></div>
+              <span style={{fontSize:18,color:T.textMute}}>âº</span>
             </Card>
           ))}
           <Card onClick={()=>handleClaimIdentity("__new__")} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",borderStyle:"dashed"}}>
-            <div style={{width:38,height:38,borderRadius:"50%",background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>＋</div>
-            <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>以新成員加入</div><div style={{fontSize:11,color:T.textMute}}>以「{currentUser}」新增到群組</div></div>
+            <div style={{width:38,height:38,borderRadius:"50%",background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>ï¼</div>
+            <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>ä»¥æ°æå¡å å¥</div><div style={{fontSize:11,color:T.textMute}}>ä»¥ã{currentUser}ãæ°å¢å°ç¾¤çµ</div></div>
           </Card>
-          <Btn onClick={()=>setClaimScreen(null)} variant="ghost" style={{width:"100%",marginTop:8,textAlign:"center"}}>← 取消</Btn>
+          <Btn onClick={()=>setClaimScreen(null)} variant="ghost" style={{width:"100%",marginTop:8,textAlign:"center"}}>â åæ¶</Btn>
         </div>
       </div>
     );
   }
 
-  // ── Group Screen ──────────────────────────────────────────────────
+  // ââ Group Screen ââââââââââââââââââââââââââââââââââââââââââââââââââ
   if(screen==="group"&&currentGroup) {
     const g=currentGroup;
     const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
@@ -876,75 +878,75 @@ export default function App() {
     }
     function handleAddExpense(form) {
       const e={id:uid(),...form};
-      updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`});
+      updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"æ°å¢æ¶è²»",detail:`æ°å¢ã${form.name}ãNT$${form.total}ï¼${form.payers.map(p=>`${p.name}ä»NT$${p.amount}`).join("ã")}`});
       setShowAdd(false);
     }
     function handleEditExpense(form) {
       const old=expenses.find(e=>e.id===editingId);
       const diffs=[];
-      if(old?.name!==form.name) diffs.push(`名稱：${old?.name} → ${form.name}`);
-      if(old?.total!==form.total) diffs.push(`金額：NT$${old?.total} → NT$${form.total}`);
-      if(old?.date!==form.date) diffs.push(`日期：${old?.date} → ${form.date}`);
-      if(old?.category!==form.category) diffs.push(`分類：${getCat(old?.category,cats)?.label} → ${getCat(form.category,cats)?.label}`);
+      if(old?.name!==form.name) diffs.push(`åç¨±ï¼${old?.name} â ${form.name}`);
+      if(old?.total!==form.total) diffs.push(`éé¡ï¼NT$${old?.total} â NT$${form.total}`);
+      if(old?.date!==form.date) diffs.push(`æ¥æï¼${old?.date} â ${form.date}`);
+      if(old?.category!==form.category) diffs.push(`åé¡ï¼${getCat(old?.category,cats)?.label} â ${getCat(form.category,cats)?.label}`);
       const oldP=(old?.payers||[]).map(p=>`${p.name}NT$${p.amount}`).join("+");
       const newP=form.payers.map(p=>`${p.name}NT$${p.amount}`).join("+");
-      if(oldP!==newP) diffs.push(`付款：${oldP} → ${newP}`);
-      if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("分帳成員變更");
-      const detail=diffs.length?`編輯「${old?.name}」：${diffs.join("；")}`:`編輯「${old?.name}」（無變動）`;
-      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...form})}),{id:uid(),ts:now(),user:me,action:"編輯消費",detail});
+      if(oldP!==newP) diffs.push(`ä»æ¬¾ï¼${oldP} â ${newP}`);
+      if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("åå¸³æå¡è®æ´");
+      const detail=diffs.length?`ç·¨è¼¯ã${old?.name}ãï¼${diffs.join("ï¼")}`:`ç·¨è¼¯ã${old?.name}ãï¼ç¡è®åï¼`;
+      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...form})}),{id:uid(),ts:now(),user:me,action:"ç·¨è¼¯æ¶è²»",detail});
       setEditingId(null);
     }
     function handleDeleteExpense(id) {
       const e=expenses.find(x=>x.id===id);
-      updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),{id:uid(),ts:now(),user:me,action:"刪除消費",detail:`刪除「${e?.name}」NT$${e?.total}`});
+      updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),{id:uid(),ts:now(),user:me,action:"åªé¤æ¶è²»",detail:`åªé¤ã${e?.name}ãNT$${e?.total}`});
       setEditingId(null);
     }
     function handleAddPayment(form) {
       const p={id:uid(),ts:now(),...form};
-      updateGroup(x=>({...x,payments:[...(x.payments||[]),p]}),{id:uid(),ts:now(),user:me,action:"記錄轉帳",detail:`${form.from} → ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`});
+      updateGroup(x=>({...x,payments:[...(x.payments||[]),p]}),{id:uid(),ts:now(),user:me,action:"è¨éè½å¸³",detail:`${form.from} â ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`});
     }
     function handleEditPayment(form) {
       const old=payments.find(p=>p.id===editingPaymentId);
       const diffs=[];
-      if(old?.from!==form.from) diffs.push(`轉出：${old?.from} → ${form.from}`);
-      if(old?.to!==form.to) diffs.push(`收款：${old?.to} → ${form.to}`);
-      if(old?.amount!==form.amount) diffs.push(`金額：NT$${old?.amount} → NT$${form.amount}`);
-      if(old?.date!==form.date) diffs.push(`日期：${old?.date} → ${form.date}`);
-      const detail=diffs.length?`編輯轉帳：${diffs.join("；")}`:"編輯轉帳（無變動）";
-      updateGroup(x=>({...x,payments:(x.payments||[]).map(p=>p.id!==editingPaymentId?p:{...p,...form,amount:parseFloat(form.amount)})}),{id:uid(),ts:now(),user:me,action:"編輯轉帳",detail});
+      if(old?.from!==form.from) diffs.push(`è½åºï¼${old?.from} â ${form.from}`);
+      if(old?.to!==form.to) diffs.push(`æ¶æ¬¾ï¼${old?.to} â ${form.to}`);
+      if(old?.amount!==form.amount) diffs.push(`éé¡ï¼NT$${old?.amount} â NT$${form.amount}`);
+      if(old?.date!==form.date) diffs.push(`æ¥æï¼${old?.date} â ${form.date}`);
+      const detail=diffs.length?`ç·¨è¼¯è½å¸³ï¼${diffs.join("ï¼")}`:"ç·¨è¼¯è½å¸³ï¼ç¡è®åï¼";
+      updateGroup(x=>({...x,payments:(x.payments||[]).map(p=>p.id!==editingPaymentId?p:{...p,...form,amount:parseFloat(form.amount)})}),{id:uid(),ts:now(),user:me,action:"ç·¨è¼¯è½å¸³",detail});
       setEditingPaymentId(null);
     }
     function handleDeletePayment(id) {
       const p=payments.find(x=>x.id===id);
-      updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"刪除轉帳",detail:`刪除 ${p?.from} → ${p?.to} NT$${p?.amount}`});
+      updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"åªé¤è½å¸³",detail:`åªé¤ ${p?.from} â ${p?.to} NT$${p?.amount}`});
       setEditingPaymentId(null);
     }
     const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:me,amount:""}],splitMode:"equal",splitData:{},splits:{}});
-    const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],["config","設定"]];
+    const TABS=[["expenses","æç´°"],["settle","çµç®"],["analytics","åæ"],["logs","ç´é"],["config","è¨­å®"]];
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,paddingBottom:50}}>
         <div style={{background:T.yellowLt,padding:"14px 16px 0",boxShadow:"0 2px 8px rgba(200,150,0,0.12)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-            <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
+            <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>â</button>
             <div style={{flex:1}}>
               <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
-              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdmin?" · 👑":""}</div>
+              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>ä»£ç¢¼ {g.code} Â· {members.length}äºº{isAdmin?" Â· ð":""}</div>
             </div>
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
           </div>
           <div style={{background:"rgba(255,255,255,0.75)",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>我的帳（{me}）</div>
+            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>æçå¸³ï¼{me}ï¼</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0}}>
               <div style={{paddingRight:10,borderRight:`1.5px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>我墊付</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>æå¢ä»</div>
                 <div style={{fontSize:16,fontWeight:800,color:T.yellowDk,lineHeight:1.2}}>NT${myPaid.toLocaleString()}</div>
               </div>
               <div style={{paddingLeft:10,paddingRight:10,borderRight:`1.5px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>我的消費</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>æçæ¶è²»</div>
                 <div style={{fontSize:16,fontWeight:800,color:T.text,lineHeight:1.2}}>NT${mySpend.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</div>
               </div>
               <div style={{paddingLeft:10}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>{myNet>=0?"別人欠我":"我欠別人"}</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>{myNet>=0?"å¥äººæ¬ æ":"ææ¬ å¥äºº"}</div>
                 <div style={{fontSize:16,fontWeight:800,color:myNet>=0?T.green:T.accent,lineHeight:1.2}}>NT${Math.abs(myNet).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</div>
               </div>
             </div>
@@ -959,12 +961,12 @@ export default function App() {
           </div>
         </div>
         <div style={{padding:"14px 14px 0"}}>
-          {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>✕</button></div>}
+          {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>â</button></div>}
           {activeTab==="expenses" && (
             <div>
               {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
               {showPayment && <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
-              {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>還沒有任何消費 🌴</div>}
+              {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>éæ²æä»»ä½æ¶è²» ð´</div>}
               {sortedDates.map(date => (
                 <div key={date}>
                   <div style={{fontSize:11,color:T.textMute,marginBottom:6,marginTop:12,fontWeight:700,letterSpacing:0.5}}>{fmtDate(date)}</div>
@@ -979,12 +981,12 @@ export default function App() {
                       return (
                         <Card key={p.id} onClick={()=>{setEditingPaymentId(p.id);setShowAdd(false);setShowPayment(false);setEditingId(null);}} style={{borderColor:isMine?"#A5D6A7":T.border,background:isMine?"#F1FBF4":T.bgCard,padding:"10px 14px"}}>
                           <div style={{display:"flex",alignItems:"center",gap:8}}>
-                            <div style={{width:36,height:36,borderRadius:10,background:"#E8F5E9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>💸</div>
+                            <div style={{width:36,height:36,borderRadius:10,background:"#E8F5E9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>ð¸</div>
                             <div style={{flex:1}}>
                               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2}}>
                                 <Avatar name={p.from} color={colors[p.from]||"#aaa"} size={18}/>
                                 <span style={{fontSize:12,fontWeight:600,color:T.text}}>{p.from}</span>
-                                <span style={{fontSize:11,color:T.textMute}}>→</span>
+                                <span style={{fontSize:11,color:T.textMute}}>â</span>
                                 <Avatar name={p.to} color={colors[p.to]||"#aaa"} size={18}/>
                                 <span style={{fontSize:12,fontWeight:600,color:T.text}}>{p.to}</span>
                               </div>
@@ -992,7 +994,7 @@ export default function App() {
                             </div>
                             <div style={{textAlign:"right"}}>
                               <div style={{fontSize:16,fontWeight:800,color:"#2E7D32"}}>NT${p.amount.toLocaleString()}</div>
-                              <div style={{fontSize:10,color:T.textMute}}>轉帳</div>
+                              <div style={{fontSize:10,color:T.textMute}}>è½å¸³</div>
                             </div>
                           </div>
                         </Card>
@@ -1011,7 +1013,7 @@ export default function App() {
                             <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{e.name}</div><div style={{fontSize:10,color:T.textMute}}>{cat.label}</div></div>
                           </div>
                           <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-                            {myShare>0 ? <div style={{fontSize:19,fontWeight:800,color:iAmPayer?T.yellowDk:T.text,lineHeight:1}}>NT${myShare%1===0?myShare.toFixed(0):myShare.toFixed(2)}</div> : <div style={{fontSize:12,color:T.textMute}}>不參與</div>}
+                            {myShare>0 ? <div style={{fontSize:19,fontWeight:800,color:iAmPayer?T.yellowDk:T.text,lineHeight:1}}>NT${myShare%1===0?myShare.toFixed(0):myShare.toFixed(2)}</div> : <div style={{fontSize:12,color:T.textMute}}>ä¸åè</div>}
                           </div>
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${T.border}`,paddingTop:6}}>
@@ -1023,7 +1025,7 @@ export default function App() {
                             ))}
                           </div>
                           <div style={{fontSize:11,color:T.textSub,flexShrink:0,marginLeft:6}}>
-                            {e.payers.length===1?`${e.payers[0].name} 付 NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
+                            {e.payers.length===1?`${e.payers[0].name} ä» NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
                           </div>
                         </div>
                       </Card>
@@ -1044,23 +1046,23 @@ export default function App() {
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
                         <Avatar name={m} color={col} size={22}/>
                         <span style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m}</span>
-                        {m===g.adminUser && <span style={{fontSize:9}}>👑</span>}
+                        {m===g.adminUser && <span style={{fontSize:9}}>ð</span>}
                       </div>
                       <div style={{display:"flex",flexDirection:"column",gap:3}}>
                         <div style={{display:"flex",justifyContent:"space-between",fontSize:10}}>
-                          <span style={{color:T.textMute}}>代墊</span>
+                          <span style={{color:T.textMute}}>ä»£å¢</span>
                           <span style={{fontWeight:600,color:T.text}}>NT${paid.toLocaleString()}</span>
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",fontSize:10}}>
-                          <span style={{color:T.textMute}}>消費</span>
+                          <span style={{color:T.textMute}}>æ¶è²»</span>
                           <span style={{fontWeight:600,color:T.text}}>NT${owes.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
                         </div>
                         <div style={{height:1,background:T.border,margin:"2px 0"}}/>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                          <span style={{fontSize:10,color:T.textMute}}>{cleared?"":"收支"}</span>
+                          <span style={{fontSize:10,color:T.textMute}}>{cleared?"":"æ¶æ¯"}</span>
                           {cleared
-                            ? <span style={{fontSize:11,fontWeight:800,color:T.green}}>✅ 結清</span>
-                            : <span style={{fontSize:13,fontWeight:800,color:net>=0?T.green:T.accent}}>{net>=0?"💰":"💸"}NT${Math.abs(net).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
+                            ? <span style={{fontSize:11,fontWeight:800,color:T.green}}>â çµæ¸</span>
+                            : <span style={{fontSize:13,fontWeight:800,color:net>=0?T.green:T.accent}}>{net>=0?"ð°":"ð¸"}NT${Math.abs(net).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
                           }
                         </div>
                       </div>
@@ -1068,16 +1070,16 @@ export default function App() {
                   );
                 })}
               </div>
-              <div style={{fontSize:10,color:T.textMute,textAlign:"center",marginBottom:12}}>總消費 NT${totalAll.toLocaleString()}</div>
+              <div style={{fontSize:10,color:T.textMute,textAlign:"center",marginBottom:12}}>ç¸½æ¶è²» NT${totalAll.toLocaleString()}</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <div style={{fontSize:12,color:T.textSub,fontWeight:700}}>最少轉帳方案</div>
-                <div style={{fontSize:11,color:T.textMute}}>{transfers.length} 筆即可結清</div>
+                <div style={{fontSize:12,color:T.textSub,fontWeight:700}}>æå°è½å¸³æ¹æ¡</div>
+                <div style={{fontSize:11,color:T.textMute}}>{transfers.length} ç­å³å¯çµæ¸</div>
               </div>
-              {transfers.length===0 && <div style={{textAlign:"center",color:T.textMute,padding:24,fontSize:16}}>已全部結清 🥳</div>}
+              {transfers.length===0 && <div style={{textAlign:"center",color:T.textMute,padding:24,fontSize:16}}>å·²å¨é¨çµæ¸ ð¥³</div>}
               {transfers.map((t,i) => {
                 const isMyAction=t.from===me||t.to===me;
                 const alreadyDone=payments.some(p=>p.from===t.from&&p.to===t.to&&Math.abs(p.amount-t.amount)<0.5);
-                const markDone=()=>{handleAddPayment({from:t.from,to:t.to,amount:t.amount,date:new Date().toISOString().slice(0,10),note:"轉帳完成"});};
+                const markDone=()=>{handleAddPayment({from:t.from,to:t.to,amount:t.amount,date:new Date().toISOString().slice(0,10),note:"è½å¸³å®æ"});};
                 return (
                   <Card key={i} style={{borderColor:alreadyDone?"#A5D6A7":isMyAction?T.yellowDk:T.border,background:alreadyDone?"#F1FBF4":isMyAction?"#FFFDE7":T.bgCard}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -1089,12 +1091,12 @@ export default function App() {
                         <div style={{fontSize:15,fontWeight:800,color:T.text}}>NT${t.amount.toLocaleString()}</div>
                         <div style={{width:"100%",display:"flex",alignItems:"center",gap:4}}>
                           <div style={{flex:1,height:1.5,background:T.border,borderRadius:2}}/>
-                          <span style={{fontSize:14}}>→</span>
+                          <span style={{fontSize:14}}>â</span>
                           <div style={{flex:1,height:1.5,background:T.border,borderRadius:2}}/>
                         </div>
-                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===me?"我要付":"我要收"}</span>}
-                        {alreadyDone && <span style={{fontSize:10,color:"#2E7D32",fontWeight:700}}>✅ 已完成</span>}
-                        {!alreadyDone && <button onClick={markDone} style={{marginTop:2,padding:"3px 12px",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:20,color:"#2E7D32",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>轉帳完成</button>}
+                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===me?"æè¦ä»":"æè¦æ¶"}</span>}
+                        {alreadyDone && <span style={{fontSize:10,color:"#2E7D32",fontWeight:700}}>â å·²å®æ</span>}
+                        {!alreadyDone && <button onClick={markDone} style={{marginTop:2,padding:"3px 12px",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:20,color:"#2E7D32",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>è½å¸³å®æ</button>}
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,minWidth:48}}>
                         <Avatar name={t.to} color={colors[t.to]||"#aaa"} size={32}/>
@@ -1109,8 +1111,8 @@ export default function App() {
           {activeTab==="analytics" && <AnalyticsTab expenses={expenses} members={members} colors={colors} cats={cats} me={me}/>}
           {activeTab==="logs" && (
             <div>
-              <div style={{fontSize:13,color:T.textSub,marginBottom:14,fontWeight:600}}>操作紀錄</div>
-              {(logs||[]).length===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>暫無紀錄</div>}
+              <div style={{fontSize:13,color:T.textSub,marginBottom:14,fontWeight:600}}>æä½ç´é</div>
+              {(logs||[]).length===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>æ«ç¡ç´é</div>}
               {(logs||[]).map(l => (
                 <Card key={l.id} style={{padding:"10px 12px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
@@ -1128,19 +1130,19 @@ export default function App() {
             g.adminUser===currentUser && !verifiedAdminGroups.has(g.id) && g.adminPin
               ? (
                 <div style={{textAlign:"center",padding:"40px 20px"}}>
-                  <div style={{fontSize:32,marginBottom:12}}>🔐</div>
-                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>需要管理員 PIN 碼</div>
-                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>輸入建立群組時設定的 PIN 碼</div>
-                  <input type="password" inputMode="numeric" placeholder="PIN 碼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
+                  <div style={{fontSize:32,marginBottom:12}}>ð</div>
+                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>éè¦ç®¡çå¡ PIN ç¢¼</div>
+                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>è¼¸å¥å»ºç«ç¾¤çµæè¨­å®ç PIN ç¢¼</div>
+                  <input type="password" inputMode="numeric" placeholder="PIN ç¢¼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
                   <Btn onClick={()=>{
                     if(adminPinInput===g.adminPin){
                       setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
                       setAdminPinInput("");
                     } else {
-                      setError("PIN 碼錯誤");
+                      setError("PIN ç¢¼é¯èª¤");
                       setAdminPinInput("");
                     }
-                  }} style={{width:"100%",maxWidth:200,padding:10}}>確認</Btn>
+                  }} style={{width:"100%",maxWidth:200,padding:10}}>ç¢ºèª</Btn>
                 </div>
               )
               : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me} setExportModal={setExportModal}/>
@@ -1152,11 +1154,11 @@ export default function App() {
             <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
               <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>💸</span> 記錄轉帳
+                <span>ð¸</span> è¨éè½å¸³
               </button>
               <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>🧾</span> 新增消費
+                <span>ð§¾</span> æ°å¢æ¶è²»
               </button>
             </div>
           )}
@@ -1167,78 +1169,78 @@ export default function App() {
               else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
             }}
             style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
-            {(showAdd||showPayment) ? "✕" : "＋"}
+            {(showAdd||showPayment) ? "â" : "ï¼"}
           </button>
         </div>
       )}
       </div>
     );
   }
-  // ── Export Modal ─────────────────────────────────────────────────
+  // ââ Export Modal âââââââââââââââââââââââââââââââââââââââââââââââââ
   if(exportModal) return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:"#fff",borderRadius:16,padding:20,width:"100%",maxWidth:500,maxHeight:"80vh",display:"flex",flexDirection:"column"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
           <div style={{fontWeight:700,fontSize:15}}>{exportModal.title}</div>
-          <button onClick={()=>setExportModal(null)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:T.textSub}}>✕</button>
+          <button onClick={()=>setExportModal(null)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:T.textSub}}>â</button>
         </div>
-        <div style={{fontSize:11,color:T.textSub,marginBottom:8}}>無法直接下載，請長按全選後複製，貼到 Excel 或記事本儲存</div>
+        <div style={{fontSize:11,color:T.textSub,marginBottom:8}}>ç¡æ³ç´æ¥ä¸è¼ï¼è«é·æå¨é¸å¾è¤è£½ï¼è²¼å° Excel æè¨äºæ¬å²å­</div>
         <textarea readOnly value={exportModal.content} style={{flex:1,border:`1px solid ${T.border}`,borderRadius:8,padding:8,fontSize:10,fontFamily:"monospace",resize:"none",outline:"none",minHeight:200}} onClick={e=>e.target.select()}/>
-        <Btn onClick={()=>{try{navigator.clipboard.writeText(exportModal.content).then(()=>alert("已複製！"));}catch{alert("請手動選取複製");}}} style={{marginTop:10,width:"100%"}}>複製內容</Btn>
+        <Btn onClick={()=>{try{navigator.clipboard.writeText(exportModal.content).then(()=>alert("å·²è¤è£½ï¼"));}catch{alert("è«æåé¸åè¤è£½");}}} style={{marginTop:10,width:"100%"}}>è¤è£½å§å®¹</Btn>
       </div>
     </div>
   );
 
-  // ── Home Screen ───────────────────────────────────────────────────
+  // ââ Home Screen âââââââââââââââââââââââââââââââââââââââââââââââââââ
   if(screen==="home") return (
     <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,padding:20}}>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
-        <div style={{width:40,height:40,borderRadius:14,background:T.yellowMd,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:T.shadow}}>🏝️</div>
-        <div><div style={{fontSize:17,fontWeight:800}}>旅遊分帳</div><div style={{fontSize:11,color:T.yellowDk,fontWeight:600}}>歡迎，{currentUser} 👋</div></div>
-        <button onClick={()=>{setCurrentUser("");setUsernameInput("");try{localStorage.removeItem("splitapp:user");}catch{}try{window.location.hash="";}catch{}setScreen("login");}} style={{marginLeft:"auto",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:20,padding:"5px 12px",color:T.textSub,fontSize:11,cursor:"pointer",fontWeight:600}}>登出</button>
+        <div style={{width:40,height:40,borderRadius:14,background:T.yellowMd,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:T.shadow}}>ðï¸</div>
+        <div><div style={{fontSize:17,fontWeight:800}}>æéåå¸³</div><div style={{fontSize:11,color:T.yellowDk,fontWeight:600}}>æ­¡è¿ï¼{currentUser} ð</div></div>
+        <button onClick={()=>{setCurrentUser("");setUsernameInput("");try{localStorage.removeItem("splitapp:user");}catch{}try{window.location.hash="";}catch{}setScreen("login");}} style={{marginLeft:"auto",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:20,padding:"5px 12px",color:T.textSub,fontSize:11,cursor:"pointer",fontWeight:600}}>ç»åº</button>
       </div>
-      {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>✕</button></div>}
+      {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>â</button></div>}
       {groups.filter(g=>g.members.includes(currentUser)).length>0 && (
         <div style={{marginBottom:20}}>
-          <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>我的群組</div>
+          <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>æçç¾¤çµ</div>
           {groups.filter(g=>g.members.includes(currentUser)).map(g => (
             <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
-              <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>🏝️</div>
-              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} 位成員 · {g.code}{g.adminUser===currentUser?" · 👑":""}</div></div>
-              <span style={{fontSize:18,color:T.textMute}}>›</span>
+              <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>ðï¸</div>
+              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} ä½æå¡ Â· {g.code}{g.adminUser===currentUser?" Â· ð":""}</div></div>
+              <span style={{fontSize:18,color:T.textMute}}>âº</span>
             </Card>
           ))}
         </div>
       )}
       <Card style={{borderColor:T.yellowMd,marginBottom:12}}>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10,color:T.yellowDk}}>＋ 建立新群組</div>
-        <input placeholder="群組名稱（例：沖繩五日遊 🌺）" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
-        <input type="password" inputMode="numeric" placeholder="管理員 PIN 碼（至少 4 位）" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
-        <div style={{fontSize:10,color:T.textMute,marginBottom:8,marginTop:-4}}>PIN 碼用於保護管理員功能，請記好</div>
-        <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>建立</Btn>
+        <div style={{fontSize:13,fontWeight:700,marginBottom:10,color:T.yellowDk}}>ï¼ å»ºç«æ°ç¾¤çµ</div>
+        <input placeholder="ç¾¤çµåç¨±ï¼ä¾ï¼æ²ç¹©äºæ¥é ðºï¼" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
+        <input type="password" inputMode="numeric" placeholder="ç®¡çå¡ PIN ç¢¼ï¼è³å° 4 ä½ï¼" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
+        <div style={{fontSize:10,color:T.textMute,marginBottom:8,marginTop:-4}}>PIN ç¢¼ç¨æ¼ä¿è­·ç®¡çå¡åè½ï¼è«è¨å¥½</div>
+        <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>å»ºç«</Btn>
       </Card>
       <Card>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>加入群組</div>
-        <input placeholder="輸入群組代碼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
-        <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>加入</Btn>
+        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>å å¥ç¾¤çµ</div>
+        <input placeholder="è¼¸å¥ç¾¤çµä»£ç¢¼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
+        <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>å å¥</Btn>
       </Card>
       <div style={{display:"flex",gap:8,marginTop:4}}>
-        <button onClick={()=>{const r=exportBackupJSON(groups);if(r)setExportModal({title:"備份資料",content:r});}} style={{flex:1,padding:"10px 0",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:12,color:"#2E7D32",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📦 備份資料</button>
-        <button onClick={()=>importFileRef.current?.click()} style={{flex:1,padding:"10px 0",background:"#FFF8E1",border:`1.5px solid ${T.yellowMd}`,borderRadius:12,color:T.yellowDk,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📂 匯入備份</button>
+        <button onClick={()=>{const r=exportBackupJSON(groups);if(r)setExportModal({title:"åä»½è³æ",content:r});}} style={{flex:1,padding:"10px 0",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:12,color:"#2E7D32",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð¦ åä»½è³æ</button>
+        <button onClick={()=>importFileRef.current?.click()} style={{flex:1,padding:"10px 0",background:"#FFF8E1",border:`1.5px solid ${T.yellowMd}`,borderRadius:12,color:T.yellowDk,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð å¯å¥åä»½</button>
         <input ref={importFileRef} type="file" accept=".json" onChange={handleImportBackup} style={{display:"none"}}/>
       </div>
     </div>
   );
 
-  // ── Login ─────────────────────────────────────────────────────────
+  // ââ Login âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   return (
     <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
-      <div style={{fontSize:60,marginBottom:8}}>🏝️</div>
-      <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>旅遊分帳</div>
-      <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>輸入你的名字開始使用</div>
+      <div style={{fontSize:60,marginBottom:8}}>ðï¸</div>
+      <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>æéåå¸³</div>
+      <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>è¼¸å¥ä½ çåå­éå§ä½¿ç¨</div>
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,width:"100%",maxWidth:320,boxSizing:"border-box"}}>{error}</div>}
-      <input placeholder="你叫什麼名字？" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
-      <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>出發！🌟</Btn>
+      <input placeholder="ä½ å«ä»éº¼åå­ï¼" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
+      <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>åºç¼ï¼ð</Btn>
     </div>
   );
 }
