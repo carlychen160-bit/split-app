@@ -10,12 +10,12 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"ð",label:"é¤é£²"},{id:"snack",icon:"ð§",label:"é£²æå°é£"},
-  {id:"transport",icon:"ð",label:"äº¤é"},{id:"hotel",icon:"ð¨",label:"ä½å®¿"},
-  {id:"spot",icon:"ð¡",label:"æ¯é»"},{id:"shop",icon:"ðï¸",label:"è³¼ç©"},
-  {id:"grocery",icon:"ð",label:"è¶å¸"},{id:"fuel",icon:"â½",label:"æ²¹é¢"},
-  {id:"parking",icon:"ð¿ï¸",label:"åè»"},{id:"ticket",icon:"ðï¸",label:"ç¥¨å¸"},
-  {id:"medical",icon:"ð",label:"é«è¥"},{id:"misc",icon:"ð¦",label:"éæ¯"},
+  {id:"food",icon:"Ã°ÂÂÂ",label:"Ã©Â¤ÂÃ©Â£Â²"},{id:"snack",icon:"Ã°ÂÂ§Â",label:"Ã©Â£Â²Ã¦ÂÂÃ¥Â°ÂÃ©Â£Â"},
+  {id:"transport",icon:"Ã°ÂÂÂ",label:"Ã¤ÂºÂ¤Ã©ÂÂ"},{id:"hotel",icon:"Ã°ÂÂÂ¨",label:"Ã¤Â½ÂÃ¥Â®Â¿"},
+  {id:"spot",icon:"Ã°ÂÂÂ¡",label:"Ã¦ÂÂ¯Ã©Â»Â"},{id:"shop",icon:"Ã°ÂÂÂÃ¯Â¸Â",label:"Ã¨Â³Â¼Ã§ÂÂ©"},
+  {id:"grocery",icon:"Ã°ÂÂÂ",label:"Ã¨Â¶ÂÃ¥Â¸Â"},{id:"fuel",icon:"Ã¢ÂÂ½",label:"Ã¦Â²Â¹Ã©ÂÂ¢"},
+  {id:"parking",icon:"Ã°ÂÂÂ¿Ã¯Â¸Â",label:"Ã¥ÂÂÃ¨Â»Â"},{id:"ticket",icon:"Ã°ÂÂÂÃ¯Â¸Â",label:"Ã§Â¥Â¨Ã¥ÂÂ¸"},
+  {id:"medical",icon:"Ã°ÂÂÂ",label:"Ã©ÂÂ«Ã¨ÂÂ¥"},{id:"misc",icon:"Ã°ÂÂÂ¦",label:"Ã©ÂÂÃ¦ÂÂ¯"},
 ];
 
 const getCat = (id, cats) => {
@@ -27,7 +27,7 @@ const MEMBER_COLORS = ["#E57373","#64B5F6","#81C784","#FFB74D","#BA68C8","#4DB6A
 
 function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function now() { return new Date().toISOString(); }
-function fmtDate(d) { const dt=new Date(d+"T00:00:00"); return `${dt.getMonth()+1}æ${dt.getDate()}æ¥`; }
+function fmtDate(d) { const dt=new Date(d+"T00:00:00"); return `${dt.getMonth()+1}Ã¦ÂÂ${dt.getDate()}Ã¦ÂÂ¥`; }
 function fmtTs(ts) {
   const d=new Date(ts);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
@@ -78,48 +78,46 @@ function minimizeTransfers(balances) {
   return transfers;
 }
 
-}
-
 function buildInitialGroup() {
-  const ALL = ["å®å®","Carly","Michael","Chien","é³éå®","é±äºç"];
-  const SG = ["Carly","é³éå®","Michael","é±äºç"];
-  const colors = {"å®å®":MEMBER_COLORS[0],"Carly":MEMBER_COLORS[1],"Michael":MEMBER_COLORS[2],"Chien":MEMBER_COLORS[3],"é³éå®":MEMBER_COLORS[4],"é±äºç":MEMBER_COLORS[5]};
+  const ALL = ["Ã¥Â®ÂÃ¥Â®Â","Carly","Michael","Chien","Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â","Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ"];
+  const SG = ["Carly","Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â","Michael","Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ"];
+  const colors = {"Ã¥Â®ÂÃ¥Â®Â":MEMBER_COLORS[0],"Carly":MEMBER_COLORS[1],"Michael":MEMBER_COLORS[2],"Chien":MEMBER_COLORS[3],"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â":MEMBER_COLORS[4],"Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ":MEMBER_COLORS[5]};
   const yu = (()=>{ const f=180,rem=1716-f,oth=ALL.filter(m=>m!=="Michael"),sh=rem/oth.length,s={}; oth.forEach(m=>s[m]=sh); s["Michael"]=f; return s; })();
-  const am = {"Carly":95/6,"é³éå®":95/6,"Chien":95/3,"Michael":95/3};
+  const am = {"Carly":95/6,"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â":95/6,"Chien":95/3,"Michael":95/3};
   return {
-    id:"clearing2026", name:"2026æ¸æç¯é1/4å³¶", code:"CLEAR1",
+    id:"clearing2026", name:"2026Ã¦Â¸ÂÃ¦ÂÂÃ§Â¯ÂÃ©ÂÂ1/4Ã¥Â³Â¶", code:"CLEAR1",
     adminUser:"Carly", adminPin:"1234", members:ALL, colors, claimedBy:{},
     categories:[...DEFAULT_CATS], payments:[],
     expenses:[
-      {id:"e1",name:"å¨è¯",category:"grocery",payers:[{name:"å®å®",amount:3476}],total:3476,date:"2026-04-02",splits:makeEqual(ALL,3476)},
-      {id:"e2",name:"æ£ºææ¿",category:"food",payers:[{name:"Carly",amount:155}],total:155,date:"2026-04-02",splits:makeEqual(ALL,155)},
-      {id:"e3",name:"å¼·èé¤",category:"food",payers:[{name:"Carly",amount:320}],total:320,date:"2026-04-02",splits:makeEqual(ALL,320)},
-      {id:"e4",name:"æAæ¼«çåå¡åº",category:"snack",payers:[{name:"Michael",amount:750}],total:750,date:"2026-04-02",splits:makeEqual(SG,750)},
-      {id:"e5",name:"ä¸ç¢å°",category:"food",payers:[{name:"Michael",amount:1255}],total:1255,date:"2026-04-02",splits:makeEqual(ALL,1255)},
-      {id:"e6",name:"æª¸æª¬æ±",category:"snack",payers:[{name:"Michael",amount:60}],total:60,date:"2026-04-02",splits:makeEqual(SG,60)},
-      {id:"e7",name:"ä½³èå°æå®¤",category:"snack",payers:[{name:"Michael",amount:1350}],total:1350,date:"2026-04-02",splits:makeEqual(SG,1350)},
-      {id:"e8",name:"ä½å®¿",category:"hotel",payers:[{name:"Carly",amount:9585}],total:9585,date:"2026-04-02",splits:makeEqual(ALL,9585)},
-      {id:"e9",name:"ç·¬ç¸æç",category:"food",payers:[{name:"Chien",amount:2320}],total:2320,date:"2026-04-03",splits:makeEqual(ALL,2320)},
-      {id:"e10",name:"æ²¹é¢",category:"fuel",payers:[{name:"Michael",amount:3416}],total:3416,date:"2026-04-03",splits:makeEqual(SG,3416)},
-      {id:"e11",name:"å¨å®¶å°å¡",category:"grocery",payers:[{name:"é³éå®",amount:118}],total:118,date:"2026-04-03",splits:makeEqual(ALL,118)},
-      {id:"e12",name:"è±çç³",category:"snack",payers:[{name:"Carly",amount:310}],total:310,date:"2026-04-04",splits:makeEqual(["Carly","é³éå®"],310)},
-      {id:"e13",name:"è¶å¸",category:"grocery",payers:[{name:"å®å®",amount:485}],total:485,date:"2026-04-04",splits:makeEqual(ALL,485)},
-      {id:"e14",name:"æ»·å³",category:"food",payers:[{name:"é³éå®",amount:645}],total:645,date:"2026-04-04",splits:makeEqual(ALL,645)},
-      {id:"e15",name:"è±è®æé£",category:"food",payers:[{name:"Carly",amount:890}],total:890,date:"2026-04-04",splits:makeEqual(ALL,890)},
-      {id:"e16",name:"åéç§å ´",category:"spot",payers:[{name:"é³éå®",amount:1716}],total:1716,date:"2026-04-04",splits:yu,isCustom:true},
-      {id:"e17",name:"åé¤è",category:"food",payers:[{name:"Michael",amount:3009}],total:3009,date:"2026-04-04",splits:makeEqual(ALL,3009)},
-      {id:"e18",name:"åå©éºµå",category:"snack",payers:[{name:"é³éå®",amount:135}],total:135,date:"2026-04-05",splits:makeEqual(ALL,135)},
-      {id:"e19",name:"æµ·é®®é¤å»³",category:"food",payers:[{name:"Chien",amount:2150}],total:2150,date:"2026-04-05",splits:makeEqual(ALL,2150)},
-      {id:"e20",name:"æ¾è¨éº»ç³¬",category:"shop",payers:[{name:"Chien",amount:243}],total:243,date:"2026-04-05",splits:makeEqual(ALL,243)},
-      {id:"e21",name:"711ç¾å¼",category:"snack",payers:[{name:"Carly",amount:95}],total:95,date:"2026-04-05",splits:am,isCustom:true},
-      {id:"e22",name:"åè»è²»",category:"parking",payers:[{name:"Michael",amount:120}],total:120,date:"2026-04-06",splits:makeEqual(SG,120)},
-      {id:"e23",name:"7-11é£¯ç³°",category:"snack",payers:[{name:"é±äºç",amount:55}],total:55,date:"2026-04-06",splits:makeEqual(["é³éå®","é±äºç"],55)},
-      {id:"e24",name:"æ¢å­åç¢",category:"shop",payers:[{name:"Chien",amount:400}],total:400,date:"2026-04-04",splits:makeEqual(["Chien","é±äºç"],400)},
+      {id:"e1",name:"Ã¥ÂÂ¨Ã¨ÂÂ¯",category:"grocery",payers:[{name:"Ã¥Â®ÂÃ¥Â®Â",amount:3476}],total:3476,date:"2026-04-02",splits:makeEqual(ALL,3476)},
+      {id:"e2",name:"Ã¦Â£ÂºÃ¦ÂÂÃ¦ÂÂ¿",category:"food",payers:[{name:"Carly",amount:155}],total:155,date:"2026-04-02",splits:makeEqual(ALL,155)},
+      {id:"e3",name:"Ã¥Â¼Â·Ã¨ÂÂÃ©Â¤Â",category:"food",payers:[{name:"Carly",amount:320}],total:320,date:"2026-04-02",splits:makeEqual(ALL,320)},
+      {id:"e4",name:"Ã¦ÂÂAÃ¦Â¼Â«Ã§ÂÂÃ¥ÂÂÃ¥ÂÂ¡Ã¥ÂºÂ",category:"snack",payers:[{name:"Michael",amount:750}],total:750,date:"2026-04-02",splits:makeEqual(SG,750)},
+      {id:"e5",name:"Ã¤Â¸ÂÃ§Â¢ÂÃ¥Â°Â",category:"food",payers:[{name:"Michael",amount:1255}],total:1255,date:"2026-04-02",splits:makeEqual(ALL,1255)},
+      {id:"e6",name:"Ã¦ÂªÂ¸Ã¦ÂªÂ¬Ã¦Â±Â",category:"snack",payers:[{name:"Michael",amount:60}],total:60,date:"2026-04-02",splits:makeEqual(SG,60)},
+      {id:"e7",name:"Ã¤Â½Â³Ã¨ÂÂÃ¥ÂÂ°Ã¦ÂÂÃ¥Â®Â¤",category:"snack",payers:[{name:"Michael",amount:1350}],total:1350,date:"2026-04-02",splits:makeEqual(SG,1350)},
+      {id:"e8",name:"Ã¤Â½ÂÃ¥Â®Â¿",category:"hotel",payers:[{name:"Carly",amount:9585}],total:9585,date:"2026-04-02",splits:makeEqual(ALL,9585)},
+      {id:"e9",name:"Ã§Â·Â¬Ã§ÂÂ¸Ã¦ÂÂÃ§ÂÂ",category:"food",payers:[{name:"Chien",amount:2320}],total:2320,date:"2026-04-03",splits:makeEqual(ALL,2320)},
+      {id:"e10",name:"Ã¦Â²Â¹Ã©ÂÂ¢",category:"fuel",payers:[{name:"Michael",amount:3416}],total:3416,date:"2026-04-03",splits:makeEqual(SG,3416)},
+      {id:"e11",name:"Ã¥ÂÂ¨Ã¥Â®Â¶Ã¥ÂÂ°Ã¥Â¡Â",category:"grocery",payers:[{name:"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â",amount:118}],total:118,date:"2026-04-03",splits:makeEqual(ALL,118)},
+      {id:"e12",name:"Ã¨ÂÂ±Ã§ÂÂÃ§Â³Â",category:"snack",payers:[{name:"Carly",amount:310}],total:310,date:"2026-04-04",splits:makeEqual(["Carly","Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â"],310)},
+      {id:"e13",name:"Ã¨Â¶ÂÃ¥Â¸Â",category:"grocery",payers:[{name:"Ã¥Â®ÂÃ¥Â®Â",amount:485}],total:485,date:"2026-04-04",splits:makeEqual(ALL,485)},
+      {id:"e14",name:"Ã¦Â»Â·Ã¥ÂÂ³",category:"food",payers:[{name:"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â",amount:645}],total:645,date:"2026-04-04",splits:makeEqual(ALL,645)},
+      {id:"e15",name:"Ã¨ÂÂ±Ã¨ÂÂ®Ã¦ÂÂÃ©Â£Â",category:"food",payers:[{name:"Carly",amount:890}],total:890,date:"2026-04-04",splits:makeEqual(ALL,890)},
+      {id:"e16",name:"Ã¥ÂÂÃ©ÂÂÃ§ÂÂ§Ã¥Â Â´",category:"spot",payers:[{name:"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â",amount:1716}],total:1716,date:"2026-04-04",splits:yu,isCustom:true},
+      {id:"e17",name:"Ã¥ÂÂÃ©Â¤ÂÃ¨ÂÂ",category:"food",payers:[{name:"Michael",amount:3009}],total:3009,date:"2026-04-04",splits:makeEqual(ALL,3009)},
+      {id:"e18",name:"Ã¥ÂÂÃ¥ÂÂ©Ã©ÂºÂµÃ¥ÂÂ",category:"snack",payers:[{name:"Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â",amount:135}],total:135,date:"2026-04-05",splits:makeEqual(ALL,135)},
+      {id:"e19",name:"Ã¦ÂµÂ·Ã©Â®Â®Ã©Â¤ÂÃ¥Â»Â³",category:"food",payers:[{name:"Chien",amount:2150}],total:2150,date:"2026-04-05",splits:makeEqual(ALL,2150)},
+      {id:"e20",name:"Ã¦ÂÂ¾Ã¨Â¨ÂÃ©ÂºÂ»Ã§Â³Â¬",category:"shop",payers:[{name:"Chien",amount:243}],total:243,date:"2026-04-05",splits:makeEqual(ALL,243)},
+      {id:"e21",name:"711Ã§Â¾ÂÃ¥Â¼Â",category:"snack",payers:[{name:"Carly",amount:95}],total:95,date:"2026-04-05",splits:am,isCustom:true},
+      {id:"e22",name:"Ã¥ÂÂÃ¨Â»ÂÃ¨Â²Â»",category:"parking",payers:[{name:"Michael",amount:120}],total:120,date:"2026-04-06",splits:makeEqual(SG,120)},
+      {id:"e23",name:"7-11Ã©Â£Â¯Ã§Â³Â°",category:"snack",payers:[{name:"Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ",amount:55}],total:55,date:"2026-04-06",splits:makeEqual(["Ã©ÂÂ³Ã©ÂÂÃ¥Â®Â","Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ"],55)},
+      {id:"e24",name:"Ã¦Â¢ÂÃ¥Â­ÂÃ¥ÂÂÃ§ÂÂ¢",category:"shop",payers:[{name:"Chien",amount:400}],total:400,date:"2026-04-04",splits:makeEqual(["Chien","Ã©ÂÂ±Ã¤ÂºÂÃ§ÂÂ"],400)},
     ],
-    logs:[{id:"l0",ts:new Date("2026-04-02").toISOString(),user:"Carly",action:"å»ºç«ç¾¤çµ",detail:"å»ºç«äºç¾¤çµã2026æ¸æç¯é1/4å³¶ã"}]
+    logs:[{id:"l0",ts:new Date("2026-04-02").toISOString(),user:"Carly",action:"Ã¥Â»ÂºÃ§Â«ÂÃ§Â¾Â¤Ã§ÂµÂ",detail:"Ã¥Â»ÂºÃ§Â«ÂÃ¤ÂºÂÃ§Â¾Â¤Ã§ÂµÂÃ£ÂÂ2026Ã¦Â¸ÂÃ¦ÂÂÃ§Â¯ÂÃ©ÂÂ1/4Ã¥Â³Â¶Ã£ÂÂ"}]
   };
 }
-// ââ Primitives ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Primitives Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function Avatar({name,color,size=26}) {
   return <div style={{width:size,height:size,borderRadius:"50%",background:color||"#ddd",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.38,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 1px 4px rgba(0,0,0,0.12)"}}>{name[0]}</div>;
 }
@@ -141,7 +139,7 @@ function Btn({children,onClick,variant="primary",style={},disabled=false}) {
   return <button onClick={disabled?undefined:onClick} style={{padding:"10px 16px",border:"none",borderRadius:12,fontSize:13,fontWeight:700,cursor:disabled?"not-allowed":"pointer",fontFamily:"inherit",opacity:disabled?0.5:1,...v[variant],...style}}>{children}</button>;
 }
 
-// ââ MultiSelect âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ MultiSelect Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function MultiSelect({value,onChange,members,colors}) {
   const [open,setOpen] = useState(false);
   const ref = useRef(null);
@@ -151,24 +149,24 @@ function MultiSelect({value,onChange,members,colors}) {
   },[]);
   const toggle = m => { if(value.includes(m)){if(value.length>1)onChange(value.filter(x=>x!==m));}else onChange([...value,m]); };
   const allSel = value.length===members.length;
-  const label = allSel ? "å¨é¨æå¡" : value.length===0 ? "è«é¸æ" : value.join("ã");
+  const label = allSel ? "Ã¥ÂÂ¨Ã©ÂÂ¨Ã¦ÂÂÃ¥ÂÂ¡" : value.length===0 ? "Ã¨Â«ÂÃ©ÂÂ¸Ã¦ÂÂ" : value.join("Ã£ÂÂ");
   return (
     <div ref={ref} style={{position:"relative",marginBottom:8}}>
       <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}}>
         <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}}>{label}</span>
-        <span style={{marginLeft:8,fontSize:10,color:T.textMute}}>{open?"â²":"â¼"}</span>
+        <span style={{marginLeft:8,fontSize:10,color:T.textMute}}>{open?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}</span>
       </div>
       {open && (
         <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,zIndex:300,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:12,overflow:"hidden",boxShadow:T.shadowMd}}>
           <div onClick={()=>onChange(allSel?[members[0]]:[...members])} style={{padding:"9px 12px",fontSize:12,color:T.textSub,cursor:"pointer",borderBottom:`1px solid ${T.border}`,display:"flex",justifyContent:"space-between",background:allSel?T.yellowLt:"#fff"}}>
-            <span>å¨é¨æå¡</span><span style={{color:T.yellowDk}}>{allSel?"â":""}</span>
+            <span>Ã¥ÂÂ¨Ã©ÂÂ¨Ã¦ÂÂÃ¥ÂÂ¡</span><span style={{color:T.yellowDk}}>{allSel?"Ã¢ÂÂ":""}</span>
           </div>
           {members.map(m => {
             const sel = value.includes(m); const col = colors[m]||"#aaa";
             return (
               <div key={m} onClick={()=>toggle(m)} style={{padding:"8px 12px",display:"flex",alignItems:"center",gap:10,cursor:"pointer",background:sel?T.yellowLt+"88":"#fff",borderBottom:`1px solid ${T.border}44`}}>
                 <div style={{width:16,height:16,borderRadius:5,border:`2px solid ${sel?T.yellowDk:T.border}`,background:sel?T.yellowMd:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                  {sel && <span style={{fontSize:9,color:T.text,fontWeight:900}}>â</span>}
+                  {sel && <span style={{fontSize:9,color:T.text,fontWeight:900}}>Ã¢ÂÂ</span>}
                 </div>
                 <Avatar name={m} color={col} size={22}/>
                 <span style={{fontSize:13,color:T.text,fontWeight:sel?700:400}}>{m}</span>
@@ -181,7 +179,7 @@ function MultiSelect({value,onChange,members,colors}) {
   );
 }
 
-// ââ Category Picker âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Category Picker Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function CategoryPicker({value,onChange,cats}) {
   const [open,setOpen] = useState(false);
   const ref = useRef(null);
@@ -195,7 +193,7 @@ function CategoryPicker({value,onChange,cats}) {
       <div onClick={()=>setOpen(!open)} style={{...iStyle,marginBottom:0,height:42,display:"flex",alignItems:"center",gap:8,cursor:"pointer",boxSizing:"border-box"}}>
         <span style={{fontSize:18}}>{cur.icon}</span>
         <span style={{flex:1,color:T.text}}>{cur.label}</span>
-        <span style={{fontSize:10,color:T.textMute}}>{open?"â²":"â¼"}</span>
+        <span style={{fontSize:10,color:T.textMute}}>{open?"Ã¢ÂÂ²":"Ã¢ÂÂ¼"}</span>
       </div>
       {open && (
         <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,zIndex:300,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:12,padding:8,boxShadow:T.shadowMd,display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:4}}>
@@ -210,7 +208,7 @@ function CategoryPicker({value,onChange,cats}) {
     </div>
   );
 }
-// ââ Split Editor ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Split Editor Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   const pt = parseFloat(total)||0;
   const fixedSum = Object.values(data).reduce((s,v)=>s+(parseFloat(v)||0),0);
@@ -220,7 +218,7 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   return (
     <div style={{marginBottom:8}}>
       <div style={{display:"flex",gap:6,marginBottom:10}}>
-        {[["equal","åå"],["amount","éé¡"],["ratio","æ¯ä¾"]].map(([k,l]) => (
+        {[["equal","Ã¥ÂÂÃ¥ÂÂ"],["amount","Ã©ÂÂÃ©Â¡Â"],["ratio","Ã¦Â¯ÂÃ¤Â¾Â"]].map(([k,l]) => (
           <button key={k} onClick={()=>{setMode(k);setData({});}} style={{flex:1,padding:"7px 0",borderRadius:10,border:`1.5px solid ${mode===k?T.yellowDk:T.border}`,background:mode===k?T.yellowLt:"#fff",color:mode===k?T.text:T.textSub,fontSize:12,fontWeight:mode===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
         ))}
       </div>
@@ -229,20 +227,20 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
       )}
       {mode==="amount" && (
         <div>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>è¼¸å¥åºå®éé¡ï¼çç©ºåååå©é¤</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>Ã¨Â¼Â¸Ã¥ÂÂ¥Ã¥ÂÂºÃ¥Â®ÂÃ©ÂÂÃ©Â¡ÂÃ¯Â¼ÂÃ§ÂÂÃ§Â©ÂºÃ¥ÂÂÃ¥ÂÂÃ¥ÂÂÃ¥ÂÂ©Ã©Â¤Â</div>
           {members.map(m => (
             <div key={m} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
               <Avatar name={m} color={colors[m]||"#aaa"} size={24}/>
               <span style={{fontSize:13,color:T.text,flex:1}}>{m}</span>
-              <input type="number" placeholder={sharePerEqual>0&&!(data[m])?`â${sharePerEqual.toFixed(0)}`:"0"} value={data[m]||""} onChange={e=>setData({...data,[m]:e.target.value})} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
+              <input type="number" placeholder={sharePerEqual>0&&!(data[m])?`Ã¢ÂÂ${sharePerEqual.toFixed(0)}`:"0"} value={data[m]||""} onChange={e=>setData({...data,[m]:e.target.value})} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
             </div>
           ))}
-          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>{remainder<-0.01?`â ï¸ è¶åº NT$${Math.abs(remainder).toFixed(0)}`:`å©é¤ NT$${remainder.toFixed(0)} ç± ${equalCount} äººåå`}</div>}
+          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>{remainder<-0.01?`Ã¢ÂÂ Ã¯Â¸Â Ã¨Â¶ÂÃ¥ÂÂº NT$${Math.abs(remainder).toFixed(0)}`:`Ã¥ÂÂ©Ã©Â¤Â NT$${remainder.toFixed(0)} Ã§ÂÂ± ${equalCount} Ã¤ÂºÂºÃ¥ÂÂÃ¥ÂÂ`}</div>}
         </div>
       )}
       {mode==="ratio" && (
         <div>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>è¼¸å¥æ¯ä¾ï¼çç©ºé è¨­1ï¼</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>Ã¨Â¼Â¸Ã¥ÂÂ¥Ã¦Â¯ÂÃ¤Â¾ÂÃ¯Â¼ÂÃ§ÂÂÃ§Â©ÂºÃ©Â ÂÃ¨Â¨Â­1Ã¯Â¼Â</div>
           {members.map(m => {
             const ratio = parseFloat(data[m])||1;
             const ratioTotal = members.reduce((s,x)=>s+(parseFloat(data[x])||1),0);
@@ -262,7 +260,7 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   );
 }
 
-// ââ Payers Editor âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Payers Editor Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function PayersEditor({payers,setPayers,members,total}) {
   const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
   const pt = parseFloat(total)||0;
@@ -277,18 +275,18 @@ function PayersEditor({payers,setPayers,members,total}) {
           <select value={p.name} onChange={e=>updatePayer(i,"name",e.target.value)} style={{...iStyle,flex:1,marginBottom:0,padding:"7px 8px"}}>
             {members.map(m=><option key={m} value={m}>{m}</option>)}
           </select>
-          <input type="number" placeholder="éé¡" value={p.amount} onChange={e=>updatePayer(i,"amount",e.target.value)} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
-          {payers.length>1 && <button onClick={()=>removePayer(i)} style={{background:"none",border:"none",color:T.textMute,cursor:"pointer",fontSize:16,padding:"0 2px"}}>â</button>}
+          <input type="number" placeholder="Ã©ÂÂÃ©Â¡Â" value={p.amount} onChange={e=>updatePayer(i,"amount",e.target.value)} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
+          {payers.length>1 && <button onClick={()=>removePayer(i)} style={{background:"none",border:"none",color:T.textMute,cursor:"pointer",fontSize:16,padding:"0 2px"}}>Ã¢ÂÂ</button>}
         </div>
       ))}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4}}>
-        <button onClick={addPayer} style={{background:"none",border:`1.5px dashed ${T.border}`,borderRadius:8,padding:"5px 10px",fontSize:12,color:T.textSub,cursor:"pointer"}}>ï¼ å ä»æ¬¾äºº</button>
-        <span style={{fontSize:11,color:Math.abs(diff)>0.01?T.accent:T.green}}>{pt>0&&(Math.abs(diff)>0.01?`â ï¸ å·® NT$${Math.abs(diff).toFixed(0)}`:"â éé¡æ­£ç¢º")}</span>
+        <button onClick={addPayer} style={{background:"none",border:`1.5px dashed ${T.border}`,borderRadius:8,padding:"5px 10px",fontSize:12,color:T.textSub,cursor:"pointer"}}>Ã¯Â¼Â Ã¥ÂÂ Ã¤Â»ÂÃ¦Â¬Â¾Ã¤ÂºÂº</button>
+        <span style={{fontSize:11,color:Math.abs(diff)>0.01?T.accent:T.green}}>{pt>0&&(Math.abs(diff)>0.01?`Ã¢ÂÂ Ã¯Â¸Â Ã¥Â·Â® NT$${Math.abs(diff).toFixed(0)}`:"Ã¢ÂÂ Ã©ÂÂÃ©Â¡ÂÃ¦Â­Â£Ã§Â¢Âº")}</span>
       </div>
     </div>
   );
 }
-// ââ Expense Form ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Expense Form Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [name,setName] = useState(initial.name||"");
   const [total,setTotal] = useState(initial.total||"");
@@ -303,7 +301,7 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     const splitMembers = splitMode==="equal" ? (Object.keys(splitData).length?Object.keys(splitData):members) : members;
     const splits = calcSplits(splitMode, splitMode==="equal"?splitMembers:splitData, splitMembers, pt);
     const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
-    if(Math.abs(paidSum-pt)>0.1){alert(`ä»æ¬¾éé¡å ç¸½ NT$${paidSum} èç¸½éé¡ NT$${pt} ä¸ç¬¦`);return;}
+    if(Math.abs(paidSum-pt)>0.1){alert(`Ã¤Â»ÂÃ¦Â¬Â¾Ã©ÂÂÃ©Â¡ÂÃ¥ÂÂ Ã§Â¸Â½ NT$${paidSum} Ã¨ÂÂÃ§Â¸Â½Ã©ÂÂÃ©Â¡Â NT$${pt} Ã¤Â¸ÂÃ§Â¬Â¦`);return;}
     onSave({name,total:pt,date,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
   const handleTotalChange = (val) => {
@@ -312,11 +310,11 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   };
   return (
     <div style={{background:"#fff",borderRadius:20,padding:"16px 14px 12px",marginBottom:12,boxShadow:"0 4px 20px rgba(180,130,40,0.13)"}}>
-      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"âï¸ ç·¨è¼¯æ¶è²»":"ð§¾ æ°å¢æ¶è²»"}</div>
+      <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>{onDelete?"Ã¢ÂÂÃ¯Â¸Â Ã§Â·Â¨Ã¨Â¼Â¯Ã¦Â¶ÂÃ¨Â²Â»":"Ã°ÂÂ§Â¾ Ã¦ÂÂ°Ã¥Â¢ÂÃ¦Â¶ÂÃ¨Â²Â»"}</div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
-        <input placeholder="é ç®åç¨±" value={name} onChange={e=>setName(e.target.value)}
+        <input placeholder="Ã©Â ÂÃ§ÂÂ®Ã¥ÂÂÃ§Â¨Â±" value={name} onChange={e=>setName(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:700,textAlign:"center",height:42}}/>
-        <input type="number" placeholder="ç¸½éé¡" value={total} onChange={e=>handleTotalChange(e.target.value)}
+        <input type="number" placeholder="Ã§Â¸Â½Ã©ÂÂÃ©Â¡Â" value={total} onChange={e=>handleTotalChange(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
       </div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
@@ -324,58 +322,58 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
         <div style={{flex:1,display:"flex"}}><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/></div>
       </div>
       <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
-        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>ä»æ¬¾äºº</div>
+        <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>Ã¤Â»ÂÃ¦Â¬Â¾Ã¤ÂºÂº</div>
         <PayersEditor payers={payers} setPayers={setPayers} members={members} total={total}/>
       </div>
       <div style={{background:"#F3F8FF",border:"1.5px solid #BBDEFB",borderRadius:12,padding:"10px 12px",marginBottom:10}}>
-        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>åå¸³æ¹å¼</div>
+        <div style={{fontSize:10,color:"#1565C0",fontWeight:700,marginBottom:6}}>Ã¥ÂÂÃ¥Â¸Â³Ã¦ÂÂ¹Ã¥Â¼Â</div>
         <SplitEditor mode={splitMode} setMode={setSplitMode} data={splitData} setData={setSplitData} members={members} colors={colors} total={total}/>
       </div>
       <div style={{display:"flex",gap:6,justifyContent:"flex-end",alignItems:"center"}}>
-        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>ðï¸</button>}
-        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>åæ¶</button>
-        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"ð¾":"â"}</button>
+        {onDelete && <button onClick={onDelete} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",padding:"4px 6px",opacity:0.5}}>Ã°ÂÂÂÃ¯Â¸Â</button>}
+        <button onClick={onCancel} style={{padding:"6px 14px",background:"none",border:`1.5px solid ${T.border}`,borderRadius:20,color:T.textSub,fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>Ã¥ÂÂÃ¦Â¶Â</button>
+        <button onClick={handleSave} style={{padding:"6px 18px",background:T.yellowMd,border:"none",borderRadius:20,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit",boxShadow:"0 2px 0 "+T.yellowDk}}>{onDelete?"Ã°ÂÂÂ¾":"Ã¢ÂÂ"}</button>
       </div>
     </div>
   );
 }
 
-// ââ Payment Form ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Payment Form Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
   const [form,setForm] = useState(initial||{from:me,to:members.find(m=>m!==me)||members[0],amount:"",date:new Date().toISOString().slice(0,10),note:""});
   function handleSave() {
-    if(!form.amount||parseFloat(form.amount)<=0){alert("è«è¼¸å¥è½å¸³éé¡");return;}
-    if(form.from===form.to){alert("è½åºåæ¶æ¬¾ä¸è½æ¯åä¸äºº");return;}
+    if(!form.amount||parseFloat(form.amount)<=0){alert("Ã¨Â«ÂÃ¨Â¼Â¸Ã¥ÂÂ¥Ã¨Â½ÂÃ¥Â¸Â³Ã©ÂÂÃ©Â¡Â");return;}
+    if(form.from===form.to){alert("Ã¨Â½ÂÃ¥ÂÂºÃ¥ÂÂÃ¦ÂÂ¶Ã¦Â¬Â¾Ã¤Â¸ÂÃ¨ÂÂ½Ã¦ÂÂ¯Ã¥ÂÂÃ¤Â¸ÂÃ¤ÂºÂº");return;}
     onSave({...form,amount:parseFloat(form.amount)});
   }
   return (
     <div style={{background:"#F1FBF4",border:"1.5px solid #A5D6A7",borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
-      <div style={{fontSize:12,color:"#2E7D32",fontWeight:700,marginBottom:10}}>{isEdit?"âï¸ ç·¨è¼¯è½å¸³":"ð¸ è¨éè½å¸³"}</div>
+      <div style={{fontSize:12,color:"#2E7D32",fontWeight:700,marginBottom:10}}>{isEdit?"Ã¢ÂÂÃ¯Â¸Â Ã§Â·Â¨Ã¨Â¼Â¯Ã¨Â½ÂÃ¥Â¸Â³":"Ã°ÂÂÂ¸ Ã¨Â¨ÂÃ©ÂÂÃ¨Â½ÂÃ¥Â¸Â³"}</div>
       <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>è½åº</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>Ã¨Â½ÂÃ¥ÂÂº</div>
           <select value={form.from} onChange={e=>setForm({...form,from:e.target.value})} style={iStyle}>{members.map(m=><option key={m} value={m}>{m}</option>)}</select>
         </div>
-        <div style={{fontSize:20,color:T.textMute,paddingTop:16}}>â</div>
+        <div style={{fontSize:20,color:T.textMute,paddingTop:16}}>Ã¢ÂÂ</div>
         <div style={{flex:1}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>æ¶æ¬¾</div>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>Ã¦ÂÂ¶Ã¦Â¬Â¾</div>
           <select value={form.to} onChange={e=>setForm({...form,to:e.target.value})} style={iStyle}>{members.map(m=><option key={m} value={m}>{m}</option>)}</select>
         </div>
       </div>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>éé¡</div>
+      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>Ã©ÂÂÃ©Â¡Â</div>
       <input type="number" placeholder="NT$" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} style={iStyle}/>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>æ¥æ</div>
+      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>Ã¦ÂÂ¥Ã¦ÂÂ</div>
       <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={iStyle}/>
-      <input placeholder="åè¨»ï¼é¸å¡«ï¼" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} style={iStyle}/>
+      <input placeholder="Ã¥ÂÂÃ¨Â¨Â»Ã¯Â¼ÂÃ©ÂÂ¸Ã¥Â¡Â«Ã¯Â¼Â" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} style={iStyle}/>
       <div style={{display:"flex",gap:8,marginTop:4}}>
-        <Btn onClick={handleSave} variant="green" style={{flex:1}}>{isEdit?"ð¾ å²å­":"â ç¢ºèª"}</Btn>
-        <Btn onClick={onCancel} variant="secondary" style={{flex:1}}>åæ¶</Btn>
-        {onDelete && <Btn onClick={onDelete} variant="danger">ðï¸</Btn>}
+        <Btn onClick={handleSave} variant="green" style={{flex:1}}>{isEdit?"Ã°ÂÂÂ¾ Ã¥ÂÂ²Ã¥Â­Â":"Ã¢ÂÂ Ã§Â¢ÂºÃ¨ÂªÂ"}</Btn>
+        <Btn onClick={onCancel} variant="secondary" style={{flex:1}}>Ã¥ÂÂÃ¦Â¶Â</Btn>
+        {onDelete && <Btn onClick={onDelete} variant="danger">Ã°ÂÂÂÃ¯Â¸Â</Btn>}
       </div>
     </div>
   );
 }
-// ââ Analytics Tab âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Analytics Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function AnalyticsTab({expenses,members,colors,cats,me}) {
   const [viewMode,setViewMode] = useState("personal");
   const [viewMember,setViewMember] = useState(me);
@@ -408,17 +406,17 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
     <div>
       <div style={{marginBottom:14}}>
         <div style={{display:"flex",gap:6,marginBottom:10}}>
-          {[["personal","ð¤ åäºº"],["group","ð¥ ç¾¤çµ"]].map(([k,l]) => (
+          {[["personal","Ã°ÂÂÂ¤ Ã¥ÂÂÃ¤ÂºÂº"],["group","Ã°ÂÂÂ¥ Ã§Â¾Â¤Ã§ÂµÂ"]].map(([k,l]) => (
             <button key={k} onClick={()=>{setViewMode(k);setSelectedCat(null);}} style={{flex:1,padding:"8px 0",borderRadius:10,border:`1.5px solid ${viewMode===k?T.yellowDk:T.border}`,background:viewMode===k?T.yellowLt:"#fff",color:viewMode===k?T.text:T.textSub,fontSize:13,fontWeight:viewMode===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
           ))}
         </div>
         {viewMode==="personal" && (
           <select value={viewMember} onChange={e=>{setViewMember(e.target.value);setSelectedCat(null);}} style={{width:"100%",background:col+"18",border:`1.5px solid ${col}44`,color:col,borderRadius:10,padding:"7px 12px",fontSize:13,fontWeight:700,cursor:"pointer",outline:"none",fontFamily:"inherit",boxSizing:"border-box"}}>
-            {members.map(m=><option key={m} value={m} style={{background:"#fff",color:T.text}}>{m}{m===me?" ï¼æï¼":""}</option>)}
+            {members.map(m=><option key={m} value={m} style={{background:"#fff",color:T.text}}>{m}{m===me?" Ã¯Â¼ÂÃ¦ÂÂÃ¯Â¼Â":""}</option>)}
           </select>
         )}
       </div>
-      {total===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>å°ç¡æ¶è²»è³æ</div>}
+      {total===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>Ã¥Â°ÂÃ§ÂÂ¡Ã¦Â¶ÂÃ¨Â²Â»Ã¨Â³ÂÃ¦ÂÂ</div>}
       {total>0 && (
         <>
           <div style={{display:"flex",justifyContent:"center",marginBottom:14}}>
@@ -427,14 +425,14 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
                 <path key={i} d={s.path} fill={s.color} stroke="#fff" strokeWidth={2} style={{cursor:"pointer",opacity:selectedCat&&selectedCat!==s.cat.id?0.35:1,transition:"opacity 0.2s"}} onClick={()=>setSelectedCat(selectedCat===s.cat.id?null:s.cat.id)}/>
               ))}
               <circle cx={cx} cy={cy} r={ir-2} fill={viewMode==="group"?T.yellowMd:col} opacity={0.15}/>
-              <text x={cx} y={cy-10} textAnchor="middle" fontSize={20}>{viewMode==="group"?"ð¥":viewMember[0]}</text>
+              <text x={cx} y={cy-10} textAnchor="middle" fontSize={20}>{viewMode==="group"?"Ã°ÂÂÂ¥":viewMember[0]}</text>
               <text x={cx} y={cy+6} textAnchor="middle" fontSize={12} fontWeight={700} fill={T.text}>NT${dispTotal.toFixed(0)}</text>
-              <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill={T.textMute}>{selCat?selCat.label:viewMode==="group"?"ç¾¤çµç¸½æ¶è²»":"ç¸½æ¶è²»"}</text>
+              <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill={T.textMute}>{selCat?selCat.label:viewMode==="group"?"Ã§Â¾Â¤Ã§ÂµÂÃ§Â¸Â½Ã¦Â¶ÂÃ¨Â²Â»":"Ã§Â¸Â½Ã¦Â¶ÂÃ¨Â²Â»"}</text>
             </svg>
           </div>
           <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>
-            {selCat?`${selCat.icon} ${selCat.label}`:"ååé¡æç´°"}
-            {selCat && <button onClick={()=>setSelectedCat(null)} style={{marginLeft:8,background:"none",border:"none",color:T.textMute,fontSize:11,cursor:"pointer"}}>â æ¸é¤</button>}
+            {selCat?`${selCat.icon} ${selCat.label}`:"Ã¥ÂÂÃ¥ÂÂÃ©Â¡ÂÃ¦ÂÂÃ§Â´Â°"}
+            {selCat && <button onClick={()=>setSelectedCat(null)} style={{marginLeft:8,background:"none",border:"none",color:T.textMute,fontSize:11,cursor:"pointer"}}>Ã¢ÂÂ Ã¦Â¸ÂÃ©ÂÂ¤</button>}
           </div>
           {(selCat?[selCat]:active).map((c,i) => {
             const amt=catSpend[c.id], pct=total>0?amt/total:0;
@@ -458,7 +456,7 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
     </div>
   );
 }
-// ââ Config Tab ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Config Tab Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function ConfigTab({group,setGroups,bal,me,setExportModal}) {
   const cats = group.categories||DEFAULT_CATS;
   const [section,setSection] = useState("members");
@@ -470,20 +468,20 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     setGroups(prev=>prev.map(g=>{
       if(g.id!==group.id) return g;
       const updated=updater(g);
-      return {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"è¨­å®è®æ´",detail},...(updated.logs||[])]};
+      return {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"Ã¨Â¨Â­Ã¥Â®ÂÃ¨Â®ÂÃ¦ÂÂ´",detail},...(updated.logs||[])]};
     }));
   }
   function handleEditCat(cat) {
-    saveGroup(g=>({...g,categories:g.categories.map(c=>c.id===cat.id?{...c,icon:editing.icon,label:editing.label}:c)}),`åé¡ã${cat.label}ãæ¹çºã${editing.icon} ${editing.label}ã`);
+    saveGroup(g=>({...g,categories:g.categories.map(c=>c.id===cat.id?{...c,icon:editing.icon,label:editing.label}:c)}),`Ã¥ÂÂÃ©Â¡ÂÃ£ÂÂ${cat.label}Ã£ÂÂÃ¦ÂÂ¹Ã§ÂÂºÃ£ÂÂ${editing.icon} ${editing.label}Ã£ÂÂ`);
     setEditing(null);
   }
   function handleDeleteCat(cat) {
-    if(cats.length<=3){alert("è³å°ä¿ç 3 ååé¡");return;}
-    saveGroup(g=>({...g,categories:g.categories.filter(c=>c.id!==cat.id)}),`åªé¤åé¡ã${cat.label}ã`);
+    if(cats.length<=3){alert("Ã¨ÂÂ³Ã¥Â°ÂÃ¤Â¿ÂÃ§ÂÂ 3 Ã¥ÂÂÃ¥ÂÂÃ©Â¡Â");return;}
+    saveGroup(g=>({...g,categories:g.categories.filter(c=>c.id!==cat.id)}),`Ã¥ÂÂªÃ©ÂÂ¤Ã¥ÂÂÃ©Â¡ÂÃ£ÂÂ${cat.label}Ã£ÂÂ`);
   }
   function handleAddCat() {
     if(!newCat.icon||!newCat.label) return;
-    saveGroup(g=>({...g,categories:[...(g.categories||DEFAULT_CATS),{id:uid(),...newCat}]}),`æ°å¢åé¡ã${newCat.icon} ${newCat.label}ã`);
+    saveGroup(g=>({...g,categories:[...(g.categories||DEFAULT_CATS),{id:uid(),...newCat}]}),`Ã¦ÂÂ°Ã¥Â¢ÂÃ¥ÂÂÃ©Â¡ÂÃ£ÂÂ${newCat.icon} ${newCat.label}Ã£ÂÂ`);
     setNewCat({icon:"",label:""}); setShowAddCat(false);
   }
   function handleAddMember() {
@@ -491,24 +489,24 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     if(!name||group.members.includes(name)) return;
     const used=Object.values(group.colors||{});
     const color=MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
-    saveGroup(g=>({...g,members:[...g.members,name],colors:{...g.colors,[name]:color}}),`æ°å¢æå¡ã${name}ã`);
+    saveGroup(g=>({...g,members:[...g.members,name],colors:{...g.colors,[name]:color}}),`Ã¦ÂÂ°Ã¥Â¢ÂÃ¦ÂÂÃ¥ÂÂ¡Ã£ÂÂ${name}Ã£ÂÂ`);
     setNewMemberName("");
   }
   function handleRemoveMember(name) {
     const net=(bal[name]?.paid||0)-(bal[name]?.owes||0);
-    if(Math.abs(net)>0.01){alert(`${name} éææªçµæ¸å¸³æ¬¾ï¼ç¡æ³ç§»é¤`);return;}
-    if(group.members.length<=2){alert("ç¾¤çµè³å°éè¦ 2 ä½æå¡");return;}
-    saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`ç§»é¤æå¡ã${name}ã`);
+    if(Math.abs(net)>0.01){alert(`${name} Ã©ÂÂÃ¦ÂÂÃ¦ÂÂªÃ§ÂµÂÃ¦Â¸ÂÃ¥Â¸Â³Ã¦Â¬Â¾Ã¯Â¼ÂÃ§ÂÂ¡Ã¦Â³ÂÃ§Â§Â»Ã©ÂÂ¤`);return;}
+    if(group.members.length<=2){alert("Ã§Â¾Â¤Ã§ÂµÂÃ¨ÂÂ³Ã¥Â°ÂÃ©ÂÂÃ¨Â¦Â 2 Ã¤Â½ÂÃ¦ÂÂÃ¥ÂÂ¡");return;}
+    saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`Ã§Â§Â»Ã©ÂÂ¤Ã¦ÂÂÃ¥ÂÂ¡Ã£ÂÂ${name}Ã£ÂÂ`);
   }
   return (
     <div>
       <div style={{display:"flex",gap:6,marginBottom:16}}>
-        {[["members","ð¥ æå¡"],["categories","ð·ï¸ åé¡"]].map(([k,l]) => (
+        {[["members","Ã°ÂÂÂ¥ Ã¦ÂÂÃ¥ÂÂ¡"],["categories","Ã°ÂÂÂ·Ã¯Â¸Â Ã¥ÂÂÃ©Â¡Â"]].map(([k,l]) => (
           <button key={k} onClick={()=>setSection(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${section===k?T.yellowDk:T.border}`,background:section===k?T.yellowLt:"#fff",color:section===k?T.text:T.textSub,fontSize:13,fontWeight:section===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
         ))}
       </div>
       <div style={{display:"flex",gap:8,marginBottom:16}}>
-        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} æç´°`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð¥ å¯åºæç´° CSV</button>
+        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} Ã¦ÂÂÃ§Â´Â°`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Ã°ÂÂÂ¥ Ã¥ÂÂ¯Ã¥ÂÂºÃ¦ÂÂÃ§Â´Â° CSV</button>
       </div>
       {section==="members" && (
         <div>
@@ -522,22 +520,22 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
                   <div style={{flex:1}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                       <span style={{fontSize:14,fontWeight:700}}>{m}</span>
-                      {m===group.adminUser && <span>ð</span>}
-                      {m===me && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>æ</span>}
+                      {m===group.adminUser && <span>Ã°ÂÂÂ</span>}
+                      {m===me && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>Ã¦ÂÂ</span>}
                     </div>
-                    <div style={{fontSize:11,color:T.textMute}}>æ¶è²» NT${(bal[m]?.owes||0).toFixed(0)} Â· å¢ä» NT${(bal[m]?.paid||0).toLocaleString()}</div>
-                    {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01 && <div style={{fontSize:10,color:T.accent,marginTop:2}}>ð¸ ææªçµæ¸å¸³æ¬¾ï¼ç¡æ³ç§»é¤</div>}
+                    <div style={{fontSize:11,color:T.textMute}}>Ã¦Â¶ÂÃ¨Â²Â» NT${(bal[m]?.owes||0).toFixed(0)} ÃÂ· Ã¥Â¢ÂÃ¤Â»Â NT${(bal[m]?.paid||0).toLocaleString()}</div>
+                    {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01 && <div style={{fontSize:10,color:T.accent,marginTop:2}}>Ã°ÂÂÂ¸ Ã¦ÂÂÃ¦ÂÂªÃ§ÂµÂÃ¦Â¸ÂÃ¥Â¸Â³Ã¦Â¬Â¾Ã¯Â¼ÂÃ§ÂÂ¡Ã¦Â³ÂÃ§Â§Â»Ã©ÂÂ¤</div>}
                   </div>
-                  {canRemove && <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"5px 10px",fontSize:12}}>ç§»é¤</Btn>}
+                  {canRemove && <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"5px 10px",fontSize:12}}>Ã§Â§Â»Ã©ÂÂ¤</Btn>}
                 </div>
               </Card>
             );
           })}
           <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:14,marginTop:6}}>
-            <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>â æ°å¢æä¼´</div>
+            <div style={{fontSize:12,color:T.textSub,marginBottom:8,fontWeight:600}}>Ã¢ÂÂ Ã¦ÂÂ°Ã¥Â¢ÂÃ¦ÂÂÃ¤Â¼Â´</div>
             <div style={{display:"flex",gap:8}}>
-              <input placeholder="è¼¸å¥åå­" value={newMemberName} onChange={e=>setNewMemberName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddMember()} style={{...iStyle,flex:1,marginBottom:0}}/>
-              <Btn onClick={handleAddMember} style={{flexShrink:0,padding:"9px 14px"}}>æ°å¢</Btn>
+              <input placeholder="Ã¨Â¼Â¸Ã¥ÂÂ¥Ã¥ÂÂÃ¥Â­Â" value={newMemberName} onChange={e=>setNewMemberName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddMember()} style={{...iStyle,flex:1,marginBottom:0}}/>
+              <Btn onClick={handleAddMember} style={{flexShrink:0,padding:"9px 14px"}}>Ã¦ÂÂ°Ã¥Â¢Â</Btn>
             </div>
           </div>
         </div>
@@ -548,49 +546,49 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
             <div key={cat.id} style={{marginBottom:8}}>
               {editing?.id===cat.id ? (
                 <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12}}>
-                  <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>åç¤ºï¼è¼¸å¥ä»»æ emojiï¼</div>
+                  <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>Ã¥ÂÂÃ§Â¤ÂºÃ¯Â¼ÂÃ¨Â¼Â¸Ã¥ÂÂ¥Ã¤Â»Â»Ã¦ÂÂ emojiÃ¯Â¼Â</div>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                     <div style={{width:44,height:44,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{editing.icon||"?"}</div>
-                    <input value={editing.icon} onChange={e=>setEditing({...editing,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="è¼¸å¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
+                    <input value={editing.icon} onChange={e=>setEditing({...editing,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="Ã¨Â¼Â¸Ã¥ÂÂ¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
                   </div>
-                  <input value={editing.label} onChange={e=>setEditing({...editing,label:e.target.value})} placeholder="åé¡åç¨±" style={{...iStyle,marginBottom:8}}/>
+                  <input value={editing.label} onChange={e=>setEditing({...editing,label:e.target.value})} placeholder="Ã¥ÂÂÃ©Â¡ÂÃ¥ÂÂÃ§Â¨Â±" style={{...iStyle,marginBottom:8}}/>
                   <div style={{display:"flex",gap:6}}>
-                    <Btn onClick={()=>handleEditCat(cat)} style={{flex:1,padding:"8px 0"}}>å²å­</Btn>
-                    <Btn onClick={()=>setEditing(null)} variant="secondary" style={{flex:1,padding:"8px 0"}}>åæ¶</Btn>
+                    <Btn onClick={()=>handleEditCat(cat)} style={{flex:1,padding:"8px 0"}}>Ã¥ÂÂ²Ã¥Â­Â</Btn>
+                    <Btn onClick={()=>setEditing(null)} variant="secondary" style={{flex:1,padding:"8px 0"}}>Ã¥ÂÂÃ¦Â¶Â</Btn>
                   </div>
                 </div>
               ) : (
                 <div style={{background:T.bgCard,border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
                   <div style={{width:36,height:36,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{cat.icon}</div>
                   <span style={{flex:1,fontSize:14,fontWeight:600,color:T.text}}>{cat.label}</span>
-                  <Btn onClick={()=>setEditing({id:cat.id,icon:cat.icon,label:cat.label})} variant="ghost" style={{padding:"4px 8px",fontSize:12}}>âï¸</Btn>
-                  <Btn onClick={()=>handleDeleteCat(cat)} variant="danger" style={{padding:"4px 8px",fontSize:12}}>ðï¸</Btn>
+                  <Btn onClick={()=>setEditing({id:cat.id,icon:cat.icon,label:cat.label})} variant="ghost" style={{padding:"4px 8px",fontSize:12}}>Ã¢ÂÂÃ¯Â¸Â</Btn>
+                  <Btn onClick={()=>handleDeleteCat(cat)} variant="danger" style={{padding:"4px 8px",fontSize:12}}>Ã°ÂÂÂÃ¯Â¸Â</Btn>
                 </div>
               )}
             </div>
           ))}
           {showAddCat ? (
             <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12,marginTop:8}}>
-              <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>åç¤ºï¼è¼¸å¥ä»»æ emojiï¼</div>
+              <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>Ã¥ÂÂÃ§Â¤ÂºÃ¯Â¼ÂÃ¨Â¼Â¸Ã¥ÂÂ¥Ã¤Â»Â»Ã¦ÂÂ emojiÃ¯Â¼Â</div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                 <div style={{width:44,height:44,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{newCat.icon||"?"}</div>
-                <input value={newCat.icon} onChange={e=>setNewCat({...newCat,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="è¼¸å¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
+                <input value={newCat.icon} onChange={e=>setNewCat({...newCat,icon:e.target.value.slice(-2)||e.target.value.slice(-1)||""})} placeholder="Ã¨Â¼Â¸Ã¥ÂÂ¥ emoji" style={{...iStyle,marginBottom:0,flex:1,fontSize:18}}/>
               </div>
-              <input value={newCat.label} onChange={e=>setNewCat({...newCat,label:e.target.value})} placeholder="åé¡åç¨±" style={{...iStyle,marginBottom:8}}/>
+              <input value={newCat.label} onChange={e=>setNewCat({...newCat,label:e.target.value})} placeholder="Ã¥ÂÂÃ©Â¡ÂÃ¥ÂÂÃ§Â¨Â±" style={{...iStyle,marginBottom:8}}/>
               <div style={{display:"flex",gap:6}}>
-                <Btn onClick={handleAddCat} style={{flex:1,padding:"8px 0"}}>æ°å¢</Btn>
-                <Btn onClick={()=>setShowAddCat(false)} variant="secondary" style={{flex:1,padding:"8px 0"}}>åæ¶</Btn>
+                <Btn onClick={handleAddCat} style={{flex:1,padding:"8px 0"}}>Ã¦ÂÂ°Ã¥Â¢Â</Btn>
+                <Btn onClick={()=>setShowAddCat(false)} variant="secondary" style={{flex:1,padding:"8px 0"}}>Ã¥ÂÂÃ¦Â¶Â</Btn>
               </div>
             </div>
           ) : (
-            <button onClick={()=>setShowAddCat(true)} style={{width:"100%",marginTop:8,padding:"10px 0",background:"none",border:`2px dashed ${T.border}`,borderRadius:12,color:T.textSub,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>ï¼ æ°å¢åé¡</button>
+            <button onClick={()=>setShowAddCat(true)} style={{width:"100%",marginTop:8,padding:"10px 0",background:"none",border:`2px dashed ${T.border}`,borderRadius:12,color:T.textSub,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>Ã¯Â¼Â Ã¦ÂÂ°Ã¥Â¢ÂÃ¥ÂÂÃ©Â¡Â</button>
           )}
         </div>
       )}
     </div>
   );
 }
-// ââ Export helpers ââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Export helpers Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 function downloadFile(filename, content, type) {
   try {
     const blob = new Blob([content], {type});
@@ -618,16 +616,16 @@ function downloadFile(filename, content, type) {
 function exportGroupCSV(group, me) {
   const cats = group.categories || DEFAULT_CATS;
   const getCatLabel = id => (cats.find(c=>c.id===id)||cats[cats.length-1]).label;
-  const rows = [["æ¥æ","é ç®","åé¡","ç¸½éé¡","ä»æ¬¾äºº","åå¸³æå¡","æçåæ¤"]];
+  const rows = [["Ã¦ÂÂ¥Ã¦ÂÂ","Ã©Â ÂÃ§ÂÂ®","Ã¥ÂÂÃ©Â¡Â","Ã§Â¸Â½Ã©ÂÂÃ©Â¡Â","Ã¤Â»ÂÃ¦Â¬Â¾Ã¤ÂºÂº","Ã¥ÂÂÃ¥Â¸Â³Ã¦ÂÂÃ¥ÂÂ¡","Ã¦ÂÂÃ§ÂÂÃ¥ÂÂÃ¦ÂÂ¤"]];
   [...group.expenses].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e => {
     const payers = e.payers.map(p=>`${p.name}(NT$${p.amount})`).join("+");
-    const splitMembers = Object.keys(e.splits).join("ã");
+    const splitMembers = Object.keys(e.splits).join("Ã£ÂÂ");
     const myShare = me ? (e.splits[me]||0).toFixed(2) : "";
     rows.push([e.date, e.name, getCatLabel(e.category), e.total, payers, splitMembers, myShare]);
   });
   const payments = group.payments || [];
   [...payments].sort((a,b)=>a.date.localeCompare(b.date)).forEach(p => {
-    rows.push([p.date, `[è½å¸³] ${p.from}â${p.to}`, "è½å¸³", p.amount, p.from, p.to, ""]);
+    rows.push([p.date, `[Ã¨Â½ÂÃ¥Â¸Â³] ${p.from}Ã¢ÂÂ${p.to}`, "Ã¨Â½ÂÃ¥Â¸Â³", p.amount, p.from, p.to, ""]);
   });
   const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
   const ok = downloadFile(`${group.name}_${new Date().toISOString().slice(0,10)}.csv`, "\uFEFF"+csv, "text/csv;charset=utf-8");
@@ -637,11 +635,11 @@ function exportGroupCSV(group, me) {
 
 function exportBackupJSON(groups) {
   const json = JSON.stringify({version:1, exportedAt:new Date().toISOString(), groups}, null, 2);
-  const ok = downloadFile(`æéåå¸³åä»½_${new Date().toISOString().slice(0,10)}.json`, json, "application/json");
+  const ok = downloadFile(`Ã¦ÂÂÃ©ÂÂÃ¥ÂÂÃ¥Â¸Â³Ã¥ÂÂÃ¤Â»Â½_${new Date().toISOString().slice(0,10)}.json`, json, "application/json");
   if(!ok) return json;
   return null;
 }
-// ââ Main App ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// Ã¢ÂÂÃ¢ÂÂ Main App Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 export default function App() {
   const [screen,setScreen] = useState("loading");
   const [groups,setGroups] = useState([]);
@@ -670,8 +668,8 @@ export default function App() {
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target.result);
-        if(!data.groups) { alert("åä»½æ ¼å¼ä¸æ­£ç¢º"); return; }
-        if(window.confirm(`ç¢ºå®è¦å¯å¥ ${data.groups.length} åç¾¤çµåï¼\nç¾æè³ææè¢«åä½µï¼ä¸æåªé¤ï¼`)) {
+        if(!data.groups) { alert("Ã¥ÂÂÃ¤Â»Â½Ã¦Â Â¼Ã¥Â¼ÂÃ¤Â¸ÂÃ¦Â­Â£Ã§Â¢Âº"); return; }
+        if(window.confirm(`Ã§Â¢ÂºÃ¥Â®ÂÃ¨Â¦ÂÃ¥ÂÂ¯Ã¥ÂÂ¥ ${data.groups.length} Ã¥ÂÂÃ§Â¾Â¤Ã§ÂµÂÃ¥ÂÂÃ¯Â¼Â\nÃ§ÂÂ¾Ã¦ÂÂÃ¨Â³ÂÃ¦ÂÂÃ¦ÂÂÃ¨Â¢Â«Ã¥ÂÂÃ¤Â½ÂµÃ¯Â¼ÂÃ¤Â¸ÂÃ¦ÂÂÃ¥ÂÂªÃ©ÂÂ¤Ã¯Â¼Â`)) {
           setGroups(prev => {
             const existingIds = new Set(prev.map(g=>g.id));
             const toAdd = data.groups.filter(g=>!existingIds.has(g.id));
@@ -679,9 +677,9 @@ export default function App() {
             const merged = prev.map(g => { const u=toUpdate.find(x=>x.id===g.id); return u||g; });
             return [...merged, ...toAdd];
           });
-          alert("å¯å¥æåï¼");
+          alert("Ã¥ÂÂ¯Ã¥ÂÂ¥Ã¦ÂÂÃ¥ÂÂÃ¯Â¼Â");
         }
-      } catch { alert("åä»½æªæ¡ç¡æ³è®å"); }
+      } catch { alert("Ã¥ÂÂÃ¤Â»Â½Ã¦ÂªÂÃ¦Â¡ÂÃ§ÂÂ¡Ã¦Â³ÂÃ¨Â®ÂÃ¥ÂÂ"); }
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -735,7 +733,7 @@ export default function App() {
 
   async function handleLogin() {
     const name=usernameInput.trim();
-    if(!name){setError("請輸入名字 🙏");return;}
+    if(!name){setError("è«è¼¸å¥åå­ ð");return;}
     // Reload groups from Firestore to get cross-device data
     try {
       const q = query(collection(db, "groups"));
@@ -749,9 +747,9 @@ export default function App() {
   function handleCreateGroup() {
     const name=newGroupName.trim();
     const pin=newGroupPin.trim();
-    if(!name){setError("è«è¼¸å¥ç¾¤çµåç¨±");return;}
-    if(!pin||pin.length<4){setError("è«è¨­å®è³å° 4 ä½æ¸çç®¡çå¡ PIN ç¢¼");return;}
-    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"å»ºç«ç¾¤çµ",detail:`å»ºç«äºç¾¤çµã${name}ã`}]};
+    if(!name){setError("Ã¨Â«ÂÃ¨Â¼Â¸Ã¥ÂÂ¥Ã§Â¾Â¤Ã§ÂµÂÃ¥ÂÂÃ§Â¨Â±");return;}
+    if(!pin||pin.length<4){setError("Ã¨Â«ÂÃ¨Â¨Â­Ã¥Â®ÂÃ¨ÂÂ³Ã¥Â°Â 4 Ã¤Â½ÂÃ¦ÂÂ¸Ã§ÂÂÃ§Â®Â¡Ã§ÂÂÃ¥ÂÂ¡ PIN Ã§Â¢Â¼");return;}
+    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"Ã¥Â»ÂºÃ§Â«ÂÃ§Â¾Â¤Ã§ÂµÂ",detail:`Ã¥Â»ÂºÃ§Â«ÂÃ¤ÂºÂÃ§Â¾Â¤Ã§ÂµÂÃ£ÂÂ${name}Ã£ÂÂ`}]};
     // Save to Firestore (cross-device sync)
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
@@ -760,7 +758,7 @@ export default function App() {
 
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
-    if(!code){setError("è«è¼¸å¥ç¾¤çµä»£ç¢¼");return;}
+    if(!code){setError("Ã¨Â«ÂÃ¨Â¼Â¸Ã¥ÂÂ¥Ã§Â¾Â¤Ã§ÂµÂÃ¤Â»Â£Ã§Â¢Â¼");return;}
     // First check locally
     let g=groups.find(x=>x.code===code);
     if(!g){
@@ -779,7 +777,7 @@ export default function App() {
         }
       } catch(e) { console.error(e); }
     }
-    if(!g){setError("æ¾ä¸å°æ­¤ç¾¤çµ ð");return;}
+    if(!g){setError("Ã¦ÂÂ¾Ã¤Â¸ÂÃ¥ÂÂ°Ã¦Â­Â¤Ã§Â¾Â¤Ã§ÂµÂ Ã°ÂÂÂ");return;}
     const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
     if(g.members.includes(currentUser)||alreadyClaimed){setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");setJoinCode("");setError("");return;}
     setClaimScreen({groupId:g.id,code});
@@ -791,7 +789,7 @@ export default function App() {
     if(!g) return;
     if(memberName==="__new__") {
       const color=getNextColor(g.colors);
-      setGroups(prev=>prev.map(x=>x.id!==g.id?x:{...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"å å¥ç¾¤çµ",detail:`${currentUser} ä»¥æ°æå¡èº«åå å¥`},...(x.logs||[])]}));
+      setGroups(prev=>prev.map(x=>x.id!==g.id?x:{...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"Ã¥ÂÂ Ã¥ÂÂ¥Ã§Â¾Â¤Ã§ÂµÂ",detail:`${currentUser} Ã¤Â»Â¥Ã¦ÂÂ°Ã¦ÂÂÃ¥ÂÂ¡Ã¨ÂºÂ«Ã¥ÂÂÃ¥ÂÂ Ã¥ÂÂ¥`},...(x.logs||[])]}));
     } else {
       const oldName=memberName;
       setGroups(prev=>prev.map(x=>{
@@ -805,13 +803,13 @@ export default function App() {
         });
         const payments=(x.payments||[]).map(p=>({...p,from:p.from===oldName?currentUser:p.from,to:p.to===oldName?currentUser:p.to}));
         const adminUser=x.adminUser===oldName?currentUser:x.adminUser;
-        const logs=[{id:uid(),ts:now(),user:currentUser,action:"èªé èº«å",detail:`${currentUser} èªé äºã${oldName}ãçèº«å`},...(x.logs||[])];
+        const logs=[{id:uid(),ts:now(),user:currentUser,action:"Ã¨ÂªÂÃ©Â ÂÃ¨ÂºÂ«Ã¥ÂÂ",detail:`${currentUser} Ã¨ÂªÂÃ©Â ÂÃ¤ÂºÂÃ£ÂÂ${oldName}Ã£ÂÂÃ§ÂÂÃ¨ÂºÂ«Ã¥ÂÂ`},...(x.logs||[])];
         return {...x,members,colors,claimedBy:{...x.claimedBy,[oldName]:currentUser},expenses,payments,adminUser,logs};
       }));
     }
     setCurrentGroupId(claimScreen.groupId); setActiveTab("expenses"); setScreen("group"); setClaimScreen(null);
   }
-  // ââ Claim Screen ââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // Ã¢ÂÂÃ¢ÂÂ Claim Screen Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
   if(claimScreen) {
     const g=groups.find(x=>x.id===claimScreen.groupId);
     if(!g) return null;
@@ -819,29 +817,29 @@ export default function App() {
     const unclaimed=g.members.filter(m=>!claimed.includes(m)&&m!==currentUser);
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,padding:24,display:"flex",flexDirection:"column",alignItems:"center"}}>
-        <div style={{fontSize:32,marginBottom:8}}>ð¤</div>
-        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>é¸æä½ çèº«å</div>
-        <div style={{fontSize:13,color:T.textMute,marginBottom:4,textAlign:"center"}}>ç¾¤çµï¼{g.name}</div>
-        <div style={{fontSize:12,color:T.textSub,marginBottom:24,textAlign:"center"}}>é¸æä½ å¨ç¾¤çµä¸­çèº«åï¼æä»¥æ°æå¡å å¥</div>
+        <div style={{fontSize:32,marginBottom:8}}>Ã°ÂÂÂ¤</div>
+        <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>Ã©ÂÂ¸Ã¦ÂÂÃ¤Â½Â Ã§ÂÂÃ¨ÂºÂ«Ã¥ÂÂ</div>
+        <div style={{fontSize:13,color:T.textMute,marginBottom:4,textAlign:"center"}}>Ã§Â¾Â¤Ã§ÂµÂÃ¯Â¼Â{g.name}</div>
+        <div style={{fontSize:12,color:T.textSub,marginBottom:24,textAlign:"center"}}>Ã©ÂÂ¸Ã¦ÂÂÃ¤Â½Â Ã¥ÂÂ¨Ã§Â¾Â¤Ã§ÂµÂÃ¤Â¸Â­Ã§ÂÂÃ¨ÂºÂ«Ã¥ÂÂÃ¯Â¼ÂÃ¦ÂÂÃ¤Â»Â¥Ã¦ÂÂ°Ã¦ÂÂÃ¥ÂÂ¡Ã¥ÂÂ Ã¥ÂÂ¥</div>
         <div style={{width:"100%",maxWidth:360}}>
           {unclaimed.map(m => (
             <Card key={m} onClick={()=>handleClaimIdentity(m)} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",marginBottom:8}}>
               <Avatar name={m} color={g.colors[m]||"#aaa"} size={38}/>
-              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{m}</div><div style={{fontSize:11,color:T.textMute}}>é»é¸èªé æ­¤èº«å</div></div>
-              <span style={{fontSize:18,color:T.textMute}}>âº</span>
+              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{m}</div><div style={{fontSize:11,color:T.textMute}}>Ã©Â»ÂÃ©ÂÂ¸Ã¨ÂªÂÃ©Â ÂÃ¦Â­Â¤Ã¨ÂºÂ«Ã¥ÂÂ</div></div>
+              <span style={{fontSize:18,color:T.textMute}}>Ã¢ÂÂº</span>
             </Card>
           ))}
           <Card onClick={()=>handleClaimIdentity("__new__")} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",borderStyle:"dashed"}}>
-            <div style={{width:38,height:38,borderRadius:"50%",background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>ï¼</div>
-            <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>ä»¥æ°æå¡å å¥</div><div style={{fontSize:11,color:T.textMute}}>ä»¥ã{currentUser}ãæ°å¢å°ç¾¤çµ</div></div>
+            <div style={{width:38,height:38,borderRadius:"50%",background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>Ã¯Â¼Â</div>
+            <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>Ã¤Â»Â¥Ã¦ÂÂ°Ã¦ÂÂÃ¥ÂÂ¡Ã¥ÂÂ Ã¥ÂÂ¥</div><div style={{fontSize:11,color:T.textMute}}>Ã¤Â»Â¥Ã£ÂÂ{currentUser}Ã£ÂÂÃ¦ÂÂ°Ã¥Â¢ÂÃ¥ÂÂ°Ã§Â¾Â¤Ã§ÂµÂ</div></div>
           </Card>
-          <Btn onClick={()=>setClaimScreen(null)} variant="ghost" style={{width:"100%",marginTop:8,textAlign:"center"}}>â åæ¶</Btn>
+          <Btn onClick={()=>setClaimScreen(null)} variant="ghost" style={{width:"100%",marginTop:8,textAlign:"center"}}>Ã¢ÂÂ Ã¥ÂÂÃ¦Â¶Â</Btn>
         </div>
       </div>
     );
   }
 
-  // ââ Group Screen ââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // Ã¢ÂÂÃ¢ÂÂ Group Screen Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
   if(screen==="group"&&currentGroup) {
     const g=currentGroup;
     const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
@@ -878,75 +876,75 @@ export default function App() {
     }
     function handleAddExpense(form) {
       const e={id:uid(),...form};
-      updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"æ°å¢æ¶è²»",detail:`æ°å¢ã${form.name}ãNT$${form.total}ï¼${form.payers.map(p=>`${p.name}ä»NT$${p.amount}`).join("ã")}`});
+      updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"Ã¦ÂÂ°Ã¥Â¢ÂÃ¦Â¶ÂÃ¨Â²Â»",detail:`Ã¦ÂÂ°Ã¥Â¢ÂÃ£ÂÂ${form.name}Ã£ÂÂNT$${form.total}Ã¯Â¼Â${form.payers.map(p=>`${p.name}Ã¤Â»ÂNT$${p.amount}`).join("Ã£ÂÂ")}`});
       setShowAdd(false);
     }
     function handleEditExpense(form) {
       const old=expenses.find(e=>e.id===editingId);
       const diffs=[];
-      if(old?.name!==form.name) diffs.push(`åç¨±ï¼${old?.name} â ${form.name}`);
-      if(old?.total!==form.total) diffs.push(`éé¡ï¼NT$${old?.total} â NT$${form.total}`);
-      if(old?.date!==form.date) diffs.push(`æ¥æï¼${old?.date} â ${form.date}`);
-      if(old?.category!==form.category) diffs.push(`åé¡ï¼${getCat(old?.category,cats)?.label} â ${getCat(form.category,cats)?.label}`);
+      if(old?.name!==form.name) diffs.push(`Ã¥ÂÂÃ§Â¨Â±Ã¯Â¼Â${old?.name} Ã¢ÂÂ ${form.name}`);
+      if(old?.total!==form.total) diffs.push(`Ã©ÂÂÃ©Â¡ÂÃ¯Â¼ÂNT$${old?.total} Ã¢ÂÂ NT$${form.total}`);
+      if(old?.date!==form.date) diffs.push(`Ã¦ÂÂ¥Ã¦ÂÂÃ¯Â¼Â${old?.date} Ã¢ÂÂ ${form.date}`);
+      if(old?.category!==form.category) diffs.push(`Ã¥ÂÂÃ©Â¡ÂÃ¯Â¼Â${getCat(old?.category,cats)?.label} Ã¢ÂÂ ${getCat(form.category,cats)?.label}`);
       const oldP=(old?.payers||[]).map(p=>`${p.name}NT$${p.amount}`).join("+");
       const newP=form.payers.map(p=>`${p.name}NT$${p.amount}`).join("+");
-      if(oldP!==newP) diffs.push(`ä»æ¬¾ï¼${oldP} â ${newP}`);
-      if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("åå¸³æå¡è®æ´");
-      const detail=diffs.length?`ç·¨è¼¯ã${old?.name}ãï¼${diffs.join("ï¼")}`:`ç·¨è¼¯ã${old?.name}ãï¼ç¡è®åï¼`;
-      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...form})}),{id:uid(),ts:now(),user:me,action:"ç·¨è¼¯æ¶è²»",detail});
+      if(oldP!==newP) diffs.push(`Ã¤Â»ÂÃ¦Â¬Â¾Ã¯Â¼Â${oldP} Ã¢ÂÂ ${newP}`);
+      if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("Ã¥ÂÂÃ¥Â¸Â³Ã¦ÂÂÃ¥ÂÂ¡Ã¨Â®ÂÃ¦ÂÂ´");
+      const detail=diffs.length?`Ã§Â·Â¨Ã¨Â¼Â¯Ã£ÂÂ${old?.name}Ã£ÂÂÃ¯Â¼Â${diffs.join("Ã¯Â¼Â")}`:`Ã§Â·Â¨Ã¨Â¼Â¯Ã£ÂÂ${old?.name}Ã£ÂÂÃ¯Â¼ÂÃ§ÂÂ¡Ã¨Â®ÂÃ¥ÂÂÃ¯Â¼Â`;
+      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...form})}),{id:uid(),ts:now(),user:me,action:"Ã§Â·Â¨Ã¨Â¼Â¯Ã¦Â¶ÂÃ¨Â²Â»",detail});
       setEditingId(null);
     }
     function handleDeleteExpense(id) {
       const e=expenses.find(x=>x.id===id);
-      updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),{id:uid(),ts:now(),user:me,action:"åªé¤æ¶è²»",detail:`åªé¤ã${e?.name}ãNT$${e?.total}`});
+      updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),{id:uid(),ts:now(),user:me,action:"Ã¥ÂÂªÃ©ÂÂ¤Ã¦Â¶ÂÃ¨Â²Â»",detail:`Ã¥ÂÂªÃ©ÂÂ¤Ã£ÂÂ${e?.name}Ã£ÂÂNT$${e?.total}`});
       setEditingId(null);
     }
     function handleAddPayment(form) {
       const p={id:uid(),ts:now(),...form};
-      updateGroup(x=>({...x,payments:[...(x.payments||[]),p]}),{id:uid(),ts:now(),user:me,action:"è¨éè½å¸³",detail:`${form.from} â ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`});
+      updateGroup(x=>({...x,payments:[...(x.payments||[]),p]}),{id:uid(),ts:now(),user:me,action:"Ã¨Â¨ÂÃ©ÂÂÃ¨Â½ÂÃ¥Â¸Â³",detail:`${form.from} Ã¢ÂÂ ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`});
     }
     function handleEditPayment(form) {
       const old=payments.find(p=>p.id===editingPaymentId);
       const diffs=[];
-      if(old?.from!==form.from) diffs.push(`è½åºï¼${old?.from} â ${form.from}`);
-      if(old?.to!==form.to) diffs.push(`æ¶æ¬¾ï¼${old?.to} â ${form.to}`);
-      if(old?.amount!==form.amount) diffs.push(`éé¡ï¼NT$${old?.amount} â NT$${form.amount}`);
-      if(old?.date!==form.date) diffs.push(`æ¥æï¼${old?.date} â ${form.date}`);
-      const detail=diffs.length?`ç·¨è¼¯è½å¸³ï¼${diffs.join("ï¼")}`:"ç·¨è¼¯è½å¸³ï¼ç¡è®åï¼";
-      updateGroup(x=>({...x,payments:(x.payments||[]).map(p=>p.id!==editingPaymentId?p:{...p,...form,amount:parseFloat(form.amount)})}),{id:uid(),ts:now(),user:me,action:"ç·¨è¼¯è½å¸³",detail});
+      if(old?.from!==form.from) diffs.push(`Ã¨Â½ÂÃ¥ÂÂºÃ¯Â¼Â${old?.from} Ã¢ÂÂ ${form.from}`);
+      if(old?.to!==form.to) diffs.push(`Ã¦ÂÂ¶Ã¦Â¬Â¾Ã¯Â¼Â${old?.to} Ã¢ÂÂ ${form.to}`);
+      if(old?.amount!==form.amount) diffs.push(`Ã©ÂÂÃ©Â¡ÂÃ¯Â¼ÂNT$${old?.amount} Ã¢ÂÂ NT$${form.amount}`);
+      if(old?.date!==form.date) diffs.push(`Ã¦ÂÂ¥Ã¦ÂÂÃ¯Â¼Â${old?.date} Ã¢ÂÂ ${form.date}`);
+      const detail=diffs.length?`Ã§Â·Â¨Ã¨Â¼Â¯Ã¨Â½ÂÃ¥Â¸Â³Ã¯Â¼Â${diffs.join("Ã¯Â¼Â")}`:"Ã§Â·Â¨Ã¨Â¼Â¯Ã¨Â½ÂÃ¥Â¸Â³Ã¯Â¼ÂÃ§ÂÂ¡Ã¨Â®ÂÃ¥ÂÂÃ¯Â¼Â";
+      updateGroup(x=>({...x,payments:(x.payments||[]).map(p=>p.id!==editingPaymentId?p:{...p,...form,amount:parseFloat(form.amount)})}),{id:uid(),ts:now(),user:me,action:"Ã§Â·Â¨Ã¨Â¼Â¯Ã¨Â½ÂÃ¥Â¸Â³",detail});
       setEditingPaymentId(null);
     }
     function handleDeletePayment(id) {
       const p=payments.find(x=>x.id===id);
-      updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"åªé¤è½å¸³",detail:`åªé¤ ${p?.from} â ${p?.to} NT$${p?.amount}`});
+      updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"Ã¥ÂÂªÃ©ÂÂ¤Ã¨Â½ÂÃ¥Â¸Â³",detail:`Ã¥ÂÂªÃ©ÂÂ¤ ${p?.from} Ã¢ÂÂ ${p?.to} NT$${p?.amount}`});
       setEditingPaymentId(null);
     }
     const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:me,amount:""}],splitMode:"equal",splitData:{},splits:{}});
-    const TABS=[["expenses","æç´°"],["settle","çµç®"],["analytics","åæ"],["logs","ç´é"],["config","è¨­å®"]];
+    const TABS=[["expenses","Ã¦ÂÂÃ§Â´Â°"],["settle","Ã§ÂµÂÃ§Â®Â"],["analytics","Ã¥ÂÂÃ¦ÂÂ"],["logs","Ã§Â´ÂÃ©ÂÂ"],["config","Ã¨Â¨Â­Ã¥Â®Â"]];
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,paddingBottom:50}}>
         <div style={{background:T.yellowLt,padding:"14px 16px 0",boxShadow:"0 2px 8px rgba(200,150,0,0.12)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-            <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>â</button>
+            <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>Ã¢ÂÂ</button>
             <div style={{flex:1}}>
               <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
-              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>ä»£ç¢¼ {g.code} Â· {members.length}äºº{isAdmin?" Â· ð":""}</div>
+              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>Ã¤Â»Â£Ã§Â¢Â¼ {g.code} ÃÂ· {members.length}Ã¤ÂºÂº{isAdmin?" ÃÂ· Ã°ÂÂÂ":""}</div>
             </div>
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
           </div>
           <div style={{background:"rgba(255,255,255,0.75)",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>æçå¸³ï¼{me}ï¼</div>
+            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>Ã¦ÂÂÃ§ÂÂÃ¥Â¸Â³Ã¯Â¼Â{me}Ã¯Â¼Â</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0}}>
               <div style={{paddingRight:10,borderRight:`1.5px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>æå¢ä»</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>Ã¦ÂÂÃ¥Â¢ÂÃ¤Â»Â</div>
                 <div style={{fontSize:16,fontWeight:800,color:T.yellowDk,lineHeight:1.2}}>NT${myPaid.toLocaleString()}</div>
               </div>
               <div style={{paddingLeft:10,paddingRight:10,borderRight:`1.5px solid ${T.border}`}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>æçæ¶è²»</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>Ã¦ÂÂÃ§ÂÂÃ¦Â¶ÂÃ¨Â²Â»</div>
                 <div style={{fontSize:16,fontWeight:800,color:T.text,lineHeight:1.2}}>NT${mySpend.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</div>
               </div>
               <div style={{paddingLeft:10}}>
-                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>{myNet>=0?"å¥äººæ¬ æ":"ææ¬ å¥äºº"}</div>
+                <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>{myNet>=0?"Ã¥ÂÂ¥Ã¤ÂºÂºÃ¦Â¬Â Ã¦ÂÂ":"Ã¦ÂÂÃ¦Â¬Â Ã¥ÂÂ¥Ã¤ÂºÂº"}</div>
                 <div style={{fontSize:16,fontWeight:800,color:myNet>=0?T.green:T.accent,lineHeight:1.2}}>NT${Math.abs(myNet).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</div>
               </div>
             </div>
@@ -961,12 +959,12 @@ export default function App() {
           </div>
         </div>
         <div style={{padding:"14px 14px 0"}}>
-          {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>â</button></div>}
+          {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>Ã¢ÂÂ</button></div>}
           {activeTab==="expenses" && (
             <div>
               {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
               {showPayment && <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
-              {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>éæ²æä»»ä½æ¶è²» ð´</div>}
+              {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>Ã©ÂÂÃ¦Â²ÂÃ¦ÂÂÃ¤Â»Â»Ã¤Â½ÂÃ¦Â¶ÂÃ¨Â²Â» Ã°ÂÂÂ´</div>}
               {sortedDates.map(date => (
                 <div key={date}>
                   <div style={{fontSize:11,color:T.textMute,marginBottom:6,marginTop:12,fontWeight:700,letterSpacing:0.5}}>{fmtDate(date)}</div>
@@ -981,12 +979,12 @@ export default function App() {
                       return (
                         <Card key={p.id} onClick={()=>{setEditingPaymentId(p.id);setShowAdd(false);setShowPayment(false);setEditingId(null);}} style={{borderColor:isMine?"#A5D6A7":T.border,background:isMine?"#F1FBF4":T.bgCard,padding:"10px 14px"}}>
                           <div style={{display:"flex",alignItems:"center",gap:8}}>
-                            <div style={{width:36,height:36,borderRadius:10,background:"#E8F5E9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>ð¸</div>
+                            <div style={{width:36,height:36,borderRadius:10,background:"#E8F5E9",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>Ã°ÂÂÂ¸</div>
                             <div style={{flex:1}}>
                               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2}}>
                                 <Avatar name={p.from} color={colors[p.from]||"#aaa"} size={18}/>
                                 <span style={{fontSize:12,fontWeight:600,color:T.text}}>{p.from}</span>
-                                <span style={{fontSize:11,color:T.textMute}}>â</span>
+                                <span style={{fontSize:11,color:T.textMute}}>Ã¢ÂÂ</span>
                                 <Avatar name={p.to} color={colors[p.to]||"#aaa"} size={18}/>
                                 <span style={{fontSize:12,fontWeight:600,color:T.text}}>{p.to}</span>
                               </div>
@@ -994,7 +992,7 @@ export default function App() {
                             </div>
                             <div style={{textAlign:"right"}}>
                               <div style={{fontSize:16,fontWeight:800,color:"#2E7D32"}}>NT${p.amount.toLocaleString()}</div>
-                              <div style={{fontSize:10,color:T.textMute}}>è½å¸³</div>
+                              <div style={{fontSize:10,color:T.textMute}}>Ã¨Â½ÂÃ¥Â¸Â³</div>
                             </div>
                           </div>
                         </Card>
@@ -1013,7 +1011,7 @@ export default function App() {
                             <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{e.name}</div><div style={{fontSize:10,color:T.textMute}}>{cat.label}</div></div>
                           </div>
                           <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
-                            {myShare>0 ? <div style={{fontSize:19,fontWeight:800,color:iAmPayer?T.yellowDk:T.text,lineHeight:1}}>NT${myShare%1===0?myShare.toFixed(0):myShare.toFixed(2)}</div> : <div style={{fontSize:12,color:T.textMute}}>ä¸åè</div>}
+                            {myShare>0 ? <div style={{fontSize:19,fontWeight:800,color:iAmPayer?T.yellowDk:T.text,lineHeight:1}}>NT${myShare%1===0?myShare.toFixed(0):myShare.toFixed(2)}</div> : <div style={{fontSize:12,color:T.textMute}}>Ã¤Â¸ÂÃ¥ÂÂÃ¨ÂÂ</div>}
                           </div>
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",borderTop:`1px solid ${T.border}`,paddingTop:6}}>
@@ -1025,7 +1023,7 @@ export default function App() {
                             ))}
                           </div>
                           <div style={{fontSize:11,color:T.textSub,flexShrink:0,marginLeft:6}}>
-                            {e.payers.length===1?`${e.payers[0].name} ä» NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
+                            {e.payers.length===1?`${e.payers[0].name} Ã¤Â»Â NT$${e.total.toLocaleString()}`:e.payers.map(p=>`${p.name}NT$${p.amount}`).join("+")}
                           </div>
                         </div>
                       </Card>
@@ -1046,23 +1044,23 @@ export default function App() {
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
                         <Avatar name={m} color={col} size={22}/>
                         <span style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m}</span>
-                        {m===g.adminUser && <span style={{fontSize:9}}>ð</span>}
+                        {m===g.adminUser && <span style={{fontSize:9}}>Ã°ÂÂÂ</span>}
                       </div>
                       <div style={{display:"flex",flexDirection:"column",gap:3}}>
                         <div style={{display:"flex",justifyContent:"space-between",fontSize:10}}>
-                          <span style={{color:T.textMute}}>ä»£å¢</span>
+                          <span style={{color:T.textMute}}>Ã¤Â»Â£Ã¥Â¢Â</span>
                           <span style={{fontWeight:600,color:T.text}}>NT${paid.toLocaleString()}</span>
                         </div>
                         <div style={{display:"flex",justifyContent:"space-between",fontSize:10}}>
-                          <span style={{color:T.textMute}}>æ¶è²»</span>
+                          <span style={{color:T.textMute}}>Ã¦Â¶ÂÃ¨Â²Â»</span>
                           <span style={{fontWeight:600,color:T.text}}>NT${owes.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
                         </div>
                         <div style={{height:1,background:T.border,margin:"2px 0"}}/>
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                          <span style={{fontSize:10,color:T.textMute}}>{cleared?"":"æ¶æ¯"}</span>
+                          <span style={{fontSize:10,color:T.textMute}}>{cleared?"":"Ã¦ÂÂ¶Ã¦ÂÂ¯"}</span>
                           {cleared
-                            ? <span style={{fontSize:11,fontWeight:800,color:T.green}}>â çµæ¸</span>
-                            : <span style={{fontSize:13,fontWeight:800,color:net>=0?T.green:T.accent}}>{net>=0?"ð°":"ð¸"}NT${Math.abs(net).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
+                            ? <span style={{fontSize:11,fontWeight:800,color:T.green}}>Ã¢ÂÂ Ã§ÂµÂÃ¦Â¸Â</span>
+                            : <span style={{fontSize:13,fontWeight:800,color:net>=0?T.green:T.accent}}>{net>=0?"Ã°ÂÂÂ°":"Ã°ÂÂÂ¸"}NT${Math.abs(net).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
                           }
                         </div>
                       </div>
@@ -1070,16 +1068,16 @@ export default function App() {
                   );
                 })}
               </div>
-              <div style={{fontSize:10,color:T.textMute,textAlign:"center",marginBottom:12}}>ç¸½æ¶è²» NT${totalAll.toLocaleString()}</div>
+              <div style={{fontSize:10,color:T.textMute,textAlign:"center",marginBottom:12}}>Ã§Â¸Â½Ã¦Â¶ÂÃ¨Â²Â» NT${totalAll.toLocaleString()}</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <div style={{fontSize:12,color:T.textSub,fontWeight:700}}>æå°è½å¸³æ¹æ¡</div>
-                <div style={{fontSize:11,color:T.textMute}}>{transfers.length} ç­å³å¯çµæ¸</div>
+                <div style={{fontSize:12,color:T.textSub,fontWeight:700}}>Ã¦ÂÂÃ¥Â°ÂÃ¨Â½ÂÃ¥Â¸Â³Ã¦ÂÂ¹Ã¦Â¡Â</div>
+                <div style={{fontSize:11,color:T.textMute}}>{transfers.length} Ã§Â­ÂÃ¥ÂÂ³Ã¥ÂÂ¯Ã§ÂµÂÃ¦Â¸Â</div>
               </div>
-              {transfers.length===0 && <div style={{textAlign:"center",color:T.textMute,padding:24,fontSize:16}}>å·²å¨é¨çµæ¸ ð¥³</div>}
+              {transfers.length===0 && <div style={{textAlign:"center",color:T.textMute,padding:24,fontSize:16}}>Ã¥Â·Â²Ã¥ÂÂ¨Ã©ÂÂ¨Ã§ÂµÂÃ¦Â¸Â Ã°ÂÂ¥Â³</div>}
               {transfers.map((t,i) => {
                 const isMyAction=t.from===me||t.to===me;
                 const alreadyDone=payments.some(p=>p.from===t.from&&p.to===t.to&&Math.abs(p.amount-t.amount)<0.5);
-                const markDone=()=>{handleAddPayment({from:t.from,to:t.to,amount:t.amount,date:new Date().toISOString().slice(0,10),note:"è½å¸³å®æ"});};
+                const markDone=()=>{handleAddPayment({from:t.from,to:t.to,amount:t.amount,date:new Date().toISOString().slice(0,10),note:"Ã¨Â½ÂÃ¥Â¸Â³Ã¥Â®ÂÃ¦ÂÂ"});};
                 return (
                   <Card key={i} style={{borderColor:alreadyDone?"#A5D6A7":isMyAction?T.yellowDk:T.border,background:alreadyDone?"#F1FBF4":isMyAction?"#FFFDE7":T.bgCard}}>
                     <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -1091,12 +1089,12 @@ export default function App() {
                         <div style={{fontSize:15,fontWeight:800,color:T.text}}>NT${t.amount.toLocaleString()}</div>
                         <div style={{width:"100%",display:"flex",alignItems:"center",gap:4}}>
                           <div style={{flex:1,height:1.5,background:T.border,borderRadius:2}}/>
-                          <span style={{fontSize:14}}>â</span>
+                          <span style={{fontSize:14}}>Ã¢ÂÂ</span>
                           <div style={{flex:1,height:1.5,background:T.border,borderRadius:2}}/>
                         </div>
-                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===me?"æè¦ä»":"æè¦æ¶"}</span>}
-                        {alreadyDone && <span style={{fontSize:10,color:"#2E7D32",fontWeight:700}}>â å·²å®æ</span>}
-                        {!alreadyDone && <button onClick={markDone} style={{marginTop:2,padding:"3px 12px",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:20,color:"#2E7D32",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>è½å¸³å®æ</button>}
+                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===me?"Ã¦ÂÂÃ¨Â¦ÂÃ¤Â»Â":"Ã¦ÂÂÃ¨Â¦ÂÃ¦ÂÂ¶"}</span>}
+                        {alreadyDone && <span style={{fontSize:10,color:"#2E7D32",fontWeight:700}}>Ã¢ÂÂ Ã¥Â·Â²Ã¥Â®ÂÃ¦ÂÂ</span>}
+                        {!alreadyDone && <button onClick={markDone} style={{marginTop:2,padding:"3px 12px",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:20,color:"#2E7D32",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Ã¨Â½ÂÃ¥Â¸Â³Ã¥Â®ÂÃ¦ÂÂ</button>}
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,minWidth:48}}>
                         <Avatar name={t.to} color={colors[t.to]||"#aaa"} size={32}/>
@@ -1111,8 +1109,8 @@ export default function App() {
           {activeTab==="analytics" && <AnalyticsTab expenses={expenses} members={members} colors={colors} cats={cats} me={me}/>}
           {activeTab==="logs" && (
             <div>
-              <div style={{fontSize:13,color:T.textSub,marginBottom:14,fontWeight:600}}>æä½ç´é</div>
-              {(logs||[]).length===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>æ«ç¡ç´é</div>}
+              <div style={{fontSize:13,color:T.textSub,marginBottom:14,fontWeight:600}}>Ã¦ÂÂÃ¤Â½ÂÃ§Â´ÂÃ©ÂÂ</div>
+              {(logs||[]).length===0 && <div style={{textAlign:"center",color:T.textMute,padding:40}}>Ã¦ÂÂ«Ã§ÂÂ¡Ã§Â´ÂÃ©ÂÂ</div>}
               {(logs||[]).map(l => (
                 <Card key={l.id} style={{padding:"10px 12px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
@@ -1130,19 +1128,19 @@ export default function App() {
             g.adminUser===currentUser && !verifiedAdminGroups.has(g.id) && g.adminPin
               ? (
                 <div style={{textAlign:"center",padding:"40px 20px"}}>
-                  <div style={{fontSize:32,marginBottom:12}}>ð</div>
-                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>éè¦ç®¡çå¡ PIN ç¢¼</div>
-                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>è¼¸å¥å»ºç«ç¾¤çµæè¨­å®ç PIN ç¢¼</div>
-                  <input type="password" inputMode="numeric" placeholder="PIN ç¢¼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
+                  <div style={{fontSize:32,marginBottom:12}}>Ã°ÂÂÂ</div>
+                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>Ã©ÂÂÃ¨Â¦ÂÃ§Â®Â¡Ã§ÂÂÃ¥ÂÂ¡ PIN Ã§Â¢Â¼</div>
+                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>Ã¨Â¼Â¸Ã¥ÂÂ¥Ã¥Â»ÂºÃ§Â«ÂÃ§Â¾Â¤Ã§ÂµÂÃ¦ÂÂÃ¨Â¨Â­Ã¥Â®ÂÃ§ÂÂ PIN Ã§Â¢Â¼</div>
+                  <input type="password" inputMode="numeric" placeholder="PIN Ã§Â¢Â¼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
                   <Btn onClick={()=>{
                     if(adminPinInput===g.adminPin){
                       setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
                       setAdminPinInput("");
                     } else {
-                      setError("PIN ç¢¼é¯èª¤");
+                      setError("PIN Ã§Â¢Â¼Ã©ÂÂ¯Ã¨ÂªÂ¤");
                       setAdminPinInput("");
                     }
-                  }} style={{width:"100%",maxWidth:200,padding:10}}>ç¢ºèª</Btn>
+                  }} style={{width:"100%",maxWidth:200,padding:10}}>Ã§Â¢ÂºÃ¨ÂªÂ</Btn>
                 </div>
               )
               : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me} setExportModal={setExportModal}/>
@@ -1154,11 +1152,11 @@ export default function App() {
             <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
               <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>ð¸</span> è¨éè½å¸³
+                <span>Ã°ÂÂÂ¸</span> Ã¨Â¨ÂÃ©ÂÂÃ¨Â½ÂÃ¥Â¸Â³
               </button>
               <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
                 style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>ð§¾</span> æ°å¢æ¶è²»
+                <span>Ã°ÂÂ§Â¾</span> Ã¦ÂÂ°Ã¥Â¢ÂÃ¦Â¶ÂÃ¨Â²Â»
               </button>
             </div>
           )}
@@ -1169,78 +1167,78 @@ export default function App() {
               else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
             }}
             style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
-            {(showAdd||showPayment) ? "â" : "ï¼"}
+            {(showAdd||showPayment) ? "Ã¢ÂÂ" : "Ã¯Â¼Â"}
           </button>
         </div>
       )}
       </div>
     );
   }
-  // ââ Export Modal âââââââââââââââââââââââââââââââââââââââââââââââââ
+  // Ã¢ÂÂÃ¢ÂÂ Export Modal Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
   if(exportModal) return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
       <div style={{background:"#fff",borderRadius:16,padding:20,width:"100%",maxWidth:500,maxHeight:"80vh",display:"flex",flexDirection:"column"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
           <div style={{fontWeight:700,fontSize:15}}>{exportModal.title}</div>
-          <button onClick={()=>setExportModal(null)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:T.textSub}}>â</button>
+          <button onClick={()=>setExportModal(null)} style={{background:"none",border:"none",fontSize:20,cursor:"pointer",color:T.textSub}}>Ã¢ÂÂ</button>
         </div>
-        <div style={{fontSize:11,color:T.textSub,marginBottom:8}}>ç¡æ³ç´æ¥ä¸è¼ï¼è«é·æå¨é¸å¾è¤è£½ï¼è²¼å° Excel æè¨äºæ¬å²å­</div>
+        <div style={{fontSize:11,color:T.textSub,marginBottom:8}}>Ã§ÂÂ¡Ã¦Â³ÂÃ§ÂÂ´Ã¦ÂÂ¥Ã¤Â¸ÂÃ¨Â¼ÂÃ¯Â¼ÂÃ¨Â«ÂÃ©ÂÂ·Ã¦ÂÂÃ¥ÂÂ¨Ã©ÂÂ¸Ã¥Â¾ÂÃ¨Â¤ÂÃ¨Â£Â½Ã¯Â¼ÂÃ¨Â²Â¼Ã¥ÂÂ° Excel Ã¦ÂÂÃ¨Â¨ÂÃ¤ÂºÂÃ¦ÂÂ¬Ã¥ÂÂ²Ã¥Â­Â</div>
         <textarea readOnly value={exportModal.content} style={{flex:1,border:`1px solid ${T.border}`,borderRadius:8,padding:8,fontSize:10,fontFamily:"monospace",resize:"none",outline:"none",minHeight:200}} onClick={e=>e.target.select()}/>
-        <Btn onClick={()=>{try{navigator.clipboard.writeText(exportModal.content).then(()=>alert("å·²è¤è£½ï¼"));}catch{alert("è«æåé¸åè¤è£½");}}} style={{marginTop:10,width:"100%"}}>è¤è£½å§å®¹</Btn>
+        <Btn onClick={()=>{try{navigator.clipboard.writeText(exportModal.content).then(()=>alert("Ã¥Â·Â²Ã¨Â¤ÂÃ¨Â£Â½Ã¯Â¼Â"));}catch{alert("Ã¨Â«ÂÃ¦ÂÂÃ¥ÂÂÃ©ÂÂ¸Ã¥ÂÂÃ¨Â¤ÂÃ¨Â£Â½");}}} style={{marginTop:10,width:"100%"}}>Ã¨Â¤ÂÃ¨Â£Â½Ã¥ÂÂ§Ã¥Â®Â¹</Btn>
       </div>
     </div>
   );
 
-  // ââ Home Screen âââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // Ã¢ÂÂÃ¢ÂÂ Home Screen Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
   if(screen==="home") return (
     <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,padding:20}}>
       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:24}}>
-        <div style={{width:40,height:40,borderRadius:14,background:T.yellowMd,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:T.shadow}}>ðï¸</div>
-        <div><div style={{fontSize:17,fontWeight:800}}>æéåå¸³</div><div style={{fontSize:11,color:T.yellowDk,fontWeight:600}}>æ­¡è¿ï¼{currentUser} ð</div></div>
-        <button onClick={()=>{setCurrentUser("");setUsernameInput("");try{localStorage.removeItem("splitapp:user");}catch{}try{window.location.hash="";}catch{}setScreen("login");}} style={{marginLeft:"auto",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:20,padding:"5px 12px",color:T.textSub,fontSize:11,cursor:"pointer",fontWeight:600}}>ç»åº</button>
+        <div style={{width:40,height:40,borderRadius:14,background:T.yellowMd,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,boxShadow:T.shadow}}>Ã°ÂÂÂÃ¯Â¸Â</div>
+        <div><div style={{fontSize:17,fontWeight:800}}>Ã¦ÂÂÃ©ÂÂÃ¥ÂÂÃ¥Â¸Â³</div><div style={{fontSize:11,color:T.yellowDk,fontWeight:600}}>Ã¦Â­Â¡Ã¨Â¿ÂÃ¯Â¼Â{currentUser} Ã°ÂÂÂ</div></div>
+        <button onClick={()=>{setCurrentUser("");setUsernameInput("");try{localStorage.removeItem("splitapp:user");}catch{}try{window.location.hash="";}catch{}setScreen("login");}} style={{marginLeft:"auto",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:20,padding:"5px 12px",color:T.textSub,fontSize:11,cursor:"pointer",fontWeight:600}}>Ã§ÂÂ»Ã¥ÂÂº</button>
       </div>
-      {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>â</button></div>}
+      {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>Ã¢ÂÂ</button></div>}
       {groups.filter(g=>g.members.includes(currentUser)).length>0 && (
         <div style={{marginBottom:20}}>
-          <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>æçç¾¤çµ</div>
+          <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>Ã¦ÂÂÃ§ÂÂÃ§Â¾Â¤Ã§ÂµÂ</div>
           {groups.filter(g=>g.members.includes(currentUser)).map(g => (
             <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
-              <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>ðï¸</div>
-              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} ä½æå¡ Â· {g.code}{g.adminUser===currentUser?" Â· ð":""}</div></div>
-              <span style={{fontSize:18,color:T.textMute}}>âº</span>
+              <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>Ã°ÂÂÂÃ¯Â¸Â</div>
+              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} Ã¤Â½ÂÃ¦ÂÂÃ¥ÂÂ¡ ÃÂ· {g.code}{g.adminUser===currentUser?" ÃÂ· Ã°ÂÂÂ":""}</div></div>
+              <span style={{fontSize:18,color:T.textMute}}>Ã¢ÂÂº</span>
             </Card>
           ))}
         </div>
       )}
       <Card style={{borderColor:T.yellowMd,marginBottom:12}}>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10,color:T.yellowDk}}>ï¼ å»ºç«æ°ç¾¤çµ</div>
-        <input placeholder="ç¾¤çµåç¨±ï¼ä¾ï¼æ²ç¹©äºæ¥é ðºï¼" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
-        <input type="password" inputMode="numeric" placeholder="ç®¡çå¡ PIN ç¢¼ï¼è³å° 4 ä½ï¼" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
-        <div style={{fontSize:10,color:T.textMute,marginBottom:8,marginTop:-4}}>PIN ç¢¼ç¨æ¼ä¿è­·ç®¡çå¡åè½ï¼è«è¨å¥½</div>
-        <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>å»ºç«</Btn>
+        <div style={{fontSize:13,fontWeight:700,marginBottom:10,color:T.yellowDk}}>Ã¯Â¼Â Ã¥Â»ÂºÃ§Â«ÂÃ¦ÂÂ°Ã§Â¾Â¤Ã§ÂµÂ</div>
+        <input placeholder="Ã§Â¾Â¤Ã§ÂµÂÃ¥ÂÂÃ§Â¨Â±Ã¯Â¼ÂÃ¤Â¾ÂÃ¯Â¼ÂÃ¦Â²ÂÃ§Â¹Â©Ã¤ÂºÂÃ¦ÂÂ¥Ã©ÂÂ Ã°ÂÂÂºÃ¯Â¼Â" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
+        <input type="password" inputMode="numeric" placeholder="Ã§Â®Â¡Ã§ÂÂÃ¥ÂÂ¡ PIN Ã§Â¢Â¼Ã¯Â¼ÂÃ¨ÂÂ³Ã¥Â°Â 4 Ã¤Â½ÂÃ¯Â¼Â" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
+        <div style={{fontSize:10,color:T.textMute,marginBottom:8,marginTop:-4}}>PIN Ã§Â¢Â¼Ã§ÂÂ¨Ã¦ÂÂ¼Ã¤Â¿ÂÃ¨Â­Â·Ã§Â®Â¡Ã§ÂÂÃ¥ÂÂ¡Ã¥ÂÂÃ¨ÂÂ½Ã¯Â¼ÂÃ¨Â«ÂÃ¨Â¨ÂÃ¥Â¥Â½</div>
+        <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>Ã¥Â»ÂºÃ§Â«Â</Btn>
       </Card>
       <Card>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>å å¥ç¾¤çµ</div>
-        <input placeholder="è¼¸å¥ç¾¤çµä»£ç¢¼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
-        <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>å å¥</Btn>
+        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>Ã¥ÂÂ Ã¥ÂÂ¥Ã§Â¾Â¤Ã§ÂµÂ</div>
+        <input placeholder="Ã¨Â¼Â¸Ã¥ÂÂ¥Ã§Â¾Â¤Ã§ÂµÂÃ¤Â»Â£Ã§Â¢Â¼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
+        <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>Ã¥ÂÂ Ã¥ÂÂ¥</Btn>
       </Card>
       <div style={{display:"flex",gap:8,marginTop:4}}>
-        <button onClick={()=>{const r=exportBackupJSON(groups);if(r)setExportModal({title:"åä»½è³æ",content:r});}} style={{flex:1,padding:"10px 0",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:12,color:"#2E7D32",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð¦ åä»½è³æ</button>
-        <button onClick={()=>importFileRef.current?.click()} style={{flex:1,padding:"10px 0",background:"#FFF8E1",border:`1.5px solid ${T.yellowMd}`,borderRadius:12,color:T.yellowDk,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>ð å¯å¥åä»½</button>
+        <button onClick={()=>{const r=exportBackupJSON(groups);if(r)setExportModal({title:"Ã¥ÂÂÃ¤Â»Â½Ã¨Â³ÂÃ¦ÂÂ",content:r});}} style={{flex:1,padding:"10px 0",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:12,color:"#2E7D32",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Ã°ÂÂÂ¦ Ã¥ÂÂÃ¤Â»Â½Ã¨Â³ÂÃ¦ÂÂ</button>
+        <button onClick={()=>importFileRef.current?.click()} style={{flex:1,padding:"10px 0",background:"#FFF8E1",border:`1.5px solid ${T.yellowMd}`,borderRadius:12,color:T.yellowDk,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>Ã°ÂÂÂ Ã¥ÂÂ¯Ã¥ÂÂ¥Ã¥ÂÂÃ¤Â»Â½</button>
         <input ref={importFileRef} type="file" accept=".json" onChange={handleImportBackup} style={{display:"none"}}/>
       </div>
     </div>
   );
 
-  // ââ Login âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // Ã¢ÂÂÃ¢ÂÂ Login Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
   return (
     <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24}}>
-      <div style={{fontSize:60,marginBottom:8}}>ðï¸</div>
-      <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>æéåå¸³</div>
-      <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>è¼¸å¥ä½ çåå­éå§ä½¿ç¨</div>
+      <div style={{fontSize:60,marginBottom:8}}>Ã°ÂÂÂÃ¯Â¸Â</div>
+      <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>Ã¦ÂÂÃ©ÂÂÃ¥ÂÂÃ¥Â¸Â³</div>
+      <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>Ã¨Â¼Â¸Ã¥ÂÂ¥Ã¤Â½Â Ã§ÂÂÃ¥ÂÂÃ¥Â­ÂÃ©ÂÂÃ¥Â§ÂÃ¤Â½Â¿Ã§ÂÂ¨</div>
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,width:"100%",maxWidth:320,boxSizing:"border-box"}}>{error}</div>}
-      <input placeholder="ä½ å«ä»éº¼åå­ï¼" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
-      <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>åºç¼ï¼ð</Btn>
+      <input placeholder="Ã¤Â½Â Ã¥ÂÂ«Ã¤Â»ÂÃ©ÂºÂ¼Ã¥ÂÂÃ¥Â­ÂÃ¯Â¼Â" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
+      <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>Ã¥ÂÂºÃ§ÂÂ¼Ã¯Â¼ÂÃ°ÂÂÂ</Btn>
     </div>
   );
 }
