@@ -679,14 +679,6 @@ export default function App(){
     }
     setClaimScreen({groupId:g.id,code});
     setJoinCode(""); setError("");
-    // Already a member or already claimed
-    const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
-    if(g.members.includes(currentUser)||alreadyClaimed){
-      setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setJoinCode(""); setError(""); return;
-    }
-    // Show claim screen
-    setClaimScreen({groupId:g.id,code});
-    setJoinCode(""); setError("");
   }
 
   function handleClaimIdentity(memberName){
@@ -1136,10 +1128,9 @@ export default function App(){
       <div style={{fontSize:60,marginBottom:8}}>🏝️</div>
       <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>旅遊分帳</div>
       <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>輸入你的名字開始使用</div>
-      {error&&<div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,width:"100%",maxWidth:320,boxSizing:"border-box"}}>{error}</div>}
+      {error&&<div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,width:"100%",maxWih:320,boxSizing:"border-box"}}>{error}</div>}
       <input placeholder="你叫什麼名字？" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
       <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>出發！🌟</Btn>
     </div>
   );
-}
 }
