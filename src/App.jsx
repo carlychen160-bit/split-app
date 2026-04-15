@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
-import { doc as fsDoc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs } from "firebase/firestore";
+import { doc as fsDoc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
 
 const T = {
   bg:"#FFFDF5", bgCard:"#FFFFFF", yellow:"#FFE566", yellowDk:"#D4A017",
@@ -117,6 +117,7 @@ function buildInitialGroup() {
     logs:[{id:"l0",ts:new Date("2026-04-02").toISOString(),user:"Carly",action:"建立群組",detail:"建立了群組「2026清明節還1/4島」"}]
   };
 }
+
 // ── Primitives ────────────────────────────────────────────────────────
 function Avatar({name,color,size=26}) {
   return <div style={{width:size,height:size,borderRadius:"50%",background:color||"#ddd",display:"flex",alignItems:"center",justifyContent:"center",fontSize:size*0.38,fontWeight:800,color:"#fff",flexShrink:0,boxShadow:"0 1px 4px rgba(0,0,0,0.12)"}}>{name[0]}</div>;
@@ -208,6 +209,7 @@ function CategoryPicker({value,onChange,cats}) {
     </div>
   );
 }
+
 // ── Split Editor ──────────────────────────────────────────────────────
 function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   const pt = parseFloat(total)||0;
@@ -286,6 +288,7 @@ function PayersEditor({payers,setPayers,members,total}) {
     </div>
   );
 }
+
 // ── Expense Form ──────────────────────────────────────────────────────
 function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [name,setName] = useState(initial.name||"");
@@ -373,6 +376,7 @@ function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
     </div>
   );
 }
+
 // ── Analytics Tab ─────────────────────────────────────────────────────
 function AnalyticsTab({expenses,members,colors,cats,me}) {
   const [viewMode,setViewMode] = useState("personal");
@@ -456,14 +460,19 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
     </div>
   );
 }
+
 // ── Config Tab ────────────────────────────────────────────────────────
-function ConfigTab({group,setGroups,bal,me,setExportModal}) {
+function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted}) {
   const cats = group.categories||DEFAULT_CATS;
   const [section,setSection] = useState("members");
   const [editing,setEditing] = useState(null);
   const [newCat,setNewCat] = useState({icon:"",label:""});
   const [showAddCat,setShowAddCat] = useState(false);
   const [newMemberName,setNewMemberName] = useState("");
+  // ── 群組名稱編輯 ──
+  const [editingGroupName,setEditingGroupName] = useState(false);
+  const [groupNameInput,setGroupNameInput] = useState(group.name);
+
   function saveGroup(updater,detail) {
     setGroups(prev=>prev.map(g=>{
       if(g.id!==group.id) return g;
@@ -473,6 +482,26 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
       return finalGroup;
     }));
   }
+
+  // ── 修改群組名稱 ──
+  function handleSaveGroupName() {
+    const name = groupNameInput.trim();
+    if(!name) return;
+    saveGroup(g=>({...g,name}),`群組名稱改為「${name}」`);
+    setEditingGroupName(false);
+  }
+
+  // ── 刪除群組 ──
+  async function handleDeleteGroup() {
+    if(!window.confirm(`確定要刪除「${group.name}」嗎？\n\n此操作無法復原，所有消費紀錄都會消失。`)) return;
+    if(!window.confirm(`再次確認：永久刪除「${group.name}」？`)) return;
+    try {
+      await deleteDoc(fsDoc(db, "groups", group.id));
+      setGroups(prev=>prev.filter(g=>g.id!==group.id));
+      onGroupDeleted();
+    } catch(e) { console.error(e); alert("刪除失敗，請稍後再試"); }
+  }
+
   function handleEditCat(cat) {
     saveGroup(g=>({...g,categories:g.categories.map(c=>c.id===cat.id?{...c,icon:editing.icon,label:editing.label}:c)}),`分類「${cat.label}」改為「${editing.icon} ${editing.label}」`);
     setEditing(null);
@@ -500,8 +529,49 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     if(group.members.length<=2){alert("群組至少需要 2 位成員");return;}
     saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`移除成員「${name}」`);
   }
+
+  // 群組連結
+  const groupUrl = `${window.location.origin}${window.location.pathname}#group/${group.code}`;
+
   return (
     <div>
+      {/* ── 群組資訊區（Admin 才看到） ── */}
+      <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:14,marginBottom:16}}>
+        <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>⚙️ 群組資訊</div>
+
+        {/* 群組名稱 */}
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600}}>群組名稱</div>
+          {editingGroupName ? (
+            <div style={{display:"flex",gap:8}}>
+              <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSaveGroupName()} style={{...iStyle,flex:1,marginBottom:0}}/>
+              <Btn onClick={handleSaveGroupName} style={{flexShrink:0,padding:"9px 14px"}}>儲存</Btn>
+              <Btn onClick={()=>{setEditingGroupName(false);setGroupNameInput(group.name);}} variant="secondary" style={{flexShrink:0,padding:"9px 14px"}}>取消</Btn>
+            </div>
+          ) : (
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{flex:1,fontSize:14,fontWeight:700,color:T.text}}>{group.name}</span>
+              <Btn onClick={()=>setEditingGroupName(true)} variant="ghost" style={{padding:"4px 10px",fontSize:12}}>✏️ 修改</Btn>
+            </div>
+          )}
+        </div>
+
+        {/* 群組代碼與連結 */}
+        <div style={{marginBottom:10}}>
+          <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600}}>群組代碼</div>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontFamily:"monospace",fontSize:15,fontWeight:800,letterSpacing:3,color:T.yellowDk,background:"#fff",border:`1.5px solid ${T.yellowMd}`,borderRadius:8,padding:"4px 10px"}}>{group.code}</span>
+            <Btn onClick={()=>{navigator.clipboard.writeText(groupUrl).then(()=>alert("連結已複製！")).catch(()=>alert(groupUrl));}} variant="secondary" style={{fontSize:11,padding:"5px 12px"}}>🔗 複製連結</Btn>
+          </div>
+        </div>
+
+        {/* 刪除群組 */}
+        <div style={{borderTop:`1px solid ${T.yellowMd}`,paddingTop:10,marginTop:4}}>
+          <Btn onClick={handleDeleteGroup} variant="danger" style={{width:"100%",padding:"9px 0"}}>🗑️ 刪除群組</Btn>
+          <div style={{fontSize:10,color:T.textMute,marginTop:4,textAlign:"center"}}>刪除後無法復原</div>
+        </div>
+      </div>
+
       <div style={{display:"flex",gap:6,marginBottom:16}}>
         {[["members","👥 成員"],["categories","🏷️ 分類"]].map(([k,l]) => (
           <button key={k} onClick={()=>setSection(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${section===k?T.yellowDk:T.border}`,background:section===k?T.yellowLt:"#fff",color:section===k?T.text:T.textSub,fontSize:13,fontWeight:section===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
@@ -590,6 +660,7 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
     </div>
   );
 }
+
 // ── Export helpers ────────────────────────────────────────────────────
 function downloadFile(filename, content, type) {
   try {
@@ -641,6 +712,7 @@ function exportBackupJSON(groups) {
   if(!ok) return json;
   return null;
 }
+
 // ── Main App ──────────────────────────────────────────────────────────
 export default function App() {
   const [screen,setScreen] = useState("loading");
@@ -661,6 +733,10 @@ export default function App() {
   const [exportModal,setExportModal] = useState(null);
   const [error,setError] = useState("");
   const [claimScreen,setClaimScreen] = useState(null);
+  // ── 新增：Accordion 狀態 ──
+  const [homePanel,setHomePanel] = useState(null); // "create" | "join" | null
+  // ── 新增：群組 URL 進入時暫存的 code ──
+  const [pendingGroupCode,setPendingGroupCode] = useState(null);
   const importFileRef = useRef(null);
 
   function handleImportBackup(e) {
@@ -687,13 +763,25 @@ export default function App() {
     e.target.value = "";
   }
 
-  // ── 修改一：只處理登入狀態，不再監聽 Firestore ────────────────────
+  // ── 修改一：解析登入狀態，支援群組 URL ────────────────────────────
   useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    // 群組 URL 格式：#group/CODEXXX
+    if(hash.startsWith("group/")) {
+      const code = hash.replace("group/","").toUpperCase();
+      setPendingGroupCode(code);
+      // 還需要確認使用者身分
+      try {
+        const _u = localStorage.getItem("splitapp:user");
+        if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setScreen("home");return;}}
+      } catch {}
+      setScreen("login");
+      return;
+    }
     try {
-      const hash = window.location.hash.slice(1);
       if(hash) {
         const username = decodeURIComponent(hash);
-        if(username) { setCurrentUser(username); setScreen("home"); return; }
+        if(username && !username.includes("/")) { setCurrentUser(username); setScreen("home"); return; }
       }
       const _u = localStorage.getItem("splitapp:user");
       if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setScreen("home");return;}}
@@ -701,28 +789,22 @@ export default function App() {
     setScreen("login");
   }, []);
 
-  // ── 修改二：登入後才監聽 Firestore，只拿自己的群組 ───────────────
+  // ── 修改二：登入後監聽 Firestore + 處理 pendingGroupCode ─────────
   useEffect(() => {
     if(!currentUser) return;
 
-    // 確保清明節群組存在於 Firestore
     const ensureInitialGroup = async () => {
       try {
         const docRef = fsDoc(db, "groups", "clearing2026");
         const docSnap = await getDoc(docRef);
         if(!docSnap.exists()) {
-          const initialGroup = buildInitialGroup();
-          await setDoc(docRef, initialGroup);
+          await setDoc(docRef, buildInitialGroup());
         }
       } catch(e) { console.error("初始群組寫入失敗:", e); }
     };
     ensureInitialGroup();
 
-    // 只監聽包含目前使用者的群組
-    const q = query(
-      collection(db, "groups"),
-      where("members", "array-contains", currentUser)
-    );
+    const q = query(collection(db, "groups"), where("members", "array-contains", currentUser));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const firestoreGroups = snapshot.docs.map(d => d.data());
       setGroups(firestoreGroups);
@@ -733,10 +815,51 @@ export default function App() {
     return () => unsubscribe();
   }, [currentUser]);
 
+  // ── 修改三：登入後若有 pendingGroupCode，自動觸發加入流程 ─────────
+  useEffect(() => {
+    if(!currentUser || !pendingGroupCode || screen !== "home") return;
+    // 等群組資料載入後再處理
+    const timer = setTimeout(async () => {
+      const code = pendingGroupCode;
+      setPendingGroupCode(null);
+      // 清除 hash，避免重複觸發
+      try { window.location.hash = encodeURIComponent(currentUser); } catch {}
+      await triggerJoinByCode(code);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [currentUser, pendingGroupCode, screen]);
+
+  // ── 共用：用代碼加入群組的核心邏輯 ──────────────────────────────
+  async function triggerJoinByCode(code) {
+    let g = groups.find(x=>x.code===code);
+    if(!g) {
+      try {
+        const q = query(collection(db, "groups"), where("code", "==", code));
+        const snapshot = await getDocs(q);
+        if(!snapshot.empty) {
+          g = snapshot.docs[0].data();
+          setGroups(prev=>{
+            const ids=new Set(prev.map(x=>x.id));
+            return ids.has(g.id) ? prev : [...prev, g];
+          });
+        }
+      } catch(e) { console.error(e); }
+    }
+    if(!g){ setError("找不到此群組 🔍"); return; }
+    const alreadyClaimed = Object.values(g.claimedBy||{}).includes(currentUser);
+    if(g.members.includes(currentUser)||alreadyClaimed) {
+      setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); return;
+    }
+    setClaimScreen({groupId:g.id, code});
+  }
+
   useEffect(() => {
     if(currentUser) {
       try { localStorage.setItem("splitapp:user",JSON.stringify({username:currentUser})); } catch {}
-      try { window.location.hash = encodeURIComponent(currentUser); } catch {}
+      // 只有非群組 URL 時才寫入 hash
+      if(!pendingGroupCode) {
+        try { window.location.hash = encodeURIComponent(currentUser); } catch {}
+      }
     }
   },[currentUser]);
 
@@ -747,7 +870,6 @@ export default function App() {
     return MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
   }
 
-  // ── 修改三：登入時不再需要檢查 Firestore（監聽器會自動處理）────
   async function handleLogin() {
     const name = usernameInput.trim();
     if (!name) { setError("請輸入使用者名稱"); return; }
@@ -765,31 +887,14 @@ export default function App() {
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
+    setHomePanel(null);
   }
 
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
     if(!code){setError("請輸入群組代碼");return;}
-    let g=groups.find(x=>x.code===code);
-    if(!g){
-      try {
-        const q = query(collection(db, "groups"), where("code", "==", code));
-        const snapshot = await getDocs(q);
-        if(!snapshot.empty) {
-          const remoteGroup = snapshot.docs[0].data();
-          g = remoteGroup;
-          setGroups(prev=>{
-            const ids=new Set(prev.map(x=>x.id));
-            return ids.has(remoteGroup.id) ? prev : [...prev, remoteGroup];
-          });
-        }
-      } catch(e) { console.error(e); }
-    }
-    if(!g){setError("找不到此群組 🔍");return;}
-    const alreadyClaimed=Object.values(g.claimedBy||{}).includes(currentUser);
-    if(g.members.includes(currentUser)||alreadyClaimed){setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");setJoinCode("");setError("");return;}
-    setClaimScreen({groupId:g.id,code});
-    setJoinCode(""); setError("");
+    await triggerJoinByCode(code);
+    setJoinCode("");
   }
 
   function handleClaimIdentity(memberName) {
@@ -824,6 +929,7 @@ export default function App() {
     }
     setCurrentGroupId(claimScreen.groupId); setActiveTab("expenses"); setScreen("group"); setClaimScreen(null);
   }
+
   // ── Claim Screen ──────────────────────────────────────────────────
   if(claimScreen) {
     const g=groups.find(x=>x.id===claimScreen.groupId);
@@ -967,7 +1073,7 @@ export default function App() {
             </div>
           </div>
           <div style={{display:"flex",gap:0}}>
-            {TABS.map(([k,l],i) => {
+            {TABS.map(([k,l]) => {
               const isActive=activeTab===k;
               return (
                 <button key={k} onClick={()=>setActiveTab(k)} style={{flex:1,padding:"9px 4px",background:isActive?"rgba(255,255,255,0.95)":"transparent",border:"none",borderRadius:"10px 10px 0 0",color:isActive?T.text:T.yellowDk,fontSize:12,fontWeight:isActive?800:600,cursor:"pointer",whiteSpace:"nowrap",borderBottom:isActive?`2.5px solid ${T.yellowDk}`:"2.5px solid transparent",transition:"all 0.15s"}}>{l}</button>
@@ -1160,37 +1266,45 @@ export default function App() {
                   }} style={{width:"100%",maxWidth:200,padding:10}}>確認</Btn>
                 </div>
               )
-              : <ConfigTab group={g} setGroups={setGroups} bal={bal} me={me} setExportModal={setExportModal}/>
+              : <ConfigTab
+                  group={g}
+                  setGroups={setGroups}
+                  bal={bal}
+                  me={me}
+                  setExportModal={setExportModal}
+                  onGroupDeleted={()=>{ setScreen("home"); setCurrentGroupId(null); }}
+                />
           )}
         </div>
-      {activeTab==="expenses" && (
-        <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
-          {(showAdd||showPayment) && (
-            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
-              <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>💸</span> 記錄轉帳
-              </button>
-              <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
-                style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                <span>🧾</span> 新增消費
-              </button>
-            </div>
-          )}
-          <button
-            onClick={()=>{
-              const isOpen=showAdd||showPayment;
-              if(isOpen){setShowAdd(false);setShowPayment(false);}
-              else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
-            }}
-            style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
-            {(showAdd||showPayment) ? "✕" : "＋"}
-          </button>
-        </div>
-      )}
+        {activeTab==="expenses" && (
+          <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
+            {(showAdd||showPayment) && (
+              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
+                <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
+                  style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
+                  <span>💸</span> 記錄轉帳
+                </button>
+                <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
+                  style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
+                  <span>🧾</span> 新增消費
+                </button>
+              </div>
+            )}
+            <button
+              onClick={()=>{
+                const isOpen=showAdd||showPayment;
+                if(isOpen){setShowAdd(false);setShowPayment(false);}
+                else{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}
+              }}
+              style={{width:54,height:54,borderRadius:"50%",background:(showAdd||showPayment)?T.text:T.yellowMd,border:"none",color:(showAdd||showPayment)?"#fff":T.text,fontSize:(showAdd||showPayment)?18:28,cursor:"pointer",boxShadow:`0 4px 16px ${(showAdd||showPayment)?"rgba(0,0,0,0.25)":"rgba(200,150,0,0.35)"}`,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s",fontFamily:"inherit"}}>
+              {(showAdd||showPayment) ? "✕" : "＋"}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
+
   // ── Export Modal ─────────────────────────────────────────────────
   if(exportModal) return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
@@ -1215,8 +1329,10 @@ export default function App() {
         <button onClick={()=>{setCurrentUser("");setUsernameInput("");try{localStorage.removeItem("splitapp:user");}catch{}try{window.location.hash="";}catch{}setScreen("login");}} style={{marginLeft:"auto",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:20,padding:"5px 12px",color:T.textSub,fontSize:11,cursor:"pointer",fontWeight:600}}>登出</button>
       </div>
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>✕</button></div>}
+
+      {/* 我的群組 */}
       {groups.filter(g=>g.members.includes(currentUser)).length>0 && (
-        <div style={{marginBottom:20}}>
+        <div style={{marginBottom:16}}>
           <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>我的群組</div>
           {groups.filter(g=>g.members.includes(currentUser)).map(g => (
             <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
@@ -1227,18 +1343,40 @@ export default function App() {
           ))}
         </div>
       )}
-      <Card style={{borderColor:T.yellowMd,marginBottom:12}}>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10,color:T.yellowDk}}>＋ 建立新群組</div>
-        <input placeholder="群組名稱（例：沖繩五日遊 🌺）" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
-        <input type="password" inputMode="numeric" placeholder="管理員 PIN 碼（至少 4 位）" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
-        <div style={{fontSize:10,color:T.textMute,marginBottom:8,marginTop:-4}}>PIN 碼用於保護管理員功能，請記好</div>
-        <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>建立</Btn>
-      </Card>
-      <Card>
-        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>加入群組</div>
-        <input placeholder="輸入群組代碼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
-        <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>加入</Btn>
-      </Card>
+
+      {/* ── Accordion：建立 / 加入 ── */}
+      <div style={{marginBottom:12}}>
+        {/* 建立新群組 */}
+        <div style={{border:`1.5px solid ${homePanel==="create"?T.yellowDk:T.border}`,borderRadius:16,marginBottom:8,overflow:"hidden",background:T.bgCard,boxShadow:T.shadow}}>
+          <button onClick={()=>setHomePanel(homePanel==="create"?null:"create")} style={{width:"100%",padding:"13px 16px",background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",fontFamily:"inherit"}}>
+            <span style={{fontSize:14,fontWeight:700,color:homePanel==="create"?T.yellowDk:T.text}}>＋ 建立新群組</span>
+            <span style={{fontSize:12,color:T.textMute,transition:"transform 0.2s",display:"inline-block",transform:homePanel==="create"?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+          </button>
+          {homePanel==="create" && (
+            <div style={{padding:"0 16px 16px"}}>
+              <input placeholder="群組名稱（例：沖繩五日遊 🌺）" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
+              <input type="password" inputMode="numeric" placeholder="管理員 PIN 碼（至少 4 位）" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
+              <div style={{fontSize:10,color:T.textMute,marginBottom:10,marginTop:-4}}>PIN 碼用於保護管理員功能，請記好</div>
+              <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>建立</Btn>
+            </div>
+          )}
+        </div>
+
+        {/* 加入群組 */}
+        <div style={{border:`1.5px solid ${homePanel==="join"?T.yellowDk:T.border}`,borderRadius:16,overflow:"hidden",background:T.bgCard,boxShadow:T.shadow}}>
+          <button onClick={()=>setHomePanel(homePanel==="join"?null:"join")} style={{width:"100%",padding:"13px 16px",background:"transparent",border:"none",display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer",fontFamily:"inherit"}}>
+            <span style={{fontSize:14,fontWeight:700,color:homePanel==="join"?T.yellowDk:T.text}}>🔗 加入群組</span>
+            <span style={{fontSize:12,color:T.textMute,transition:"transform 0.2s",display:"inline-block",transform:homePanel==="join"?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+          </button>
+          {homePanel==="join" && (
+            <div style={{padding:"0 16px 16px"}}>
+              <input placeholder="輸入群組代碼" value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase())} onKeyDown={e=>e.key==="Enter"&&handleJoinGroup()} style={{...iStyle,fontFamily:"monospace",letterSpacing:3,textTransform:"uppercase"}}/>
+              <Btn onClick={handleJoinGroup} variant="secondary" style={{width:"100%",padding:11,fontSize:14}}>加入</Btn>
+            </div>
+          )}
+        </div>
+      </div>
+
       <div style={{display:"flex",gap:8,marginTop:4}}>
         <button onClick={()=>{const r=exportBackupJSON(groups);if(r)setExportModal({title:"備份資料",content:r});}} style={{flex:1,padding:"10px 0",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:12,color:"#2E7D32",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📦 備份資料</button>
         <button onClick={()=>importFileRef.current?.click()} style={{flex:1,padding:"10px 0",background:"#FFF8E1",border:`1.5px solid ${T.yellowMd}`,borderRadius:12,color:T.yellowDk,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📂 匯入備份</button>
