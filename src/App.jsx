@@ -10,8 +10,8 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
+  {id:"food",icon:"🍜",label:"伙食"},{id:"snack",icon:"🧋",label:"飲料"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
