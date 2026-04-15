@@ -469,7 +469,6 @@ function ConfigTab({group,setGroups,bal,me,setExportModal}) {
       if(g.id!==group.id) return g;
       const updated=updater(g);
       const finalGroup = {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"設定變更",detail},...(updated.logs||[])]};
-      // Sync to Firestore immediately
       setDoc(fsDoc(db, "groups", finalGroup.id), finalGroup).catch(console.error);
       return finalGroup;
     }));
@@ -688,41 +687,51 @@ export default function App() {
     e.target.value = "";
   }
 
+  // ── 修改一：只處理登入狀態，不再監聽 Firestore ────────────────────
   useEffect(() => {
-    // Real-time sync with Firestore using onSnapshot
-    const q = query(collection(db, "groups"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const firestoreGroups = snapshot.docs.map(d => d.data());
-      if(firestoreGroups.length > 0) {
-        setGroups(firestoreGroups);
-      } else if(screen === "loading") {
-        setGroups([buildInitialGroup()]);
-      }
-    }, (error) => {
-      console.error("Firestore sync error:", error);
-      if(screen === "loading") {
-        setGroups([buildInitialGroup()]);
-      }
-    });
-
-    // Check for user login
     try {
       const hash = window.location.hash.slice(1);
       if(hash) {
         const username = decodeURIComponent(hash);
-        if(username) { setCurrentUser(username); setUsernameInput(username); setScreen("home"); return; }
+        if(username) { setCurrentUser(username); setScreen("home"); return; }
       }
       const _u = localStorage.getItem("splitapp:user");
-      if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setUsernameInput(username);setScreen("home");return;}}
+      if(_u){const {username}=JSON.parse(_u); if(username){setCurrentUser(username);setScreen("home");return;}}
     } catch {}
     setScreen("login");
+  }, []);
 
-    // Cleanup listener when component unmounts
+  // ── 修改二：登入後才監聽 Firestore，只拿自己的群組 ───────────────
+  useEffect(() => {
+    if(!currentUser) return;
+
+    // 確保清明節群組存在於 Firestore
+    const ensureInitialGroup = async () => {
+      try {
+        const docRef = fsDoc(db, "groups", "clearing2026");
+        const docSnap = await getDoc(docRef);
+        if(!docSnap.exists()) {
+          const initialGroup = buildInitialGroup();
+          await setDoc(docRef, initialGroup);
+        }
+      } catch(e) { console.error("初始群組寫入失敗:", e); }
+    };
+    ensureInitialGroup();
+
+    // 只監聽包含目前使用者的群組
+    const q = query(
+      collection(db, "groups"),
+      where("members", "array-contains", currentUser)
+    );
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const firestoreGroups = snapshot.docs.map(d => d.data());
+      setGroups(firestoreGroups);
+    }, (error) => {
+      console.error("Firestore sync error:", error);
+    });
+
     return () => unsubscribe();
-  },[]);
-
-  // Note: Individual group updates are now handled by updateGroup function
-  // No need for a global sync effect that could cause loops
+  }, [currentUser]);
 
   useEffect(() => {
     if(currentUser) {
@@ -738,17 +747,10 @@ export default function App() {
     return MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
   }
 
+  // ── 修改三：登入時不再需要檢查 Firestore（監聽器會自動處理）────
   async function handleLogin() {
     const name = usernameInput.trim();
-
-    // Check if name is empty
-    if (!name) {
-      setError("請輸入使用者名稱");
-      return;
-    }
-
-    // No need to reload from Firestore - onSnapshot is already listening
-    // Login success
+    if (!name) { setError("請輸入使用者名稱"); return; }
     setCurrentUser(name);
     setScreen("home");
     setError("");
@@ -760,7 +762,6 @@ export default function App() {
     if(!name){setError("請輸入群組名稱");return;}
     if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
     const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
-    // Save to Firestore (cross-device sync)
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
@@ -769,17 +770,14 @@ export default function App() {
   async function handleJoinGroup() {
     const code=joinCode.trim().toUpperCase();
     if(!code){setError("請輸入群組代碼");return;}
-    // First check locally
     let g=groups.find(x=>x.code===code);
     if(!g){
-      // Query Firestore by group code
       try {
         const q = query(collection(db, "groups"), where("code", "==", code));
         const snapshot = await getDocs(q);
         if(!snapshot.empty) {
           const remoteGroup = snapshot.docs[0].data();
           g = remoteGroup;
-          // Add to local state if not already present
           setGroups(prev=>{
             const ids=new Set(prev.map(x=>x.id));
             return ids.has(remoteGroup.id) ? prev : [...prev, remoteGroup];
@@ -802,7 +800,6 @@ export default function App() {
       setGroups(prev=>prev.map(x=>{
         if(x.id!==g.id) return x;
         const updated = {...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"加入群組",detail:`${currentUser} 以新成員身分加入`},...(x.logs||[])]};
-        // Sync to Firestore
         setDoc(fsDoc(db, "groups", updated.id), updated).catch(console.error);
         return updated;
       }));
@@ -821,7 +818,6 @@ export default function App() {
         const adminUser=x.adminUser===oldName?currentUser:x.adminUser;
         const logs=[{id:uid(),ts:now(),user:currentUser,action:"認領身分",detail:`${currentUser} 認領了「${oldName}」的身分`},...(x.logs||[])];
         const updated = {...x,members,colors,claimedBy:{...x.claimedBy,[oldName]:currentUser},expenses,payments,adminUser,logs};
-        // Sync to Firestore
         setDoc(fsDoc(db, "groups", updated.id), updated).catch(console.error);
         return updated;
       }));
@@ -891,7 +887,6 @@ export default function App() {
         if(x.id!==g.id) return x;
         const updated=updater(x);
         const finalGroup = {...updated,logs:[logEntry,...(updated.logs||[])]};
-        // Sync to Firestore immediately
         setDoc(fsDoc(db, "groups", finalGroup.id), finalGroup).catch(console.error);
         return finalGroup;
       }));
