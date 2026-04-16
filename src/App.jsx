@@ -295,29 +295,23 @@ function PayersEditor({payers,setPayers,members,total}) {
 }
 
 // ── Expense Form ──────────────────────────────────────────────────────
-// Generate time options every 5 minutes
-const TIME_OPTIONS = [];
-for(let h=0;h<24;h++) for(let m=0;m<60;m+=5)
-  TIME_OPTIONS.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+const HOUR_OPTIONS = Array.from({length:24},(_,h)=>String(h).padStart(2,"0"));
+const MIN_OPTIONS = ["00","05","10","15","20","25","30","35","40","45","50","55"];
 
 function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [name,setName] = useState(initial.name||"");
   const [total,setTotal] = useState(initial.total||"");
   const [date,setDate] = useState(initial.date||new Date().toISOString().slice(0,10));
-  // Parse initial time from ts if available, else round down to nearest 5-min
-  const initTime = () => {
-    if(initial.ts) {
-      const d=new Date(initial.ts);
-      const h=String(d.getHours()).padStart(2,"0");
-      const m=String(Math.floor(d.getMinutes()/5)*5).padStart(2,"0");
-      return `${h}:${m}`;
-    }
-    const now=new Date();
-    const h=String(now.getHours()).padStart(2,"0");
-    const m=String(Math.floor(now.getMinutes()/5)*5).padStart(2,"0");
-    return `${h}:${m}`;
+  const initHour = () => {
+    const d = initial.ts ? new Date(initial.ts) : new Date();
+    return String(d.getHours()).padStart(2,"0");
   };
-  const [time,setTime] = useState(initTime);
+  const initMin = () => {
+    const d = initial.ts ? new Date(initial.ts) : new Date();
+    return String(Math.floor(d.getMinutes()/5)*5).padStart(2,"0");
+  };
+  const [hour,setHour] = useState(initHour);
+  const [min,setMin] = useState(initMin);
   const [category,setCategory] = useState(initial.category||"food");
   const [payers,setPayers] = useState(initial.payers||[{name:members[0],amount:""}]);
   const [splitMode,setSplitMode] = useState(initial.splitMode||"equal");
@@ -329,8 +323,7 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     const splits = calcSplits(splitMode, splitMode==="equal"?splitMembers:splitData, splitMembers, pt);
     const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
     if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
-    // Build ts from date + selected time
-    const ts = new Date(`${date}T${time}:00`).toISOString();
+    const ts = new Date(`${date}T${hour}:${min}:00`).toISOString();
     onSave({name,total:pt,date,ts,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
   const handleTotalChange = (val) => {
@@ -346,14 +339,20 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
         <input type="number" placeholder="總金額" value={total} onChange={e=>handleTotalChange(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
       </div>
-      <div style={{display:"flex",gap:8,marginBottom:8}}>
-        <div style={{flex:1}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
-        <div style={{flex:1,display:"flex",gap:4}}>
-          <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/>
-          <select value={time} onChange={e=>setTime(e.target.value)} style={{...iStyle,marginBottom:0,width:80,minHeight:40,padding:"0 6px",flexShrink:0}}>
-            {TIME_OPTIONS.map(t=><option key={t} value={t}>{t}</option>)}
-          </select>
-        </div>
+      <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"stretch"}}>
+        <div style={{flex:"0 0 auto"}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
+        {/* 日期（縮小）+ 小時 + 分鐘 */}
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+          style={{...iStyle,marginBottom:0,width:130,minHeight:40,flexShrink:0,fontSize:12}}/>
+        <select value={hour} onChange={e=>setHour(e.target.value)}
+          style={{...iStyle,marginBottom:0,width:56,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          {HOUR_OPTIONS.map(h=><option key={h} value={h}>{h}</option>)}
+        </select>
+        <span style={{display:"flex",alignItems:"center",color:T.textMute,fontSize:14,fontWeight:700,flexShrink:0}}>:</span>
+        <select value={min} onChange={e=>setMin(e.target.value)}
+          style={{...iStyle,marginBottom:0,width:56,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          {MIN_OPTIONS.map(m=><option key={m} value={m}>{m}</option>)}
+        </select>
       </div>
       <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
         <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>付款人</div>
@@ -1116,7 +1115,7 @@ export default function App() {
     const g=currentGroup;
     // Guard: still rendering but access check above will redirect
     if(!(g.claimedUsers||[]).includes(currentUser)) return null;
-    const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
+    const isAdminUser = g.adminUser===currentUser;
     const me=currentUser;
     const claimedBy=g.claimedBy||{};
     // Build reverse map: loginName → originalName
@@ -1217,7 +1216,7 @@ export default function App() {
     }
     const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:myOriginalName,amount:""}],splitMode:"equal",splitData:{},splits:{}});
     const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],
-      ...(isAdmin ? [["config","設定"]] : [])
+      ...(isAdminUser ? [["config","設定"]] : [])
     ];
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,paddingBottom:50}}>
@@ -1226,7 +1225,7 @@ export default function App() {
             <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
             <div style={{flex:1}}>
               <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
-              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdmin?" · 👑":""}</div>
+              <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdminUser?" · 👑":""}</div>
             </div>
             <button onClick={()=>{const url=`${window.location.origin}${window.location.pathname}#group/${g.code}`;navigator.clipboard.writeText(url).then(()=>alert("連結已複製！分享給朋友就能直接進入群組 🎉")).catch(()=>alert(`請複製此連結：\n${url}`));}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}} title="複製群組連結">🔗</button>
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
@@ -1444,34 +1443,15 @@ export default function App() {
             </div>
           )}
           {activeTab==="config" && (
-            // 所有人進設定都需要 PIN（admin 驗證後才能看管理員功能，非 admin 驗證後只能看一般功能）
-            !verifiedAdminGroups.has(g.id) && g.adminPin
-              ? (
-                <div style={{textAlign:"center",padding:"40px 20px"}}>
-                  <div style={{fontSize:32,marginBottom:12}}>🔐</div>
-                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>需要 PIN 碼</div>
-                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>{g.adminUser===currentUser?"輸入你建立群組時設定的 PIN 碼":"輸入群組 PIN 碼以進入設定"}</div>
-                  <input type="password" inputMode="numeric" placeholder="PIN 碼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&(()=>{if(adminPinInput===g.adminPin){setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));setAdminPinInput("");}else{setError("PIN 碼錯誤");setAdminPinInput("");}})() } style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
-                  <Btn onClick={()=>{
-                    if(adminPinInput===g.adminPin){
-                      setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
-                      setAdminPinInput("");
-                    } else {
-                      setError("PIN 碼錯誤");
-                      setAdminPinInput("");
-                    }
-                  }} style={{width:"100%",maxWidth:200,padding:10}}>確認</Btn>
-                </div>
-              )
-              : <ConfigTab
-                  group={g}
-                  setGroups={setGroups}
-                  bal={bal}
-                  me={myOriginalName}
-                  isAdmin={isAdmin}
-                  setExportModal={setExportModal}
-                  onGroupDeleted={()=>{ setScreen("home"); setCurrentGroupId(null); }}
-                />
+            <ConfigTab
+              group={g}
+              setGroups={setGroups}
+              bal={bal}
+              me={myOriginalName}
+              isAdmin={isAdminUser}
+              setExportModal={setExportModal}
+              onGroupDeleted={()=>{ setScreen("home"); setCurrentGroupId(null); }}
+            />
           )}
         </div>
         {activeTab==="expenses" && (
