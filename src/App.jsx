@@ -10,8 +10,8 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
+  {id:"food",icon:"🍜",label:"食物"},{id:"snack",icon:"🧋",label:"飲料"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
@@ -86,7 +86,8 @@ function buildInitialGroup() {
   const am = {"Carly":95/6,"陳霆宇":95/6,"Chien":95/3,"Michael":95/3};
   return {
     id:"clearing2026", name:"2026清明節還1/4島", code:"CLEAR1",
-    adminUser:"Carly", adminPin:"1234", members:ALL, colors, claimedBy:{},
+    adminUser:"Carly", adminPin:"1234", members:ALL, colors, claimedBy:{Carly:"Carly"},
+    claimedUsers:["Carly"],
     categories:[...DEFAULT_CATS], payments:[],
     expenses:[
       {id:"e1",name:"全聯",category:"grocery",payers:[{name:"安安",amount:3476}],total:3476,date:"2026-04-02",splits:makeEqual(ALL,3476)},
@@ -499,14 +500,16 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
     } catch(e) { console.error(e); alert("刪除失敗，請稍後再試"); }
   }
 
-  // Admin: disconnect a member's claim so they need to re-identify
+  // Admin: disconnect a member's claim so they need to re-identify and lose group access
   function handleDisconnect(originalName) {
-    if(!window.confirm(`確定要斷開「${originalName}」的身分連結嗎？\n對方下次進入群組時需要重新認領身分。`)) return;
+    const loginName = (group.claimedBy||{})[originalName];
+    if(!window.confirm(`確定要斷開「${originalName}」的身分連結嗎？\n對方（${loginName||originalName}）將立即失去群組存取權，需重新認領身分才能進入。`)) return;
     saveGroup(g=>{
       const newClaimedBy={...g.claimedBy};
       delete newClaimedBy[originalName];
-      return {...g,claimedBy:newClaimedBy};
-    },`管理員斷開了「${originalName}」的身分連結`);
+      const newClaimedUsers=(g.claimedUsers||[]).filter(u=>u!==loginName);
+      return {...g,claimedBy:newClaimedBy,claimedUsers:newClaimedUsers};
+    },`管理員斷開了「${originalName}」（${loginName||""}）的身分連結`);
   }
 
   function handleEditCat(cat) {
@@ -860,15 +863,30 @@ export default function App() {
         const docSnap = await getDoc(docRef);
         if(!docSnap.exists()) {
           await setDoc(docRef, buildInitialGroup());
+        } else {
+          // Patch: if existing doc is missing claimedUsers, add it
+          const data = docSnap.data();
+          if(!data.claimedUsers) {
+            const claimedUsers = Object.values(data.claimedBy||{});
+            await setDoc(docRef, {...data, claimedUsers}, {merge:true});
+          }
         }
       } catch(e) { console.error("初始群組寫入失敗:", e); }
     };
     ensureInitialGroup();
 
-    const q = query(collection(db, "groups"), where("members", "array-contains", currentUser));
+    const q = query(collection(db, "groups"), where("claimedUsers", "array-contains", currentUser));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const firestoreGroups = snapshot.docs.map(d => d.data());
       setGroups(firestoreGroups);
+      // Patch any group missing claimedUsers (migration for old data)
+      snapshot.docs.forEach(d => {
+        const data = d.data();
+        if(!data.claimedUsers) {
+          const claimedUsers = Object.values(data.claimedBy||{});
+          setDoc(d.ref, {...data, claimedUsers}, {merge:true}).catch(console.error);
+        }
+      });
     }, (error) => {
       console.error("Firestore sync error:", error);
     });
@@ -907,12 +925,12 @@ export default function App() {
       } catch(e) { console.error(e); }
     }
     if(!g){ setError("找不到此群組 🔍"); return; }
-    // 只有當這個使用者已經被 claimedBy 記錄過，才直接進入
-    const alreadyClaimed = Object.values(g.claimedBy||{}).includes(currentUser);
-    // 名字完全一樣也要跳認領畫面讓使用者確認（名字可能重複）
+    // 只有 claimedUsers 裡有這個登入名稱，才直接進入
+    const alreadyClaimed = (g.claimedUsers||[]).includes(currentUser);
     if(alreadyClaimed) {
       setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); return;
     }
+    // 否則一律顯示認領畫面
     setClaimScreen({groupId:g.id, code});
   }
 
@@ -946,7 +964,7 @@ export default function App() {
     const pin=newGroupPin.trim();
     if(!name){setError("請輸入群組名稱");return;}
     if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
-    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
+    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},claimedUsers:[currentUser],categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
@@ -964,29 +982,32 @@ export default function App() {
     const g=groups.find(x=>x.id===claimScreen.groupId);
     if(!g) return;
     if(memberName==="__new__") {
+      // Add as a brand new member
       const color=getNextColor(g.colors);
       setGroups(prev=>prev.map(x=>{
         if(x.id!==g.id) return x;
-        const updated = {...x,members:[...x.members,currentUser],colors:{...x.colors,[currentUser]:color},logs:[{id:uid(),ts:now(),user:currentUser,action:"加入群組",detail:`${currentUser} 以新成員身分加入`},...(x.logs||[])]};
-        setDoc(fsDoc(db, "groups", updated.id), updated).catch(console.error);
+        const updated={
+          ...x,
+          members:[...x.members,currentUser],
+          colors:{...x.colors,[currentUser]:color},
+          claimedBy:{...x.claimedBy,[currentUser]:currentUser},
+          claimedUsers:[...(x.claimedUsers||[]),currentUser],
+          logs:[{id:uid(),ts:now(),user:currentUser,action:"加入群組",detail:`${currentUser} 以新成員身分加入`},...(x.logs||[])]
+        };
+        setDoc(fsDoc(db,"groups",updated.id),updated).catch(console.error);
         return updated;
       }));
     } else {
-      const oldName=memberName;
+      // Claim an existing member slot — do NOT rename members array
+      // Just record the mapping: originalName → loginName
+      const originalName=memberName;
       setGroups(prev=>prev.map(x=>{
         if(x.id!==g.id) return x;
-        const members=x.members.map(m=>m===oldName?currentUser:m);
-        const colors={}; Object.entries(x.colors).forEach(([k,v])=>{colors[k===oldName?currentUser:k]=v;});
-        const expenses=x.expenses.map(e=>{
-          const splits={}; Object.entries(e.splits).forEach(([k,v])=>{splits[k===oldName?currentUser:k]=v;});
-          const payers=e.payers.map(p=>p.name===oldName?{...p,name:currentUser}:p);
-          return {...e,splits,payers};
-        });
-        const payments=(x.payments||[]).map(p=>({...p,from:p.from===oldName?currentUser:p.from,to:p.to===oldName?currentUser:p.to}));
-        const adminUser=x.adminUser===oldName?currentUser:x.adminUser;
-        const logs=[{id:uid(),ts:now(),user:currentUser,action:"認領身分",detail:`${currentUser} 認領了「${oldName}」的身分`},...(x.logs||[])];
-        const updated = {...x,members,colors,claimedBy:{...x.claimedBy,[oldName]:currentUser},expenses,payments,adminUser,logs};
-        setDoc(fsDoc(db, "groups", updated.id), updated).catch(console.error);
+        const newClaimedBy={...x.claimedBy,[originalName]:currentUser};
+        const newClaimedUsers=[...(x.claimedUsers||[]).filter(u=>u!==currentUser),currentUser];
+        const logs=[{id:uid(),ts:now(),user:currentUser,action:"認領身分",detail:`${currentUser} 認領了「${originalName}」的身分`},...(x.logs||[])];
+        const updated={...x,claimedBy:newClaimedBy,claimedUsers:newClaimedUsers,logs};
+        setDoc(fsDoc(db,"groups",updated.id),updated).catch(console.error);
         return updated;
       }));
     }
@@ -1028,8 +1049,16 @@ export default function App() {
   // ── Group Screen ──────────────────────────────────────────────────
   if(screen==="group"&&currentGroup) {
     const g=currentGroup;
+    // Security: if user was disconnected or never claimed, kick back to home
+    if(!(g.claimedUsers||[]).includes(currentUser)) {
+      setScreen("home"); setCurrentGroupId(null);
+      return null;
+    }
     const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
     const me=currentUser;
+    // Find the original member name this user has claimed (for bal lookups)
+    const claimedBy=g.claimedBy||{};
+    const myOriginalName=Object.keys(claimedBy).find(k=>claimedBy[k]===currentUser)||currentUser;
     const {members,colors,expenses,logs}=g;
     const payments=g.payments||[];
     const cats=g.categories||DEFAULT_CATS;
@@ -1043,9 +1072,10 @@ export default function App() {
       if(bal[p.from]) bal[p.from].paid+=p.amount;
       if(bal[p.to])   bal[p.to].paid-=p.amount;
     });
-    const myNet=(bal[me]?.paid||0)-(bal[me]?.owes||0);
-    const mySpend=bal[me]?.owes||0;
-    const myPaid=bal[me]?.paid||0;
+    const myBal=bal[myOriginalName]||{paid:0,owes:0};
+    const myNet=myBal.paid-myBal.owes;
+    const mySpend=myBal.owes;
+    const myPaid=myBal.paid;
     const totalAll=expenses.reduce((s,e)=>s+e.total,0);
     const transfers=minimizeTransfers(bal);
     const grouped={};
@@ -1107,7 +1137,7 @@ export default function App() {
       updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"刪除轉帳",detail:`刪除 ${p?.from} → ${p?.to} NT$${p?.amount}`});
       setEditingPaymentId(null);
     }
-    const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:me,amount:""}],splitMode:"equal",splitData:{},splits:{}});
+    const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:myOriginalName,amount:""}],splitMode:"equal",splitData:{},splits:{}});
     const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],["config","設定"]];
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,paddingBottom:50}}>
@@ -1122,7 +1152,9 @@ export default function App() {
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
           </div>
           <div style={{background:"rgba(255,255,255,0.75)",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>我的帳（{me}）</div>
+            <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:8}}>
+              我的帳（{me}{myOriginalName!==me?` → ${myOriginalName}`:""}）
+            </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:0}}>
               <div style={{paddingRight:10,borderRight:`1.5px solid ${T.border}`}}>
                 <div style={{fontSize:10,color:T.textMute,marginBottom:2}}>我墊付</div>
@@ -1152,17 +1184,17 @@ export default function App() {
           {activeTab==="expenses" && (
             <div>
               {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
-              {showPayment && <PaymentForm members={members} me={me} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
+              {showPayment && <PaymentForm members={members} me={myOriginalName} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
               {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>還沒有任何消費 🌴</div>}
               {sortedDates.map(date => (
                 <div key={date}>
                   <div style={{fontSize:11,color:T.textMute,marginBottom:6,marginTop:12,fontWeight:700,letterSpacing:0.5}}>{fmtDate(date)}</div>
                   {grouped[date].map(item => {
                     if(item._type==="payment") {
-                      const p=item, isMine=p.from===me||p.to===me;
+                      const p=item, isMine=p.from===myOriginalName||p.to===myOriginalName;
                       if(editingPaymentId===p.id) return (
                         <div key={p.id} style={{marginBottom:10}}>
-                          <PaymentForm members={members} me={me} initial={{from:p.from,to:p.to,amount:String(p.amount),date:p.date,note:p.note||""}} onSave={f=>{handleEditPayment(f);}} onCancel={()=>setEditingPaymentId(null)} onDelete={()=>handleDeletePayment(p.id)} isEdit/>
+                          <PaymentForm members={members} me={myOriginalName} initial={{from:p.from,to:p.to,amount:String(p.amount),date:p.date,note:p.note||""}} onSave={f=>{handleEditPayment(f);}} onCancel={()=>setEditingPaymentId(null)} onDelete={()=>handleDeletePayment(p.id)} isEdit/>
                         </div>
                       );
                       return (
@@ -1187,8 +1219,8 @@ export default function App() {
                         </Card>
                       );
                     }
-                    const e=item, myShare=e.splits[me]||0, participants=Object.keys(e.splits);
-                    const cat=getCat(e.category,cats), iAmPayer=e.payers.some(p=>p.name===me);
+                    const e=item, myShare=e.splits[myOriginalName]||0, participants=Object.keys(e.splits);
+                    const cat=getCat(e.category,cats), iAmPayer=e.payers.some(p=>p.name===myOriginalName);
                     if(editingId===e.id) return (
                       <ExpenseForm key={e.id} initial={{name:e.name,total:String(e.total),date:e.date,category:e.category||"food",payers:e.payers||[{name:members[0],amount:String(e.total)}],splitMode:e.splitMode||"equal",splitData:e.splitData||{},splits:e.splits}} members={members} colors={colors} cats={cats} onSave={handleEditExpense} onCancel={()=>setEditingId(null)} onDelete={()=>handleDeleteExpense(e.id)}/>
                     );
@@ -1225,14 +1257,16 @@ export default function App() {
           {activeTab==="settle" && (
             <div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-                {[me,...members.filter(m=>m!==me)].map(m => {
-                  const {paid,owes}=bal[m]||{paid:0,owes:0}, net=paid-owes, col=colors[m]||"#aaa", isMe=m===me;
+                {[myOriginalName,...members.filter(m=>m!==myOriginalName)].map(m => {
+                  const {paid,owes}=bal[m]||{paid:0,owes:0}, net=paid-owes, col=colors[m]||"#aaa", isMe=m===myOriginalName;
                   const cleared=Math.abs(net)<0.5;
+                  // Show login name if claimed
+                  const displayName = (g.claimedBy||{})[m] || m;
                   return (
                     <div key={m} style={{background:isMe?T.yellowLt:T.bgCard,border:`1.5px solid ${isMe?T.yellowMd:T.border}`,borderRadius:12,padding:"10px 12px",boxShadow:T.shadow}}>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:7}}>
                         <Avatar name={m} color={col} size={22}/>
-                        <span style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m}</span>
+                        <span style={{fontWeight:700,fontSize:12,color:T.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{displayName}</span>
                         {m===g.adminUser && <span style={{fontSize:9}}>👑</span>}
                       </div>
                       <div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -1264,7 +1298,7 @@ export default function App() {
               </div>
               {transfers.length===0 && <div style={{textAlign:"center",color:T.textMute,padding:24,fontSize:16}}>已全部結清 🥳</div>}
               {transfers.map((t,i) => {
-                const isMyAction=t.from===me||t.to===me;
+                const isMyAction=t.from===myOriginalName||t.to===myOriginalName;
                 const alreadyDone=payments.some(p=>p.from===t.from&&p.to===t.to&&Math.abs(p.amount-t.amount)<0.5);
                 const markDone=()=>{handleAddPayment({from:t.from,to:t.to,amount:t.amount,date:new Date().toISOString().slice(0,10),note:"轉帳完成"});};
                 return (
@@ -1281,7 +1315,7 @@ export default function App() {
                           <span style={{fontSize:14}}>→</span>
                           <div style={{flex:1,height:1.5,background:T.border,borderRadius:2}}/>
                         </div>
-                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===me?"我要付":"我要收"}</span>}
+                        {isMyAction&&!alreadyDone && <span style={{fontSize:10,color:T.yellowDk,fontWeight:700}}>{t.from===myOriginalName?"我要付":"我要收"}</span>}
                         {alreadyDone && <span style={{fontSize:10,color:"#2E7D32",fontWeight:700}}>✅ 已完成</span>}
                         {!alreadyDone && <button onClick={markDone} style={{marginTop:2,padding:"3px 12px",background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:20,color:"#2E7D32",fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>轉帳完成</button>}
                       </div>
@@ -1295,7 +1329,7 @@ export default function App() {
               })}
             </div>
           )}
-          {activeTab==="analytics" && <AnalyticsTab expenses={expenses} members={members} colors={colors} cats={cats} me={me}/>}
+          {activeTab==="analytics" && <AnalyticsTab expenses={expenses} members={members} colors={colors} cats={cats} me={myOriginalName}/>}
           {activeTab==="logs" && (
             <div>
               <div style={{fontSize:13,color:T.textSub,marginBottom:14,fontWeight:600}}>操作紀錄</div>
@@ -1337,7 +1371,7 @@ export default function App() {
                   group={g}
                   setGroups={setGroups}
                   bal={bal}
-                  me={me}
+                  me={myOriginalName}
                   isAdmin={isAdmin}
                   setExportModal={setExportModal}
                   onGroupDeleted={()=>{ setScreen("home"); setCurrentGroupId(null); }}
@@ -1399,10 +1433,10 @@ export default function App() {
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>✕</button></div>}
 
       {/* 我的群組 */}
-      {groups.filter(g=>g.members.includes(currentUser)).length>0 && (
+      {groups.filter(g=>(g.claimedUsers||[]).includes(currentUser)).length>0 && (
         <div style={{marginBottom:16}}>
           <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>我的群組</div>
-          {groups.filter(g=>g.members.includes(currentUser)).map(g => (
+          {groups.filter(g=>(g.claimedUsers||[]).includes(currentUser)).map(g => (
             <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
               <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>🏝️</div>
               <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} 位成員 · {g.code}{g.adminUser===currentUser?" · 👑":""}</div></div>
