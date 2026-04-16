@@ -295,10 +295,29 @@ function PayersEditor({payers,setPayers,members,total}) {
 }
 
 // ── Expense Form ──────────────────────────────────────────────────────
+// Generate time options every 5 minutes
+const TIME_OPTIONS = [];
+for(let h=0;h<24;h++) for(let m=0;m<60;m+=5)
+  TIME_OPTIONS.push(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`);
+
 function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [name,setName] = useState(initial.name||"");
   const [total,setTotal] = useState(initial.total||"");
   const [date,setDate] = useState(initial.date||new Date().toISOString().slice(0,10));
+  // Parse initial time from ts if available, else round down to nearest 5-min
+  const initTime = () => {
+    if(initial.ts) {
+      const d=new Date(initial.ts);
+      const h=String(d.getHours()).padStart(2,"0");
+      const m=String(Math.floor(d.getMinutes()/5)*5).padStart(2,"0");
+      return `${h}:${m}`;
+    }
+    const now=new Date();
+    const h=String(now.getHours()).padStart(2,"0");
+    const m=String(Math.floor(now.getMinutes()/5)*5).padStart(2,"0");
+    return `${h}:${m}`;
+  };
+  const [time,setTime] = useState(initTime);
   const [category,setCategory] = useState(initial.category||"food");
   const [payers,setPayers] = useState(initial.payers||[{name:members[0],amount:""}]);
   const [splitMode,setSplitMode] = useState(initial.splitMode||"equal");
@@ -310,7 +329,9 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     const splits = calcSplits(splitMode, splitMode==="equal"?splitMembers:splitData, splitMembers, pt);
     const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
     if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
-    onSave({name,total:pt,date,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
+    // Build ts from date + selected time
+    const ts = new Date(`${date}T${time}:00`).toISOString();
+    onSave({name,total:pt,date,ts,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
   const handleTotalChange = (val) => {
     setTotal(val);
@@ -327,7 +348,12 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
       </div>
       <div style={{display:"flex",gap:8,marginBottom:8}}>
         <div style={{flex:1}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
-        <div style={{flex:1,display:"flex"}}><input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/></div>
+        <div style={{flex:1,display:"flex",gap:4}}>
+          <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{...iStyle,marginBottom:0,flex:1,minHeight:40}}/>
+          <select value={time} onChange={e=>setTime(e.target.value)} style={{...iStyle,marginBottom:0,width:80,minHeight:40,padding:"0 6px",flexShrink:0}}>
+            {TIME_OPTIONS.map(t=><option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
       </div>
       <div style={{background:"#FFF8E1",border:`1.5px solid ${T.yellowLt}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
         <div style={{fontSize:10,color:T.yellowDk,fontWeight:700,marginBottom:6}}>付款人</div>
@@ -1129,7 +1155,7 @@ export default function App() {
       }));
     }
     function handleAddExpense(form) {
-      const e={id:uid(),ts:now(),...form};
+      const e={id:uid(),...form};
       updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`});
       setShowAdd(false);
     }
