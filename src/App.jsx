@@ -10,8 +10,8 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"食物"},{id:"snack",icon:"🧋",label:"飲料"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
+  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
@@ -29,6 +29,10 @@ function uid() { return Date.now().toString(36)+Math.random().toString(36).slice
 function now() { return new Date().toISOString(); }
 function fmtDate(d) { const dt=new Date(d+"T00:00:00"); return `${dt.getMonth()+1}月${dt.getDate()}日`; }
 function fmtTs(ts) {
+  const d=new Date(ts);
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function fmtTsFull(ts) {
   const d=new Date(ts);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
@@ -1068,7 +1072,6 @@ export default function App() {
       || (g.members.includes(currentUser) ? currentUser : currentUser);
     // Normalize a name: if it's a login name in the map, convert to original
     const toOrig = n => loginToOriginal[n] || n;
-    // Normalize expenses in memory (don't write back, just for display)
     const {colors,logs}=g;
     const members=g.members;
     const expenses=g.expenses.map(e=>({
@@ -1203,8 +1206,24 @@ export default function App() {
           {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:10,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between",alignItems:"center"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:14}}>✕</button></div>}
           {activeTab==="expenses" && (
             <div>
-              {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>setShowAdd(false)}/>}
-              {showPayment && <PaymentForm members={members} me={myOriginalName} onSave={f=>{handleAddPayment(f);setShowPayment(false);}} onCancel={()=>setShowPayment(false)}/>}
+              {/* ── 新增區：tab 切換 + 表單 ── */}
+              {(showAdd||showPayment) && (
+                <div style={{marginBottom:4}}>
+                  {/* Tab switcher */}
+                  <div style={{display:"flex",gap:0,marginBottom:12,background:"#f5f0e8",borderRadius:12,padding:3}}>
+                    <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
+                      style={{flex:1,padding:"8px 0",borderRadius:10,border:"none",background:showAdd?T.yellowMd:"transparent",color:T.text,fontSize:13,fontWeight:showAdd?700:500,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
+                      🧾 新增消費
+                    </button>
+                    <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
+                      style={{flex:1,padding:"8px 0",borderRadius:10,border:"none",background:showPayment?T.yellowMd:"transparent",color:T.text,fontSize:13,fontWeight:showPayment?700:500,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"}}>
+                      💸 記錄轉帳
+                    </button>
+                  </div>
+                  {showAdd && <ExpenseForm initial={emptyForm()} members={members} colors={colors} cats={cats} onSave={handleAddExpense} onCancel={()=>{setShowAdd(false);setShowPayment(false);}}/>}
+                  {showPayment && <PaymentForm members={members} me={myOriginalName} onSave={f=>{handleAddPayment(f);setShowPayment(false);setShowAdd(false);}} onCancel={()=>{setShowPayment(false);setShowAdd(false);}}/>}
+                </div>
+              )}
               {sortedDates.length===0&&!showAdd&&!showPayment && <div style={{textAlign:"center",color:T.textMute,padding:40,fontSize:13}}>還沒有任何消費 🌴</div>}
               {sortedDates.map(date => (
                 <div key={date}>
@@ -1359,7 +1378,7 @@ export default function App() {
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                     <Avatar name={l.user} color={colors[l.user]||"#aaa"} size={24}/>
                     <span style={{fontSize:12,fontWeight:700,color:colors[l.user]||T.textSub}}>{l.user}</span>
-                    <span style={{marginLeft:"auto",fontSize:10,color:T.textMute}}>{fmtTs(l.ts)}</span>
+                    <span style={{marginLeft:"auto",fontSize:10,color:T.textMute}}>{fmtTsFull(l.ts)}</span>
                   </div>
                   <div style={{fontSize:11,color:T.yellowDk,marginBottom:2,fontWeight:700}}>{l.action}</div>
                   <div style={{fontSize:12,color:T.textSub}}>{l.detail}</div>
@@ -1399,19 +1418,7 @@ export default function App() {
           )}
         </div>
         {activeTab==="expenses" && (
-          <div style={{position:"fixed",bottom:24,right:20,zIndex:500,display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8}}>
-            {(showAdd||showPayment) && (
-              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,marginBottom:4}}>
-                <button onClick={()=>{setShowPayment(true);setShowAdd(false);setEditingId(null);setEditingPaymentId(null);}}
-                  style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                  <span>💸</span> 記錄轉帳
-                </button>
-                <button onClick={()=>{setShowAdd(true);setShowPayment(false);setEditingId(null);setEditingPaymentId(null);}}
-                  style={{display:"flex",alignItems:"center",gap:8,padding:"8px 16px 8px 12px",background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:24,color:T.text,fontSize:12,fontWeight:700,cursor:"pointer",boxShadow:"0 3px 12px rgba(0,0,0,0.15)",whiteSpace:"nowrap",fontFamily:"inherit"}}>
-                  <span>🧾</span> 新增消費
-                </button>
-              </div>
-            )}
+          <div style={{position:"fixed",bottom:24,right:20,zIndex:500}}>
             <button
               onClick={()=>{
                 const isOpen=showAdd||showPayment;
