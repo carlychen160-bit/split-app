@@ -10,8 +10,8 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"食物"},{id:"snack",icon:"🧋",label:"飲料"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
+  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
@@ -560,34 +560,37 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
             const col=group.colors[m]||"#aaa";
             const net=(bal[m]?.paid||0)-(bal[m]?.owes||0);
             const canRemove=m!==group.adminUser&&Math.abs(net)<0.01&&group.members.length>2;
-            // Check if this member name has been claimed
             const isClaimed = claimedBy.hasOwnProperty(m);
-            const claimedByUser = claimedBy[m]; // who claimed this original name
+            const claimedByUser = claimedBy[m]; // login name of who claimed this
             const isMe = m===me;
+            // Unclaimed: black avatar; Claimed: use member color
+            const avatarColor = isClaimed ? col : "#333";
             return (
               <Card key={m} style={{padding:"10px 14px"}}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
                   <div style={{position:"relative",flexShrink:0}}>
-                    <Avatar name={m} color={col} size={40}/>
-                    {/* Connection badge */}
-                    <div style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,borderRadius:"50%",background:isClaimed?"#43A047":"#ccc",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    <Avatar name={m} color={avatarColor} size={40}/>
+                    <div style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,borderRadius:"50%",background:isClaimed?"#43A047":"#999",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
                       <span style={{fontSize:8,color:"#fff"}}>{isClaimed?"✓":"?"}</span>
                     </div>
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
-                      <span style={{fontSize:14,fontWeight:700}}>{m}</span>
+                      {/* Show claimed login name if different from original name, else just the name */}
+                      <span style={{fontSize:14,fontWeight:700,color:isClaimed?T.text:"#999"}}>
+                        {isClaimed && claimedByUser!==m ? `${claimedByUser}` : m}
+                      </span>
+                      {isClaimed && claimedByUser!==m && (
+                        <span style={{fontSize:11,color:T.textMute}}>({m})</span>
+                      )}
                       {m===group.adminUser && <span>👑</span>}
                       {isMe && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>我</span>}
                     </div>
-                    {isClaimed
-                      ? <div style={{fontSize:11,color:"#43A047",fontWeight:600}}>🔗 已連結：{claimedByUser}</div>
-                      : <div style={{fontSize:11,color:T.textMute}}>⚪ 尚未有人認領</div>
-                    }
-                    <div style={{fontSize:10,color:T.textMute,marginTop:1}}>消費 NT${(bal[m]?.owes||0).toFixed(0)} · 墊付 NT${(bal[m]?.paid||0).toLocaleString()}</div>
+                    {!isClaimed && (
+                      <div style={{fontSize:11,color:"#999"}}>尚未有人認領</div>
+                    )}
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
-                    {/* Admin can disconnect a claimed identity (but not their own) */}
                     {isAdmin && isClaimed && m!==me && (
                       <Btn onClick={()=>handleDisconnect(m)} variant="danger" style={{padding:"4px 8px",fontSize:11}}>斷開</Btn>
                     )}
@@ -1311,14 +1314,14 @@ export default function App() {
             </div>
           )}
           {activeTab==="config" && (
-            // 只有 adminUser 才需要 PIN 驗證；非 admin 直接看一般設定（無改名/刪除）
-            g.adminUser===currentUser && !verifiedAdminGroups.has(g.id) && g.adminPin
+            // 所有人進設定都需要 PIN（admin 驗證後才能看管理員功能，非 admin 驗證後只能看一般功能）
+            !verifiedAdminGroups.has(g.id) && g.adminPin
               ? (
                 <div style={{textAlign:"center",padding:"40px 20px"}}>
                   <div style={{fontSize:32,marginBottom:12}}>🔐</div>
-                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>需要管理員 PIN 碼</div>
-                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>輸入建立群組時設定的 PIN 碼</div>
-                  <input type="password" inputMode="numeric" placeholder="PIN 碼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
+                  <div style={{fontSize:15,fontWeight:700,marginBottom:6}}>需要 PIN 碼</div>
+                  <div style={{fontSize:12,color:T.textSub,marginBottom:16}}>{g.adminUser===currentUser?"輸入你建立群組時設定的 PIN 碼":"輸入群組 PIN 碼以進入設定"}</div>
+                  <input type="password" inputMode="numeric" placeholder="PIN 碼" value={adminPinInput} onChange={e=>setAdminPinInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&(()=>{if(adminPinInput===g.adminPin){setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));setAdminPinInput("");}else{setError("PIN 碼錯誤");setAdminPinInput("");}})() } style={{...iStyle,maxWidth:200,textAlign:"center",fontSize:18,letterSpacing:4,marginBottom:12}}/>
                   <Btn onClick={()=>{
                     if(adminPinInput===g.adminPin){
                       setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
