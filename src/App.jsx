@@ -10,7 +10,7 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"伙食"},{id:"snack",icon:"🧋",label:"飲料"},
+  {id:"food",icon:"🍜",label:"食物"},{id:"snack",icon:"🧋",label:"飲料"},
   {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
@@ -462,7 +462,7 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
 }
 
 // ── Config Tab ────────────────────────────────────────────────────────
-function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted}) {
+function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin=false}) {
   const cats = group.categories||DEFAULT_CATS;
   const [section,setSection] = useState("members");
   const [editing,setEditing] = useState(null);
@@ -535,9 +535,10 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted}) {
 
   return (
     <div>
-      {/* ── 群組資訊區（Admin 才看到） ── */}
+      {/* ── 群組資訊區（Admin 才看到改名/刪除） ── */}
+      {isAdmin && (
       <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:14,marginBottom:16}}>
-        <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>⚙️ 群組資訊</div>
+        <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>⚙️ 群組設定（管理員）</div>
 
         {/* 群組名稱 */}
         <div style={{marginBottom:10}}>
@@ -556,21 +557,13 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted}) {
           )}
         </div>
 
-        {/* 群組代碼與連結 */}
-        <div style={{marginBottom:10}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600}}>群組代碼</div>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontFamily:"monospace",fontSize:15,fontWeight:800,letterSpacing:3,color:T.yellowDk,background:"#fff",border:`1.5px solid ${T.yellowMd}`,borderRadius:8,padding:"4px 10px"}}>{group.code}</span>
-            <Btn onClick={()=>{navigator.clipboard.writeText(groupUrl).then(()=>alert("連結已複製！")).catch(()=>alert(groupUrl));}} variant="secondary" style={{fontSize:11,padding:"5px 12px"}}>🔗 複製連結</Btn>
-          </div>
-        </div>
-
         {/* 刪除群組 */}
         <div style={{borderTop:`1px solid ${T.yellowMd}`,paddingTop:10,marginTop:4}}>
           <Btn onClick={handleDeleteGroup} variant="danger" style={{width:"100%",padding:"9px 0"}}>🗑️ 刪除群組</Btn>
           <div style={{fontSize:10,color:T.textMute,marginTop:4,textAlign:"center"}}>刪除後無法復原</div>
         </div>
       </div>
+      )}
 
       <div style={{display:"flex",gap:6,marginBottom:16}}>
         {[["members","👥 成員"],["categories","🏷️ 分類"]].map(([k,l]) => (
@@ -846,8 +839,10 @@ export default function App() {
       } catch(e) { console.error(e); }
     }
     if(!g){ setError("找不到此群組 🔍"); return; }
+    // 只有當這個使用者已經被 claimedBy 記錄過，才直接進入
     const alreadyClaimed = Object.values(g.claimedBy||{}).includes(currentUser);
-    if(g.members.includes(currentUser)||alreadyClaimed) {
+    // 名字完全一樣也要跳認領畫面讓使用者確認（名字可能重複）
+    if(alreadyClaimed) {
       setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); return;
     }
     setClaimScreen({groupId:g.id, code});
@@ -986,7 +981,7 @@ export default function App() {
     const grouped={};
     expenses.forEach(e=>{if(!grouped[e.date])grouped[e.date]=[];grouped[e.date].push({...e,_type:"expense"});});
     payments.forEach(p=>{if(!grouped[p.date])grouped[p.date]=[];grouped[p.date].push({...p,_type:"payment"});});
-    Object.keys(grouped).forEach(d=>grouped[d].sort((a,b)=>(a.ts||a.id).localeCompare(b.ts||b.id)));
+    Object.keys(grouped).forEach(d=>grouped[d].sort((a,b)=>(b.ts||b.id).localeCompare(a.ts||a.id)));
     const sortedDates=Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
     function updateGroup(updater,logEntry) {
       setGroups(prev=>prev.map(x=>{
@@ -998,7 +993,7 @@ export default function App() {
       }));
     }
     function handleAddExpense(form) {
-      const e={id:uid(),...form};
+      const e={id:uid(),ts:now(),...form};
       updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`});
       setShowAdd(false);
     }
@@ -1053,6 +1048,7 @@ export default function App() {
               <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
               <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdmin?" · 👑":""}</div>
             </div>
+            <button onClick={()=>{const url=`${window.location.origin}${window.location.pathname}#group/${g.code}`;navigator.clipboard.writeText(url).then(()=>alert("連結已複製！分享給朋友就能直接進入群組 🎉")).catch(()=>alert(`請複製此連結：\n${url}`));}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}} title="複製群組連結">🔗</button>
             <Avatar name={me} color={colors[me]||"#aaa"} size={30}/>
           </div>
           <div style={{background:"rgba(255,255,255,0.75)",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
@@ -1115,7 +1111,7 @@ export default function App() {
                             </div>
                             <div style={{textAlign:"right"}}>
                               <div style={{fontSize:16,fontWeight:800,color:"#2E7D32"}}>NT${p.amount.toLocaleString()}</div>
-                              <div style={{fontSize:10,color:T.textMute}}>轉帳</div>
+                              <div style={{fontSize:10,color:T.textMute}}>轉帳{p.ts?` · ${fmtTs(p.ts)}`:"" }</div>
                             </div>
                           </div>
                         </Card>
@@ -1131,7 +1127,7 @@ export default function App() {
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
                           <div style={{display:"flex",alignItems:"center",gap:8,flex:1}}>
                             <div style={{width:36,height:36,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{cat.icon}</div>
-                            <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{e.name}</div><div style={{fontSize:10,color:T.textMute}}>{cat.label}</div></div>
+                            <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{e.name}</div><div style={{fontSize:10,color:T.textMute}}>{cat.label}{e.ts?` · ${fmtTs(e.ts)}`:""}</div></div>
                           </div>
                           <div style={{textAlign:"right",flexShrink:0,marginLeft:8}}>
                             {myShare>0 ? <div style={{fontSize:19,fontWeight:800,color:iAmPayer?T.yellowDk:T.text,lineHeight:1}}>NT${myShare%1===0?myShare.toFixed(0):myShare.toFixed(2)}</div> : <div style={{fontSize:12,color:T.textMute}}>不參與</div>}
@@ -1248,6 +1244,7 @@ export default function App() {
             </div>
           )}
           {activeTab==="config" && (
+            // 只有 adminUser 才需要 PIN 驗證；非 admin 直接看一般設定（無改名/刪除）
             g.adminUser===currentUser && !verifiedAdminGroups.has(g.id) && g.adminPin
               ? (
                 <div style={{textAlign:"center",padding:"40px 20px"}}>
@@ -1271,6 +1268,7 @@ export default function App() {
                   setGroups={setGroups}
                   bal={bal}
                   me={me}
+                  isAdmin={isAdmin}
                   setExportModal={setExportModal}
                   onGroupDeleted={()=>{ setScreen("home"); setCurrentGroupId(null); }}
                 />
