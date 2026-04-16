@@ -339,18 +339,21 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
         <input type="number" placeholder="總金額" value={total} onChange={e=>handleTotalChange(e.target.value)}
           style={{...iStyle,flex:1,marginBottom:0,fontSize:15,fontWeight:800,textAlign:"center",color:T.text,height:42}}/>
       </div>
-      <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"stretch"}}>
-        <div style={{flex:"0 0 auto"}}><CategoryPicker value={category} onChange={setCategory} cats={cats}/></div>
-        {/* 日期（縮小）+ 小時 + 分鐘 */}
+      {/* 分類（獨佔一行） */}
+      <div style={{marginBottom:8}}>
+        <CategoryPicker value={category} onChange={setCategory} cats={cats}/>
+      </div>
+      {/* 日期 + 小時 : 分鐘 */}
+      <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center"}}>
         <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-          style={{...iStyle,marginBottom:0,width:130,minHeight:40,flexShrink:0,fontSize:12}}/>
+          style={{...iStyle,marginBottom:0,flex:1,minHeight:40,fontSize:13}}/>
         <select value={hour} onChange={e=>setHour(e.target.value)}
-          style={{...iStyle,marginBottom:0,width:56,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
           {HOUR_OPTIONS.map(h=><option key={h} value={h}>{h}</option>)}
         </select>
-        <span style={{display:"flex",alignItems:"center",color:T.textMute,fontSize:14,fontWeight:700,flexShrink:0}}>:</span>
+        <span style={{color:T.textMute,fontSize:16,fontWeight:700,flexShrink:0}}>:</span>
         <select value={min} onChange={e=>setMin(e.target.value)}
-          style={{...iStyle,marginBottom:0,width:56,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
           {MIN_OPTIONS.map(m=><option key={m} value={m}>{m}</option>)}
         </select>
       </div>
