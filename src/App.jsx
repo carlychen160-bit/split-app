@@ -1059,11 +1059,28 @@ export default function App() {
     }
     const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
     const me=currentUser;
-    // Find the original member name this user has claimed (for bal lookups)
     const claimedBy=g.claimedBy||{};
-    const myOriginalName=Object.keys(claimedBy).find(k=>claimedBy[k]===currentUser)||currentUser;
-    const {members,colors,expenses,logs}=g;
-    const payments=g.payments||[];
+    // Build reverse map: loginName → originalName
+    const loginToOriginal={};
+    Object.entries(claimedBy).forEach(([orig,login])=>{ loginToOriginal[login]=orig; });
+    // Find this user's original member name
+    const myOriginalName=loginToOriginal[currentUser]
+      || (g.members.includes(currentUser) ? currentUser : currentUser);
+    // Normalize a name: if it's a login name in the map, convert to original
+    const toOrig = n => loginToOriginal[n] || n;
+    // Normalize expenses in memory (don't write back, just for display)
+    const {colors,logs}=g;
+    const members=g.members;
+    const expenses=g.expenses.map(e=>({
+      ...e,
+      payers: e.payers.map(p=>({...p, name: toOrig(p.name)})),
+      splits: Object.fromEntries(Object.entries(e.splits).map(([k,v])=>[toOrig(k),v])),
+    }));
+    const payments=(g.payments||[]).map(p=>({
+      ...p,
+      from: toOrig(p.from),
+      to: toOrig(p.to),
+    }));
     const cats=g.categories||DEFAULT_CATS;
     const bal={};
     members.forEach(m=>bal[m]={paid:0,owes:0});
