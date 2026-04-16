@@ -1003,15 +1003,10 @@ export default function App() {
 
   function handleCreateGroup() {
     const name=newGroupName.trim();
-    const pin=newGroupPin.trim();
     if(!name){setError("請輸入群組名稱");return;}
-    if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
-    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},claimedUsers:[currentUser],categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
+    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:null,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},claimedUsers:[currentUser],categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
-    // 建立後直接進入設定→成員頁，讓 admin 馬上新增旅伴
-    // 也同時把 PIN 驗證標記為已通過，這樣不用再輸入一次
-    setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("config"); setScreen("group"); setError("");
     setHomePanel(null);
   }
@@ -1613,9 +1608,7 @@ export default function App() {
           </button>
           {homePanel==="create" && (
             <div style={{padding:"0 16px 16px"}}>
-              <input placeholder="群組名稱（例：沖繩五日遊 🌺）" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} style={iStyle}/>
-              <input type="password" inputMode="numeric" placeholder="管理員 PIN 碼（至少 4 位）" value={newGroupPin} onChange={e=>setNewGroupPin(e.target.value)} style={{...iStyle,letterSpacing:4}}/>
-              <div style={{fontSize:10,color:T.textMute,marginBottom:10,marginTop:-4}}>PIN 碼用於保護管理員功能，請記好</div>
+              <input placeholder="群組名稱（例：沖繩五日遊 🌺）" value={newGroupName} onChange={e=>setNewGroupName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleCreateGroup()} style={iStyle}/>
               <Btn onClick={handleCreateGroup} style={{width:"100%",padding:11,fontSize:14}}>建立</Btn>
             </div>
           )}
@@ -1650,9 +1643,17 @@ export default function App() {
       <div style={{fontSize:60,marginBottom:8}}>🏝️</div>
       <div style={{fontSize:24,fontWeight:800,marginBottom:4}}>旅遊分帳</div>
       <div style={{fontSize:13,color:T.textMute,marginBottom:32}}>輸入你的名字開始使用</div>
+      {pendingGroupCode && (
+        <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:12,padding:"8px 16px",marginBottom:16,fontSize:12,color:T.yellowDk,fontWeight:700}}>
+          🔗 即將加入群組代碼：{pendingGroupCode}
+        </div>
+      )}
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,width:"100%",maxWidth:320,boxSizing:"border-box"}}>{error}</div>}
       <input placeholder="你叫什麼名字？" value={usernameInput} onChange={e=>setUsernameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLogin()} style={{...iStyle,maxWidth:320,textAlign:"center",fontSize:16,marginBottom:12}}/>
       <Btn onClick={handleLogin} style={{width:"100%",maxWidth:320,padding:13,fontSize:15}}>出發！🌟</Btn>
+      <div style={{marginTop:20,maxWidth:300,textAlign:"center",fontSize:11,color:T.textMute,lineHeight:1.6}}>
+        本系統為朋友間使用，未綁定帳號密碼，請記得好好記住你的名稱喔～ 😊
+      </div>
     </div>
   );
 }
