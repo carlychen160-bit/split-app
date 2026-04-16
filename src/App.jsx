@@ -1093,13 +1093,17 @@ export default function App() {
   }
 
   // ── Group Screen ──────────────────────────────────────────────────
+  // Security: redirect if user lost access (disconnected)
+  useEffect(()=>{
+    if(screen==="group" && currentGroup && !(currentGroup.claimedUsers||[]).includes(currentUser)) {
+      setScreen("home"); setCurrentGroupId(null);
+    }
+  },[screen, currentGroup, currentUser]);
+
   if(screen==="group"&&currentGroup) {
     const g=currentGroup;
-    // Security: if user was disconnected or never claimed, kick back to home
-    if(!(g.claimedUsers||[]).includes(currentUser)) {
-      setScreen("home"); setCurrentGroupId(null);
-      return null;
-    }
+    // Guard: still rendering but access check above will redirect
+    if(!(g.claimedUsers||[]).includes(currentUser)) return null;
     const isAdmin=g.adminUser===currentUser && (g.adminPin==null || verifiedAdminGroups.has(g.id));
     const me=currentUser;
     const claimedBy=g.claimedBy||{};
