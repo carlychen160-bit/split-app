@@ -1060,6 +1060,25 @@ export default function App() {
     setCurrentGroupId(claimScreen.groupId); setActiveTab("expenses"); setScreen("group"); setClaimScreen(null);
   }
 
+  // ── Security: redirect if user lost group access (must be before any early returns) ──
+  useEffect(()=>{
+    if(screen==="group" && currentGroup && !(currentGroup.claimedUsers||[]).includes(currentUser)) {
+      setScreen("home"); setCurrentGroupId(null);
+    }
+  },[screen, currentGroup, currentUser]);
+
+  // ── Owner Dashboard data loader (must be before any early returns) ──
+  useEffect(()=>{
+    if(screen!=="ownerDashboard") return;
+    setOwnerLoading(true);
+    const q2 = collection(db,"groups");
+    const unsub = onSnapshot(q2,(snap)=>{
+      setOwnerGroups(snap.docs.map(d=>d.data()));
+      setOwnerLoading(false);
+    });
+    return ()=>unsub();
+  },[screen]);
+
   // ── Claim Screen ──────────────────────────────────────────────────
   if(claimScreen) {
     const g=groups.find(x=>x.id===claimScreen.groupId);
@@ -1093,13 +1112,6 @@ export default function App() {
   }
 
   // ── Group Screen ──────────────────────────────────────────────────
-  // Security: redirect if user lost access (disconnected)
-  useEffect(()=>{
-    if(screen==="group" && currentGroup && !(currentGroup.claimedUsers||[]).includes(currentUser)) {
-      setScreen("home"); setCurrentGroupId(null);
-    }
-  },[screen, currentGroup, currentUser]);
-
   if(screen==="group"&&currentGroup) {
     const g=currentGroup;
     // Guard: still rendering but access check above will redirect
@@ -1480,17 +1492,6 @@ export default function App() {
   }
 
   // ── Owner Dashboard ───────────────────────────────────────────────
-  useEffect(()=>{
-    if(screen!=="ownerDashboard") return;
-    setOwnerLoading(true);
-    const q2 = collection(db,"groups");
-    const unsub = onSnapshot(q2,(snap)=>{
-      setOwnerGroups(snap.docs.map(d=>d.data()));
-      setOwnerLoading(false);
-    });
-    return ()=>unsub();
-  },[screen]);
-
   if(screen==="ownerDashboard") {
     const allUsers = {};
     ownerGroups.forEach(g=>{
