@@ -967,7 +967,10 @@ export default function App() {
     const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},claimedUsers:[currentUser],categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
-    setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
+    // 建立後直接進入設定→成員頁，讓 admin 馬上新增旅伴
+    // 也同時把 PIN 驗證標記為已通過，這樣不用再輸入一次
+    setVerifiedAdminGroups(prev=>new Set([...prev,g.id]));
+    setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("config"); setScreen("group"); setError("");
     setHomePanel(null);
   }
 
