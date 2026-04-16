@@ -469,7 +469,6 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
   const [newCat,setNewCat] = useState({icon:"",label:""});
   const [showAddCat,setShowAddCat] = useState(false);
   const [newMemberName,setNewMemberName] = useState("");
-  // ── 群組名稱編輯 ──
   const [editingGroupName,setEditingGroupName] = useState(false);
   const [groupNameInput,setGroupNameInput] = useState(group.name);
 
@@ -477,29 +476,37 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
     setGroups(prev=>prev.map(g=>{
       if(g.id!==group.id) return g;
       const updated=updater(g);
-      const finalGroup = {...updated,logs:[{id:uid(),ts:now(),user:group.adminUser,action:"設定變更",detail},...(updated.logs||[])]};
-      setDoc(fsDoc(db, "groups", finalGroup.id), finalGroup).catch(console.error);
+      const finalGroup={...updated,logs:[{id:uid(),ts:now(),user:me,action:"設定變更",detail},...(updated.logs||[])]};
+      setDoc(fsDoc(db,"groups",finalGroup.id),finalGroup).catch(console.error);
       return finalGroup;
     }));
   }
 
-  // ── 修改群組名稱 ──
   function handleSaveGroupName() {
-    const name = groupNameInput.trim();
+    const name=groupNameInput.trim();
     if(!name) return;
     saveGroup(g=>({...g,name}),`群組名稱改為「${name}」`);
     setEditingGroupName(false);
   }
 
-  // ── 刪除群組 ──
   async function handleDeleteGroup() {
-    if(!window.confirm(`確定要刪除「${group.name}」嗎？\n\n此操作無法復原，所有消費紀錄都會消失。`)) return;
+    if(!window.confirm(`確定要刪除「${group.name}」嗎？\n此操作無法復原，所有消費紀錄將永久刪除。`)) return;
     if(!window.confirm(`再次確認：永久刪除「${group.name}」？`)) return;
     try {
-      await deleteDoc(fsDoc(db, "groups", group.id));
+      await deleteDoc(fsDoc(db,"groups",group.id));
       setGroups(prev=>prev.filter(g=>g.id!==group.id));
       onGroupDeleted();
     } catch(e) { console.error(e); alert("刪除失敗，請稍後再試"); }
+  }
+
+  // Admin: disconnect a member's claim so they need to re-identify
+  function handleDisconnect(originalName) {
+    if(!window.confirm(`確定要斷開「${originalName}」的身分連結嗎？\n對方下次進入群組時需要重新認領身分。`)) return;
+    saveGroup(g=>{
+      const newClaimedBy={...g.claimedBy};
+      delete newClaimedBy[originalName];
+      return {...g,claimedBy:newClaimedBy};
+    },`管理員斷開了「${originalName}」的身分連結`);
   }
 
   function handleEditCat(cat) {
@@ -530,69 +537,68 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
     saveGroup(g=>({...g,members:g.members.filter(m=>m!==name)}),`移除成員「${name}」`);
   }
 
-  // 群組連結
-  const groupUrl = `${window.location.origin}${window.location.pathname}#group/${group.code}`;
+  const claimedBy = group.claimedBy||{};
+  // reverse map: claimedUsername → originalName
+  const claimedByReverse = {};
+  Object.entries(claimedBy).forEach(([orig,user])=>{ claimedByReverse[user]=orig; });
+
+  const TABS_CFG=[["members","👥 成員"],["categories","🏷️ 分類"],["settings","⚙️ 群組設定"]];
 
   return (
     <div>
-      {/* ── 群組資訊區（Admin 才看到改名/刪除） ── */}
-      {isAdmin && (
-      <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:14,marginBottom:16}}>
-        <div style={{fontSize:11,color:T.yellowDk,fontWeight:700,marginBottom:10}}>⚙️ 群組設定（管理員）</div>
-
-        {/* 群組名稱 */}
-        <div style={{marginBottom:10}}>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:4,fontWeight:600}}>群組名稱</div>
-          {editingGroupName ? (
-            <div style={{display:"flex",gap:8}}>
-              <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSaveGroupName()} style={{...iStyle,flex:1,marginBottom:0}}/>
-              <Btn onClick={handleSaveGroupName} style={{flexShrink:0,padding:"9px 14px"}}>儲存</Btn>
-              <Btn onClick={()=>{setEditingGroupName(false);setGroupNameInput(group.name);}} variant="secondary" style={{flexShrink:0,padding:"9px 14px"}}>取消</Btn>
-            </div>
-          ) : (
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{flex:1,fontSize:14,fontWeight:700,color:T.text}}>{group.name}</span>
-              <Btn onClick={()=>setEditingGroupName(true)} variant="ghost" style={{padding:"4px 10px",fontSize:12}}>✏️ 修改</Btn>
-            </div>
-          )}
-        </div>
-
-        {/* 刪除群組 */}
-        <div style={{borderTop:`1px solid ${T.yellowMd}`,paddingTop:10,marginTop:4}}>
-          <Btn onClick={handleDeleteGroup} variant="danger" style={{width:"100%",padding:"9px 0"}}>🗑️ 刪除群組</Btn>
-          <div style={{fontSize:10,color:T.textMute,marginTop:4,textAlign:"center"}}>刪除後無法復原</div>
-        </div>
-      </div>
-      )}
-
+      {/* ── 三個標籤 ── */}
       <div style={{display:"flex",gap:6,marginBottom:16}}>
-        {[["members","👥 成員"],["categories","🏷️ 分類"]].map(([k,l]) => (
-          <button key={k} onClick={()=>setSection(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${section===k?T.yellowDk:T.border}`,background:section===k?T.yellowLt:"#fff",color:section===k?T.text:T.textSub,fontSize:13,fontWeight:section===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
+        {TABS_CFG.map(([k,l])=>(
+          <button key={k} onClick={()=>setSection(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${section===k?T.yellowDk:T.border}`,background:section===k?T.yellowLt:"#fff",color:section===k?T.text:T.textSub,fontSize:12,fontWeight:section===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
         ))}
       </div>
-      <div style={{display:"flex",gap:8,marginBottom:16}}>
-        <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} 明細`,content:r});}} style={{flex:1,padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📥 匯出明細 CSV</button>
-      </div>
+
+      {/* ── 成員 ── */}
       {section==="members" && (
         <div>
-          {group.members.map(m => {
-            const col=group.colors[m]||"#aaa", net=(bal[m]?.paid||0)-(bal[m]?.owes||0);
+          {group.members.map(m=>{
+            const col=group.colors[m]||"#aaa";
+            const net=(bal[m]?.paid||0)-(bal[m]?.owes||0);
             const canRemove=m!==group.adminUser&&Math.abs(net)<0.01&&group.members.length>2;
+            // Check if this member name has been claimed
+            const isClaimed = claimedBy.hasOwnProperty(m);
+            const claimedByUser = claimedBy[m]; // who claimed this original name
+            const isMe = m===me;
             return (
-              <Card key={m}>
+              <Card key={m} style={{padding:"10px 14px"}}>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <Avatar name={m} color={col} size={38}/>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                  <div style={{position:"relative",flexShrink:0}}>
+                    <Avatar name={m} color={col} size={40}/>
+                    {/* Connection badge */}
+                    <div style={{position:"absolute",bottom:-2,right:-2,width:16,height:16,borderRadius:"50%",background:isClaimed?"#43A047":"#ccc",border:"2px solid #fff",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <span style={{fontSize:8,color:"#fff"}}>{isClaimed?"✓":"?"}</span>
+                    </div>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2,flexWrap:"wrap"}}>
                       <span style={{fontSize:14,fontWeight:700}}>{m}</span>
                       {m===group.adminUser && <span>👑</span>}
-                      {m===me && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>我</span>}
+                      {isMe && <span style={{background:T.yellowLt,color:T.yellowDk,border:`1px solid ${T.yellowMd}`,borderRadius:20,padding:"1px 6px",fontSize:11,fontWeight:700}}>我</span>}
                     </div>
-                    <div style={{fontSize:11,color:T.textMute}}>消費 NT${(bal[m]?.owes||0).toFixed(0)} · 墊付 NT${(bal[m]?.paid||0).toLocaleString()}</div>
-                    {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01 && <div style={{fontSize:10,color:T.accent,marginTop:2}}>💸 有未結清帳款，無法移除</div>}
+                    {isClaimed
+                      ? <div style={{fontSize:11,color:"#43A047",fontWeight:600}}>🔗 已連結：{claimedByUser}</div>
+                      : <div style={{fontSize:11,color:T.textMute}}>⚪ 尚未有人認領</div>
+                    }
+                    <div style={{fontSize:10,color:T.textMute,marginTop:1}}>消費 NT${(bal[m]?.owes||0).toFixed(0)} · 墊付 NT${(bal[m]?.paid||0).toLocaleString()}</div>
                   </div>
-                  {canRemove && <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"5px 10px",fontSize:12}}>移除</Btn>}
+                  <div style={{display:"flex",flexDirection:"column",gap:4,flexShrink:0}}>
+                    {/* Admin can disconnect a claimed identity (but not their own) */}
+                    {isAdmin && isClaimed && m!==me && (
+                      <Btn onClick={()=>handleDisconnect(m)} variant="danger" style={{padding:"4px 8px",fontSize:11}}>斷開</Btn>
+                    )}
+                    {canRemove && (
+                      <Btn onClick={()=>handleRemoveMember(m)} variant="danger" style={{padding:"4px 8px",fontSize:11}}>移除</Btn>
+                    )}
+                  </div>
                 </div>
+                {m!==group.adminUser&&group.members.length>2&&Math.abs(net)>0.01&&(
+                  <div style={{fontSize:10,color:T.accent,marginTop:6,paddingTop:6,borderTop:`1px solid ${T.border}`}}>💸 有未結清帳款，無法移除</div>
+                )}
               </Card>
             );
           })}
@@ -605,11 +611,13 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
           </div>
         </div>
       )}
+
+      {/* ── 分類 ── */}
       {section==="categories" && (
         <div>
-          {cats.map(cat => (
+          {cats.map(cat=>(
             <div key={cat.id} style={{marginBottom:8}}>
-              {editing?.id===cat.id ? (
+              {editing?.id===cat.id?(
                 <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12}}>
                   <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>圖示（輸入任意 emoji）</div>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
@@ -622,7 +630,7 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
                     <Btn onClick={()=>setEditing(null)} variant="secondary" style={{flex:1,padding:"8px 0"}}>取消</Btn>
                   </div>
                 </div>
-              ) : (
+              ):(
                 <div style={{background:T.bgCard,border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 14px",display:"flex",alignItems:"center",gap:10}}>
                   <div style={{width:36,height:36,borderRadius:10,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{cat.icon}</div>
                   <span style={{flex:1,fontSize:14,fontWeight:600,color:T.text}}>{cat.label}</span>
@@ -632,7 +640,7 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
               )}
             </div>
           ))}
-          {showAddCat ? (
+          {showAddCat?(
             <div style={{background:T.yellowLt,border:`1.5px solid ${T.yellowMd}`,borderRadius:14,padding:12,marginTop:8}}>
               <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>圖示（輸入任意 emoji）</div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
@@ -645,8 +653,65 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
                 <Btn onClick={()=>setShowAddCat(false)} variant="secondary" style={{flex:1,padding:"8px 0"}}>取消</Btn>
               </div>
             </div>
-          ) : (
+          ):(
             <button onClick={()=>setShowAddCat(true)} style={{width:"100%",marginTop:8,padding:"10px 0",background:"none",border:`2px dashed ${T.border}`,borderRadius:12,color:T.textSub,fontSize:13,cursor:"pointer",fontFamily:"inherit"}}>＋ 新增分類</button>
+          )}
+        </div>
+      )}
+
+      {/* ── 群組設定 ── */}
+      {section==="settings" && (
+        <div>
+          {/* 匯出 CSV - 所有人都能用 */}
+          <Card style={{padding:"12px 14px",marginBottom:8}}>
+            <div style={{fontSize:12,color:T.textSub,fontWeight:700,marginBottom:8}}>📊 資料匯出</div>
+            <button onClick={()=>{const r=exportGroupCSV(group,me);if(r)setExportModal({title:`${group.name} 明細`,content:r});}} style={{width:"100%",padding:"9px 0",background:"#E3F2FD",border:"1.5px solid #90CAF9",borderRadius:10,color:"#1565C0",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>📥 匯出明細 CSV</button>
+          </Card>
+
+          {/* 群組資訊 - 只有 admin 能改名/刪除 */}
+          {isAdmin && (
+            <Card style={{padding:"12px 14px",borderColor:T.yellowMd,background:T.yellowLt}}>
+              <div style={{fontSize:12,color:T.yellowDk,fontWeight:700,marginBottom:12}}>👑 管理員設定</div>
+
+              {/* 群組名稱 */}
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>群組名稱</div>
+                {editingGroupName?(
+                  <div style={{display:"flex",gap:8}}>
+                    <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSaveGroupName()} style={{...iStyle,flex:1,marginBottom:0}}/>
+                    <Btn onClick={handleSaveGroupName} style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>儲存</Btn>
+                    <Btn onClick={()=>{setEditingGroupName(false);setGroupNameInput(group.name);}} variant="secondary" style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>取消</Btn>
+                  </div>
+                ):(
+                  <div style={{display:"flex",alignItems:"center",gap:8,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:10,padding:"8px 12px"}}>
+                    <span style={{flex:1,fontSize:14,fontWeight:700,color:T.text}}>{group.name}</span>
+                    <Btn onClick={()=>setEditingGroupName(true)} variant="ghost" style={{padding:"2px 8px",fontSize:12}}>✏️</Btn>
+                  </div>
+                )}
+              </div>
+
+              {/* 群組代碼（唯讀） */}
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>群組代碼</div>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:10,padding:"8px 12px"}}>
+                  <span style={{fontFamily:"monospace",fontSize:16,fontWeight:800,letterSpacing:3,color:T.yellowDk,flex:1}}>{group.code}</span>
+                  <span style={{fontSize:10,color:T.textMute}}>唯讀</span>
+                </div>
+              </div>
+
+              {/* 刪除群組 */}
+              <div style={{paddingTop:12,borderTop:`1px solid ${T.yellowMd}`}}>
+                <Btn onClick={handleDeleteGroup} variant="danger" style={{width:"100%",padding:"10px 0",fontSize:13}}>🗑️ 刪除群組</Btn>
+                <div style={{fontSize:10,color:T.textMute,textAlign:"center",marginTop:6}}>刪除後所有資料將永久消失，無法復原</div>
+              </div>
+            </Card>
+          )}
+
+          {!isAdmin && (
+            <div style={{textAlign:"center",color:T.textMute,padding:"32px 20px",fontSize:13}}>
+              <div style={{fontSize:28,marginBottom:8}}>🔒</div>
+              <div>管理員設定僅限群組建立者操作</div>
+            </div>
           )}
         </div>
       )}
@@ -878,7 +943,7 @@ export default function App() {
     const pin=newGroupPin.trim();
     if(!name){setError("請輸入群組名稱");return;}
     if(!pin||pin.length<4){setError("請設定至少 4 位數的管理員 PIN 碼");return;}
-    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
+    const g={id:uid(),name,code:Math.random().toString(36).slice(2,8).toUpperCase(),adminUser:currentUser,adminPin:pin,members:[currentUser],colors:{[currentUser]:getNextColor({})},claimedBy:{[currentUser]:currentUser},categories:[...DEFAULT_CATS],payments:[],expenses:[],logs:[{id:uid(),ts:now(),user:currentUser,action:"建立群組",detail:`建立了群組「${name}」`}]};
     setDoc(fsDoc(db, "groups", g.id), g).catch(console.error);
     setGroups(prev=>[...prev,g]);
     setNewGroupName(""); setNewGroupPin(""); setCurrentGroupId(g.id); setActiveTab("expenses"); setScreen("group"); setError("");
@@ -929,8 +994,10 @@ export default function App() {
   if(claimScreen) {
     const g=groups.find(x=>x.id===claimScreen.groupId);
     if(!g) return null;
-    const claimed=Object.keys(g.claimedBy||{});
-    const unclaimed=g.members.filter(m=>!claimed.includes(m)&&m!==currentUser);
+    // claimedBy maps originalName → currentUsername
+    // Show all members who haven't been claimed by anyone yet
+    const claimedOriginalNames = Object.keys(g.claimedBy||{});
+    const unclaimed = g.members.filter(m => !claimedOriginalNames.includes(m));
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,padding:24,display:"flex",flexDirection:"column",alignItems:"center"}}>
         <div style={{fontSize:32,marginBottom:8}}>👤</div>
