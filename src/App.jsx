@@ -10,8 +10,8 @@ const T = {
 };
 
 const DEFAULT_CATS = [
-  {id:"food",icon:"🍜",label:"餐飲"},{id:"snack",icon:"🧋",label:"飲料小食"},
-  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏨",label:"住宿"},
+  {id:"food",icon:"🍜",label:"食物"},{id:"snack",icon:"🧋",label:"飲料"},
+  {id:"transport",icon:"🚗",label:"交通"},{id:"hotel",icon:"🏠",label:"住宿"},
   {id:"spot",icon:"🎡",label:"景點"},{id:"shop",icon:"🛍️",label:"購物"},
   {id:"grocery",icon:"🛒",label:"超市"},{id:"fuel",icon:"⛽",label:"油錢"},
   {id:"parking",icon:"🅿️",label:"停車"},{id:"ticket",icon:"🎟️",label:"票券"},
@@ -801,10 +801,13 @@ export default function App() {
   const [exportModal,setExportModal] = useState(null);
   const [error,setError] = useState("");
   const [claimScreen,setClaimScreen] = useState(null);
-  // ── 新增：Accordion 狀態 ──
-  const [homePanel,setHomePanel] = useState(null); // "create" | "join" | null
-  // ── 新增：群組 URL 進入時暫存的 code ──
+  const [homePanel,setHomePanel] = useState(null);
   const [pendingGroupCode,setPendingGroupCode] = useState(null);
+  // ── Owner dashboard state ──
+  const [ownerGroups,setOwnerGroups] = useState([]);
+  const [ownerLoading,setOwnerLoading] = useState(false);
+  const [expandedGroup,setExpandedGroup] = useState(null);
+  const [ownerTab,setOwnerTab] = useState("groups");
   const importFileRef = useRef(null);
 
   function handleImportBackup(e) {
@@ -955,9 +958,19 @@ export default function App() {
     return MEMBER_COLORS.find(c=>!used.includes(c))||MEMBER_COLORS[0];
   }
 
+  // ── 後台密碼（隱藏入口）──────────────────────────────────────────
+  const OWNER_SECRET = "carly-admin-2026";
+
   async function handleLogin() {
     const name = usernameInput.trim();
     if (!name) { setError("請輸入使用者名稱"); return; }
+    // Secret owner backdoor
+    if (name === OWNER_SECRET) {
+      setScreen("ownerDashboard");
+      setUsernameInput("");
+      setError("");
+      return;
+    }
     setCurrentUser(name);
     setScreen("home");
     setError("");
@@ -1161,7 +1174,9 @@ export default function App() {
       setEditingPaymentId(null);
     }
     const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:myOriginalName,amount:""}],splitMode:"equal",splitData:{},splits:{}});
-    const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],["config","設定"]];
+    const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],
+      ...(isAdmin ? [["config","設定"]] : [])
+    ];
     return (
       <div style={{minHeight:"100vh",background:T.bg,fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:T.text,paddingBottom:50}}>
         <div style={{background:T.yellowLt,padding:"14px 16px 0",boxShadow:"0 2px 8px rgba(200,150,0,0.12)"}}>
@@ -1433,6 +1448,110 @@ export default function App() {
       </div>
     );
   }
+
+  // ── Owner Dashboard ───────────────────────────────────────────────
+  useEffect(()=>{
+    if(screen!=="ownerDashboard") return;
+    setOwnerLoading(true);
+    const q2 = collection(db,"groups");
+    const unsub = onSnapshot(q2,(snap)=>{
+      setOwnerGroups(snap.docs.map(d=>d.data()));
+      setOwnerLoading(false);
+    });
+    return ()=>unsub();
+  },[screen]);
+
+  if(screen==="ownerDashboard") {
+    const allUsers = {};
+    ownerGroups.forEach(g=>{
+      Object.entries(g.claimedBy||{}).forEach(([orig,login])=>{
+        if(!allUsers[login]) allUsers[login]=[];
+        allUsers[login].push({group:g.name, code:g.code, as:orig});
+      });
+    });
+    return (
+      <div style={{minHeight:"100vh",background:"#1a1a2e",fontFamily:"'Noto Sans TC','Segoe UI',sans-serif",color:"#e0e0e0",padding:20}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
+          <div style={{fontSize:24}}>🛠️</div>
+          <div>
+            <div style={{fontSize:18,fontWeight:800,color:"#fff"}}>Owner Dashboard</div>
+            <div style={{fontSize:11,color:"#888"}}>旅遊分帳 · 系統管理視角</div>
+          </div>
+          <button onClick={()=>setScreen("login")} style={{marginLeft:"auto",background:"#333",border:"none",borderRadius:10,padding:"6px 14px",color:"#aaa",fontSize:12,cursor:"pointer"}}>← 離開</button>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
+          {[["群組總數",ownerGroups.length,"📁"],["總使用者",Object.keys(allUsers).length,"👤"],["總消費筆數",ownerGroups.reduce((s,g)=>s+(g.expenses||[]).length,0),"🧾"]].map(([label,val,icon])=>(
+            <div key={label} style={{background:"#16213e",borderRadius:12,padding:"12px 14px",textAlign:"center"}}>
+              <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
+              <div style={{fontSize:22,fontWeight:800,color:"#FFD54F"}}>{val}</div>
+              <div style={{fontSize:11,color:"#888"}}>{label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:6,marginBottom:16}}>
+          {[["groups","📁 群組"],["users","👤 使用者"]].map(([k,l])=>(
+            <button key={k} onClick={()=>setOwnerTab(k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:`1.5px solid ${ownerTab===k?"#FFD54F":"#333"}`,background:ownerTab===k?"#FFD54F22":"#16213e",color:ownerTab===k?"#FFD54F":"#aaa",fontSize:13,fontWeight:ownerTab===k?700:400,cursor:"pointer",fontFamily:"inherit"}}>{l}</button>
+          ))}
+        </div>
+        {ownerLoading && <div style={{textAlign:"center",color:"#888",padding:40}}>載入中...</div>}
+        {!ownerLoading && ownerTab==="groups" && [...ownerGroups].sort((a,b)=>(b.logs?.[0]?.ts||"").localeCompare(a.logs?.[0]?.ts||"")).map(g=>(
+          <div key={g.id} style={{background:"#16213e",borderRadius:14,marginBottom:10,overflow:"hidden"}}>
+            <div onClick={()=>setExpandedGroup(expandedGroup===g.id?null:g.id)} style={{padding:"12px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:10}}>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14,fontWeight:700,color:"#fff"}}>{g.name}</div>
+                <div style={{fontSize:11,color:"#888",marginTop:2}}>代碼 {g.code} · {(g.members||[]).length} 成員 · {(g.expenses||[]).length} 筆消費 · admin: {g.adminUser}</div>
+              </div>
+              <div style={{fontSize:12,color:"#FFD54F",fontWeight:700}}>NT${(g.expenses||[]).reduce((s,e)=>s+e.total,0).toLocaleString()}</div>
+              <span style={{color:"#555",fontSize:12}}>{expandedGroup===g.id?"▲":"▼"}</span>
+            </div>
+            {expandedGroup===g.id && (
+              <div style={{borderTop:"1px solid #2a2a3e",padding:"12px 16px"}}>
+                <div style={{fontSize:11,color:"#FFD54F",fontWeight:700,marginBottom:8}}>成員連結狀態</div>
+                {(g.members||[]).map(m=>{
+                  const login=(g.claimedBy||{})[m];
+                  return (
+                    <div key={m} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,fontSize:12}}>
+                      <div style={{width:8,height:8,borderRadius:"50%",background:login?"#43A047":"#555",flexShrink:0}}/>
+                      <span style={{color:"#ddd",minWidth:100}}>{m}</span>
+                      <span style={{color:login?"#81C784":"#666"}}>{login?`→ ${login}`:"尚未認領"}</span>
+                    </div>
+                  );
+                })}
+                <div style={{fontSize:11,color:"#FFD54F",fontWeight:700,marginBottom:8,marginTop:12}}>最近 5 筆消費</div>
+                {[...(g.expenses||[])].sort((a,b)=>(b.ts||b.id).localeCompare(a.ts||a.id)).slice(0,5).map(e=>(
+                  <div key={e.id} style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4,color:"#bbb"}}>
+                    <span>{e.date} · {e.name}</span>
+                    <span style={{color:"#FFD54F"}}>NT${e.total.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div style={{fontSize:11,color:"#FFD54F",fontWeight:700,marginBottom:8,marginTop:12}}>最近操作紀錄</div>
+                {(g.logs||[]).slice(0,5).map(l=>(
+                  <div key={l.id} style={{fontSize:11,color:"#888",marginBottom:3}}>
+                    <span style={{color:"#aaa"}}>{fmtTsFull(l.ts)}</span> · <span style={{color:"#ddd"}}>{l.user}</span> · {l.detail}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        {!ownerLoading && ownerTab==="users" && (
+          <div>
+            {Object.entries(allUsers).sort((a,b)=>a[0].localeCompare(b[0])).map(([login,grps])=>(
+              <div key={login} style={{background:"#16213e",borderRadius:12,padding:"12px 16px",marginBottom:8}}>
+                <div style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:6}}>👤 {login}</div>
+                {grps.map((g,i)=>(
+                  <div key={i} style={{fontSize:12,color:"#888",marginBottom:3}}>
+                    📁 {g.group} <span style={{color:"#555"}}>({g.code})</span> · 身分：<span style={{color:"#81C784"}}>{g.as}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
 
   // ── Export Modal ─────────────────────────────────────────────────
   if(exportModal) return (
