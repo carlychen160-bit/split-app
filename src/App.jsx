@@ -323,6 +323,11 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
     const splits = calcSplits(splitMode, splitMode==="equal"?splitMembers:splitData, splitMembers, pt);
     const paidSum = payers.reduce((s,p)=>s+(parseFloat(p.amount)||0),0);
     if(Math.abs(paidSum-pt)>0.1){alert(`付款金額加總 NT$${paidSum} 與總金額 NT$${pt} 不符`);return;}
+    // Validate split total matches expense total (for "amount" mode)
+    if(splitMode==="amount") {
+      const splitSum = Object.values(splits).reduce((s,v)=>s+v,0);
+      if(Math.abs(splitSum-pt)>0.1){alert(`分帳金額加總 NT$${splitSum.toFixed(0)} 與總金額 NT$${pt} 不符，請確認金額`);return;}
+    }
     const ts = new Date(`${date}T${hour}:${min}:00`).toISOString();
     onSave({name,total:pt,date,ts,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
@@ -346,14 +351,14 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
       {/* 日期 + 小時 : 分鐘 */}
       <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center"}}>
         <input type="date" value={date} onChange={e=>setDate(e.target.value)}
-          style={{...iStyle,marginBottom:0,flex:1,minHeight:40,fontSize:13}}/>
+          style={{...iStyle,marginBottom:0,flex:1,height:42,fontSize:13}}/>
         <select value={hour} onChange={e=>setHour(e.target.value)}
-          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          style={{...iStyle,marginBottom:0,width:64,height:42,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
           {HOUR_OPTIONS.map(h=><option key={h} value={h}>{h}</option>)}
         </select>
         <span style={{color:T.textMute,fontSize:16,fontWeight:700,flexShrink:0}}>:</span>
         <select value={min} onChange={e=>setMin(e.target.value)}
-          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          style={{...iStyle,marginBottom:0,width:64,height:42,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
           {MIN_OPTIONS.map(m=><option key={m} value={m}>{m}</option>)}
         </select>
       </div>
@@ -376,11 +381,16 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
 
 // ── Payment Form ──────────────────────────────────────────────────────
 function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
+  const initH = () => { const d=initial?.ts?new Date(initial.ts):new Date(); return String(d.getHours()).padStart(2,"0"); };
+  const initM = () => { const d=initial?.ts?new Date(initial.ts):new Date(); return String(Math.floor(d.getMinutes()/5)*5).padStart(2,"0"); };
   const [form,setForm] = useState(initial||{from:me,to:members.find(m=>m!==me)||members[0],amount:"",date:new Date().toISOString().slice(0,10),note:""});
+  const [hour,setHour] = useState(initH);
+  const [min,setMin] = useState(initM);
   function handleSave() {
     if(!form.amount||parseFloat(form.amount)<=0){alert("請輸入轉帳金額");return;}
     if(form.from===form.to){alert("轉出和收款不能是同一人");return;}
-    onSave({...form,amount:parseFloat(form.amount)});
+    const ts = new Date(`${form.date}T${hour}:${min}:00`).toISOString();
+    onSave({...form,amount:parseFloat(form.amount),ts});
   }
   return (
     <div style={{background:"#F1FBF4",border:"1.5px solid #A5D6A7",borderRadius:16,padding:14,marginBottom:12,boxShadow:T.shadow}}>
@@ -398,8 +408,20 @@ function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
       </div>
       <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>金額</div>
       <input type="number" placeholder="NT$" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} style={iStyle}/>
-      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>日期</div>
-      <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} style={iStyle}/>
+      <div style={{fontSize:11,color:T.textSub,marginBottom:3,fontWeight:600}}>日期與時間</div>
+      <div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center"}}>
+        <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}
+          style={{...iStyle,marginBottom:0,flex:1,minHeight:40,fontSize:13}}/>
+        <select value={hour} onChange={e=>setHour(e.target.value)}
+          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          {HOUR_OPTIONS.map(h=><option key={h} value={h}>{h}</option>)}
+        </select>
+        <span style={{color:T.textMute,fontSize:16,fontWeight:700,flexShrink:0}}>:</span>
+        <select value={min} onChange={e=>setMin(e.target.value)}
+          style={{...iStyle,marginBottom:0,width:64,minHeight:40,padding:"0 4px",flexShrink:0,textAlign:"center"}}>
+          {MIN_OPTIONS.map(m=><option key={m} value={m}>{m}</option>)}
+        </select>
+      </div>
       <input placeholder="備註（選填）" value={form.note} onChange={e=>setForm({...form,note:e.target.value})} style={iStyle}/>
       <div style={{display:"flex",gap:8,marginTop:4}}>
         <Btn onClick={handleSave} variant="green" style={{flex:1}}>{isEdit?"💾 儲存":"✅ 確認"}</Btn>
