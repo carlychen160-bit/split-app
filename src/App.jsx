@@ -1190,7 +1190,12 @@ export default function App() {
       }));
     }
     function handleAddExpense(form) {
-      const e={id:uid(),...form};
+      // 用表單選的日期+時間，但加上當下的秒數，確保同一分鐘內多筆記錄可正確排序
+      const base = new Date(form.ts);
+      const realNow = new Date();
+      base.setSeconds(realNow.getSeconds());
+      base.setMilliseconds(realNow.getMilliseconds());
+      const e={id:uid(),...form, ts: base.toISOString()};
       updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`});
       setShowAdd(false);
     }
@@ -1206,7 +1211,9 @@ export default function App() {
       if(oldP!==newP) diffs.push(`付款：${oldP} → ${newP}`);
       if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("分帳成員變更");
       const detail=diffs.length?`編輯「${old?.name}」：${diffs.join("；")}`:`編輯「${old?.name}」（無變動）`;
-      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...form})}),{id:uid(),ts:now(),user:me,action:"編輯消費",detail});
+      // 編輯時保留原始 ts，不更新為當下時間
+      const preserved = {...form, ts: old?.ts || form.ts};
+      updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...preserved})}),{id:uid(),ts:now(),user:me,action:"編輯消費",detail});
       setEditingId(null);
     }
     function handleDeleteExpense(id) {
