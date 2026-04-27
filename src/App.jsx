@@ -45,9 +45,12 @@ function makeEqual(members, total) {
 function calcSplits(mode, data, members, total) {
   if (mode === "equal") return makeEqual(data, total);
   if (mode === "amount") {
+    // Filter out excluded members (keys starting with "~")
+    const excludedSet = new Set(Object.keys(data).filter(k=>k.startsWith("~")).map(k=>k.slice(1)));
+    const includedMembers = members.filter(m=>!excludedSet.has(m));
     const fixed = {}, equalM = [];
     let fixedSum = 0;
-    members.forEach(m => {
+    includedMembers.forEach(m => {
       const v = parseFloat(data[m]);
       if (v > 0) { fixed[m] = v; fixedSum += v; } else equalM.push(m);
     });
@@ -218,10 +221,30 @@ function CategoryPicker({value,onChange,cats}) {
 // ── Split Editor ──────────────────────────────────────────────────────
 function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
   const pt = parseFloat(total)||0;
-  const fixedSum = Object.values(data).reduce((s,v)=>s+(parseFloat(v)||0),0);
-  const equalCount = members.filter(m=>!(parseFloat(data[m])>0)).length;
+  // For amount mode: track which members are included (default all)
+  // data stores { memberName: amountString } for included members
+  // excluded members have key prefixed with "~" to mark exclusion, or simply absent
+  // We use a separate "excluded" set tracked via data keys starting with "~"
+  const excluded = new Set(Object.keys(data).filter(k=>k.startsWith("~")).map(k=>k.slice(1)));
+  const included = members.filter(m=>!excluded.has(m));
+  const fixedSum = included.reduce((s,m)=>s+(parseFloat(data[m])||0),0);
+  const equalCount = included.filter(m=>!(parseFloat(data[m])>0)).length;
   const remainder = pt - fixedSum;
   const sharePerEqual = equalCount>0 ? remainder/equalCount : 0;
+
+  function toggleExclude(m) {
+    const newData = {...data};
+    if(excluded.has(m)) {
+      // re-include: remove exclusion marker
+      delete newData[`~${m}`];
+    } else {
+      // exclude: add marker, remove any amount
+      newData[`~${m}`] = "1";
+      delete newData[m];
+    }
+    setData(newData);
+  }
+
   return (
     <div style={{marginBottom:8}}>
       <div style={{display:"flex",gap:6,marginBottom:10}}>
@@ -234,15 +257,32 @@ function SplitEditor({mode,setMode,data,setData,members,colors,total}) {
       )}
       {mode==="amount" && (
         <div>
-          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>輸入固定金額，留空則均分剩餘</div>
-          {members.map(m => (
-            <div key={m} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <Avatar name={m} color={colors[m]||"#aaa"} size={24}/>
-              <span style={{fontSize:13,color:T.text,flex:1}}>{m}</span>
-              <input type="number" placeholder={sharePerEqual>0&&!(data[m])?`≈${sharePerEqual.toFixed(0)}`:"0"} value={data[m]||""} onChange={e=>setData({...data,[m]:e.target.value})} style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
-            </div>
-          ))}
-          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>{remainder<-0.01?`⚠️ 超出 NT$${Math.abs(remainder).toFixed(0)}`:`剩餘 NT$${remainder.toFixed(0)} 由 ${equalCount} 人均分`}</div>}
+          <div style={{fontSize:11,color:T.textSub,marginBottom:6}}>勾選參與者，輸入固定金額，留空則均分剩餘</div>
+          {members.map(m => {
+            const isExcluded = excluded.has(m);
+            return (
+              <div key={m} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,opacity:isExcluded?0.4:1}}>
+                {/* Checkbox */}
+                <div onClick={()=>toggleExclude(m)} style={{width:20,height:20,borderRadius:6,border:`2px solid ${isExcluded?T.border:T.yellowDk}`,background:isExcluded?"transparent":T.yellowMd,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0}}>
+                  {!isExcluded && <span style={{fontSize:10,color:T.text,fontWeight:900}}>✓</span>}
+                </div>
+                <Avatar name={m} color={colors[m]||"#aaa"} size={24}/>
+                <span style={{fontSize:13,color:T.text,flex:1}}>{m}</span>
+                {!isExcluded && (
+                  <input type="number"
+                    placeholder={sharePerEqual>0&&!(parseFloat(data[m])>0)?`≈${sharePerEqual.toFixed(0)}`:"0"}
+                    value={data[m]||""}
+                    onChange={e=>setData({...data,[m]:e.target.value})}
+                    style={{...iStyle,width:90,marginBottom:0,textAlign:"right"}}/>
+                )}
+              </div>
+            );
+          })}
+          {pt>0 && <div style={{fontSize:11,color:remainder<-0.01?T.accent:T.green,marginTop:4}}>
+            {remainder<-0.01
+              ? `⚠️ 超出 NT$${Math.abs(remainder).toFixed(0)}`
+              : `剩餘 NT$${remainder.toFixed(0)} 由 ${equalCount} 人均分`}
+          </div>}
         </div>
       )}
       {mode==="ratio" && (
@@ -1341,7 +1381,9 @@ export default function App() {
                         </Card>
                       );
                     }
-                    const e=item, myShare=e.splits[myOriginalName]||0, participants=Object.keys(e.splits);
+                    const e=item, myShare=e.splits[myOriginalName]||0;
+                    // Sort participants by members array order for consistency
+                    const participants=members.filter(m=>Object.keys(e.splits).includes(m));
                     const cat=getCat(e.category,cats), iAmPayer=e.payers.some(p=>p.name===myOriginalName);
                     if(editingId===e.id) return (
                       <ExpenseForm key={e.id} initial={{name:e.name,total:String(e.total),date:e.date,category:e.category||"food",payers:e.payers||[{name:members[0],amount:String(e.total)}],splitMode:e.splitMode||"equal",splitData:e.splitData||{},splits:e.splits}} members={members} colors={colors} cats={cats} onSave={handleEditExpense} onCancel={()=>setEditingId(null)} onDelete={()=>handleDeleteExpense(e.id)}/>
