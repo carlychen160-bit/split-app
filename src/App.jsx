@@ -1251,8 +1251,12 @@ export default function App() {
       if(oldP!==newP) diffs.push(`付款：${oldP} → ${newP}`);
       if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("分帳成員變更");
       const detail=diffs.length?`編輯「${old?.name}」：${diffs.join("；")}`:`編輯「${old?.name}」（無變動）`;
-      // 編輯時保留原始 ts，不更新為當下時間
-      const preserved = {...form, ts: old?.ts || form.ts};
+      // 只有當使用者調整了時間（HH:MM）時才更新 ts，否則保留原始 ts（含秒數）
+      const oldHHMM = old?.ts ? fmtTs(old.ts) : null;
+      const newHHMM = form.ts ? fmtTs(form.ts) : null;
+      const timeChanged = oldHHMM !== newHHMM || old?.date !== form.date;
+      const finalTs = timeChanged ? form.ts : (old?.ts || form.ts);
+      const preserved = {...form, ts: finalTs};
       updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...preserved})}),{id:uid(),ts:now(),user:me,action:"編輯消費",detail});
       setEditingId(null);
     }
