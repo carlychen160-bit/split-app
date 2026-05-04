@@ -566,7 +566,12 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
           {/* 選中分類時顯示該分類的明細清單 */}
           {selCat && (()=>{
             const catExpenses = expenses
-              .filter(e=>(e.category||"misc")===selCat.id)
+              .filter(e=>{
+                if((e.category||"misc")!==selCat.id) return false;
+                // 個人模式：只顯示有分帳到 viewMember 的明細
+                if(viewMode==="personal") return (e.splits[viewMember]||0) > 0;
+                return true;
+              })
               .sort((a,b)=>(b.ts||b.id).localeCompare(a.ts||a.id));
             if(catExpenses.length===0) return null;
             return (
