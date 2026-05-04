@@ -36,6 +36,18 @@ function fmtTsFull(ts) {
   const d=new Date(ts);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }
+// 把「本地日期 + 本地時間」轉成 ISO string，避免時區偏移導致日期跑掉
+function localToISO(dateStr, hourStr, minStr, secMs="") {
+  const d = new Date();
+  const [y,mo,day] = dateStr.split("-").map(Number);
+  d.setFullYear(y, mo-1, day);
+  d.setHours(Number(hourStr), Number(minStr), 0, 0);
+  if(secMs) {
+    const [sec, ms] = secMs.split(".").map(Number);
+    d.setSeconds(sec||0, ms||0);
+  }
+  return d.toISOString();
+}
 
 function makeEqual(members, total) {
   const share = total / members.length;
@@ -368,7 +380,7 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
       const splitSum = Object.values(splits).reduce((s,v)=>s+v,0);
       if(Math.abs(splitSum-pt)>0.1){alert(`分帳金額加總 NT$${splitSum.toFixed(0)} 與總金額 NT$${pt} 不符，請確認金額`);return;}
     }
-    const ts = new Date(`${date}T${hour}:${min}:00`).toISOString();
+    const ts = localToISO(date, hour, min);
     onSave({name,total:pt,date,ts,category,payers:payers.map(p=>({name:p.name,amount:parseFloat(p.amount)||0})),splits,splitMode,splitData});
   }
   const handleTotalChange = (val) => {
@@ -429,7 +441,7 @@ function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
   function handleSave() {
     if(!form.amount||parseFloat(form.amount)<=0){alert("請輸入轉帳金額");return;}
     if(form.from===form.to){alert("轉出和收款不能是同一人");return;}
-    const ts = new Date(`${form.date}T${hour}:${min}:00`).toISOString();
+    const ts = localToISO(form.date, hour, min);
     onSave({...form,amount:parseFloat(form.amount),ts});
   }
   return (
@@ -550,6 +562,43 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
               </div>
             );
           })}
+
+          {/* 選中分類時顯示該分類的明細清單 */}
+          {selCat && (()=>{
+            const catExpenses = expenses
+              .filter(e=>(e.category||"misc")===selCat.id)
+              .sort((a,b)=>(b.ts||b.id).localeCompare(a.ts||a.id));
+            if(catExpenses.length===0) return null;
+            return (
+              <div style={{marginTop:12}}>
+                <div style={{fontSize:11,color:T.textSub,fontWeight:700,marginBottom:8}}>
+                  {selCat.icon} {selCat.label} 明細
+                </div>
+                {catExpenses.map(e=>{
+                  const myAmt = viewMode==="personal" ? (e.splits[viewMember]||0) : e.total;
+                  const payers = e.payers.map(p=>`${p.name} NT$${p.amount}`).join("、");
+                  const participants = Object.keys(e.splits);
+                  return (
+                    <div key={e.id} style={{background:T.bgCard,border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+                        <div>
+                          <span style={{fontSize:13,fontWeight:700,color:T.text}}>{e.name}</span>
+                          <span style={{fontSize:10,color:T.textMute,marginLeft:6}}>{e.date}{e.ts?` · ${fmtTs(e.ts)}`:""}</span>
+                        </div>
+                        <span style={{fontSize:14,fontWeight:800,color:T.text,flexShrink:0,marginLeft:8}}>
+                          NT${myAmt%1===0?myAmt.toFixed(0):myAmt.toFixed(2)}
+                        </span>
+                      </div>
+                      <div style={{fontSize:11,color:T.textSub}}>付款：{payers}</div>
+                      <div style={{fontSize:11,color:T.textMute,marginTop:2}}>
+                        分攤：{participants.join("、")}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </>
       )}
     </div>
@@ -1230,7 +1279,7 @@ export default function App() {
       }));
     }
     function handleAddExpense(form) {
-      // 用表單選的日期+時間，但加上當下的秒數，確保同一分鐘內多筆記錄可正確排序
+      // form.ts 已用 localToISO 建立（本地時間），加上當下真實秒數確保同分鐘內排序正確
       const base = new Date(form.ts);
       const realNow = new Date();
       base.setSeconds(realNow.getSeconds());
