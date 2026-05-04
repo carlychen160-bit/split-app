@@ -355,11 +355,11 @@ function ExpenseForm({initial,members,colors,cats,onSave,onCancel,onDelete}) {
   const [total,setTotal] = useState(initial.total||"");
   const [date,setDate] = useState(initial.date||new Date().toISOString().slice(0,10));
   const initHour = () => {
-    const d = initial.ts ? new Date(initial.ts) : new Date();
+    const d = initial?.ts ? new Date(initial.ts) : new Date();
     return String(d.getHours()).padStart(2,"0");
   };
   const initMin = () => {
-    const d = initial.ts ? new Date(initial.ts) : new Date();
+    const d = initial?.ts ? new Date(initial.ts) : new Date();
     return String(Math.floor(d.getMinutes()/5)*5).padStart(2,"0");
   };
   const [hour,setHour] = useState(initHour);
@@ -485,7 +485,7 @@ function PaymentForm({members,me,onSave,onCancel,onDelete,initial,isEdit}) {
 }
 
 // ── Analytics Tab ─────────────────────────────────────────────────────
-function AnalyticsTab({expenses,members,colors,cats,me}) {
+function AnalyticsTab({expenses=[],members=[],colors={},cats,me}) {
   const [viewMode,setViewMode] = useState("personal");
   const [viewMember,setViewMember] = useState(me);
   const [selectedCat,setSelectedCat] = useState(null);
@@ -564,48 +564,47 @@ function AnalyticsTab({expenses,members,colors,cats,me}) {
           })}
 
           {/* 選中分類時顯示該分類的明細清單 */}
-          {selCat && (()=>{
-            const catExpenses = expenses
-              .filter(e=>{
-                if((e.category||"misc")!==selCat.id) return false;
-                // 個人模式：只顯示有分帳到 viewMember 的明細
-                if(viewMode==="personal") return (e.splits[viewMember]||0) > 0;
-                return true;
-              })
-              .sort((a,b)=>(b.ts||b.id).localeCompare(a.ts||a.id));
-            if(catExpenses.length===0) return null;
-            return (
-              <div style={{marginTop:12}}>
-                <div style={{fontSize:11,color:T.textSub,fontWeight:700,marginBottom:8}}>
-                  {selCat.icon} {selCat.label} 明細
-                </div>
-                {catExpenses.map(e=>{
-                  const myAmt = viewMode==="personal" ? (e.splits[viewMember]||0) : e.total;
-                  const payers = e.payers.map(p=>`${p.name} NT$${p.amount}`).join("、");
-                  const participants = Object.keys(e.splits);
-                  return (
-                    <div key={e.id} style={{background:T.bgCard,border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
-                        <div>
-                          <span style={{fontSize:13,fontWeight:700,color:T.text}}>{e.name}</span>
-                          <span style={{fontSize:10,color:T.textMute,marginLeft:6}}>{e.date}{e.ts?` · ${fmtTs(e.ts)}`:""}</span>
-                        </div>
-                        <span style={{fontSize:14,fontWeight:800,color:T.text,flexShrink:0,marginLeft:8}}>
-                          NT${myAmt%1===0?myAmt.toFixed(0):myAmt.toFixed(2)}
-                        </span>
-                      </div>
-                      <div style={{fontSize:11,color:T.textSub}}>付款：{payers}</div>
-                      <div style={{fontSize:11,color:T.textMute,marginTop:2}}>
-                        分攤：{participants.join("、")}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })()}
+          {selCat && catExpenseList(selCat, expenses, viewMode, viewMember, cats)}
         </>
       )}
+    </div>
+  );
+}
+
+function catExpenseList(selCat, expenses, viewMode, viewMember, cats) {
+  const catExpenses = expenses
+    .filter(e => {
+      if((e.category||"misc") !== selCat.id) return false;
+      if(viewMode==="personal") return (e.splits[viewMember]||0) > 0;
+      return true;
+    })
+    .sort((a,b) => (b.ts||b.id).localeCompare(a.ts||a.id));
+  if(catExpenses.length === 0) return null;
+  return (
+    <div style={{marginTop:12}}>
+      <div style={{fontSize:11,color:T.textSub,fontWeight:700,marginBottom:8}}>
+        {selCat.icon} {selCat.label} 明細
+      </div>
+      {catExpenses.map(e => {
+        const myAmt = viewMode==="personal" ? (e.splits[viewMember]||0) : e.total;
+        const payers = e.payers.map(p=>`${p.name} NT$${p.amount}`).join("、");
+        const participants = Object.keys(e.splits);
+        return (
+          <div key={e.id} style={{background:"#FFFFFF",border:`1.5px solid ${T.border}`,borderRadius:12,padding:"10px 12px",marginBottom:6}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+              <div>
+                <span style={{fontSize:13,fontWeight:700,color:T.text}}>{e.name}</span>
+                <span style={{fontSize:10,color:T.textMute,marginLeft:6}}>{e.date}{e.ts?` · ${fmtTs(e.ts)}`:""}</span>
+              </div>
+              <span style={{fontSize:14,fontWeight:800,color:T.text,flexShrink:0,marginLeft:8}}>
+                NT${myAmt%1===0?myAmt.toFixed(0):myAmt.toFixed(2)}
+              </span>
+            </div>
+            <div style={{fontSize:11,color:T.textSub}}>付款：{payers}</div>
+            <div style={{fontSize:11,color:T.textMute,marginTop:2}}>分攤：{participants.join("、")}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1339,7 +1338,8 @@ export default function App() {
       updateGroup(x=>({...x,payments:(x.payments||[]).filter(pm=>pm.id!==id)}),{id:uid(),ts:now(),user:me,action:"刪除轉帳",detail:`刪除 ${p?.from} → ${p?.to} NT$${p?.amount}`});
       setEditingPaymentId(null);
     }
-    const emptyForm=()=>({name:"",total:"",date:new Date().toISOString().slice(0,10),category:"food",payers:[{name:myOriginalName,amount:""}],splitMode:"equal",splitData:{},splits:{}});
+    const todayLocal = ()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+    const emptyForm=()=>({name:"",total:"",date:todayLocal(),category:"food",payers:[{name:myOriginalName,amount:""}],splitMode:"equal",splitData:{},splits:{}});
     const TABS=[["expenses","明細"],["settle","結算"],["analytics","分析"],["logs","紀錄"],
       ...(isAdminUser ? [["config","設定"]] : [])
     ];
