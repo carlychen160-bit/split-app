@@ -1444,7 +1444,7 @@ export default function App() {
                     const participants=members.filter(m=>Object.keys(e.splits).includes(m));
                     const cat=getCat(e.category,cats), iAmPayer=e.payers.some(p=>p.name===myOriginalName);
                     if(editingId===e.id) return (
-                      <ExpenseForm key={e.id} initial={{name:e.name,total:String(e.total),date:e.date,category:e.category||"food",payers:e.payers||[{name:members[0],amount:String(e.total)}],splitMode:e.splitMode||"equal",splitData:e.splitData||{},splits:e.splits}} members={members} colors={colors} cats={cats} onSave={handleEditExpense} onCancel={()=>setEditingId(null)} onDelete={()=>handleDeleteExpense(e.id)}/>
+                      <ExpenseForm key={e.id} initial={{name:e.name,total:String(e.total),date:e.date,ts:e.ts||null,category:e.category||"food",payers:e.payers||[{name:members[0],amount:String(e.total)}],splitMode:e.splitMode||"equal",splitData:e.splitData||{},splits:e.splits}} members={members} colors={colors} cats={cats} onSave={handleEditExpense} onCancel={()=>setEditingId(null)} onDelete={()=>handleDeleteExpense(e.id)}/>
                     );
                     return (
                       <Card key={e.id} onClick={()=>{setEditingId(e.id);setShowAdd(false);setShowPayment(false);setEditingPaymentId(null);}} style={{borderColor:iAmPayer?T.yellowMd:T.border,background:iAmPayer?"#FFFDE7":T.bgCard}}>
