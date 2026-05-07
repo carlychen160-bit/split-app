@@ -619,6 +619,7 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
   const [newMemberName,setNewMemberName] = useState("");
   const [editingGroupName,setEditingGroupName] = useState(false);
   const [groupNameInput,setGroupNameInput] = useState(group.name);
+  const [groupIconInput,setGroupIconInput] = useState(group.icon||"🏝️");
 
   function saveGroup(updater,detail) {
     setGroups(prev=>prev.map(g=>{
@@ -635,6 +636,16 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
     if(!name) return;
     saveGroup(g=>({...g,name}),`群組名稱改為「${name}」`);
     setEditingGroupName(false);
+  }
+
+  function handleSaveGroupIcon(icon) {
+    if(!icon.trim()) return;
+    saveGroup(g=>({...g,icon:icon.trim()}),`群組圖示改為「${icon.trim()}」`);
+  }
+
+  function handleToggleStatus() {
+    const next = group.status==="ended" ? "active" : "ended";
+    saveGroup(g=>({...g,status:next}),`群組狀態改為「${next==="ended"?"已結束":"進行中"}」`);
   }
 
   async function handleDeleteGroup() {
@@ -826,21 +837,41 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
             <Card style={{padding:"12px 14px",borderColor:T.yellowMd,background:T.yellowLt}}>
               <div style={{fontSize:12,color:T.yellowDk,fontWeight:700,marginBottom:12}}>👑 管理員設定</div>
 
-              {/* 群組名稱 */}
+              {/* 群組圖示 + 群組名稱（同一行） */}
               <div style={{marginBottom:14}}>
-                <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>群組名稱</div>
-                {editingGroupName?(
-                  <div style={{display:"flex",gap:8}}>
-                    <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleSaveGroupName()} style={{...iStyle,flex:1,marginBottom:0}}/>
-                    <Btn onClick={handleSaveGroupName} style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>儲存</Btn>
-                    <Btn onClick={()=>{setEditingGroupName(false);setGroupNameInput(group.name);}} variant="secondary" style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>取消</Btn>
+                <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>群組圖示與名稱</div>
+                {editingGroupName ? (
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    {/* Icon editor */}
+                    <input value={groupIconInput} onChange={e=>{const v=e.target.value;setGroupIconInput(v.slice(-2)||v.slice(-1)||"");}} placeholder="🏝️"
+                      style={{...iStyle,marginBottom:0,width:52,textAlign:"center",fontSize:22,padding:"6px 4px",flexShrink:0}}/>
+                    <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&(()=>{handleSaveGroupName();handleSaveGroupIcon(groupIconInput);})()} style={{...iStyle,flex:1,marginBottom:0}}/>
+                    <Btn onClick={()=>{handleSaveGroupName();handleSaveGroupIcon(groupIconInput);}} style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>儲存</Btn>
+                    <Btn onClick={()=>{setEditingGroupName(false);setGroupNameInput(group.name);setGroupIconInput(group.icon||"🏝️");}} variant="secondary" style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>取消</Btn>
                   </div>
-                ):(
+                ) : (
                   <div style={{display:"flex",alignItems:"center",gap:8,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:10,padding:"8px 12px"}}>
+                    <span style={{fontSize:22,flexShrink:0}}>{group.icon||"🏝️"}</span>
                     <span style={{flex:1,fontSize:14,fontWeight:700,color:T.text}}>{group.name}</span>
                     <Btn onClick={()=>setEditingGroupName(true)} variant="ghost" style={{padding:"2px 8px",fontSize:12}}>✏️</Btn>
                   </div>
                 )}
+              </div>
+
+              {/* 群組狀態 */}
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:11,color:T.textSub,marginBottom:6,fontWeight:600}}>群組狀態</div>
+                <div style={{display:"flex",alignItems:"center",gap:10,background:"#fff",border:`1.5px solid ${T.border}`,borderRadius:10,padding:"8px 12px"}}>
+                  <span style={{flex:1,fontSize:13,color:T.text}}>
+                    {group.status==="ended"
+                      ? <span style={{color:"#888"}}>⏹ 已結束</span>
+                      : <span style={{color:T.green}}>▶ 進行中</span>}
+                  </span>
+                  {/* Toggle switch */}
+                  <div onClick={handleToggleStatus} style={{width:48,height:26,borderRadius:13,background:group.status==="ended"?"#ccc":T.green,cursor:"pointer",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                    <div style={{position:"absolute",top:3,left:group.status==="ended"?3:23,width:20,height:20,borderRadius:"50%",background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,0.2)",transition:"left 0.2s"}}/>
+                  </div>
+                </div>
               </div>
 
               {/* 群組代碼（唯讀） */}
@@ -1349,7 +1380,11 @@ export default function App() {
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
             <button onClick={()=>{setScreen("home");setCurrentGroupId(null);}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>←</button>
             <div style={{flex:1}}>
-              <div style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</div>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:18}}>{g.icon||"🏝️"}</span>
+                <span style={{fontSize:15,fontWeight:800,color:T.text}}>{g.name}</span>
+                {g.status==="ended" && <span style={{fontSize:10,color:"#888",background:"rgba(0,0,0,0.08)",borderRadius:10,padding:"1px 6px"}}>已結束</span>}
+              </div>
               <div style={{fontSize:10,color:T.yellowDk,fontWeight:600}}>代碼 {g.code} · {members.length}人{isAdminUser?" · 👑":""}</div>
             </div>
             <button onClick={()=>{const url=`${window.location.origin}${window.location.pathname}#group/${g.code}`;navigator.clipboard.writeText(url).then(()=>alert("連結已複製！分享給朋友就能直接進入群組 🎉")).catch(()=>alert(`請複製此連結：\n${url}`));}} style={{background:"rgba(255,255,255,0.7)",border:"none",borderRadius:10,width:32,height:32,fontSize:16,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}} title="複製群組連結">🔗</button>
@@ -1717,18 +1752,43 @@ export default function App() {
       {error && <div style={{background:"#FFF0EE",border:`1.5px solid ${T.accent}44`,borderRadius:12,padding:"8px 12px",marginBottom:12,fontSize:12,color:T.accent,display:"flex",justifyContent:"space-between"}}><span>{error}</span><button onClick={()=>setError("")} style={{background:"none",border:"none",color:T.accent,cursor:"pointer"}}>✕</button></div>}
 
       {/* 我的群組 */}
-      {groups.filter(g=>(g.claimedUsers||[]).includes(currentUser)).length>0 && (
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>我的群組</div>
-          {groups.filter(g=>(g.claimedUsers||[]).includes(currentUser)).map(g => (
-            <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer"}}>
-              <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>🏝️</div>
-              <div style={{flex:1}}><div style={{fontSize:15,fontWeight:700}}>{g.name}</div><div style={{fontSize:11,color:T.textMute}}>{g.members.length} 位成員 · {g.code}{g.adminUser===currentUser?" · 👑":""}</div></div>
-              <span style={{fontSize:18,color:T.textMute}}>›</span>
-            </Card>
-          ))}
-        </div>
-      )}
+      {groups.filter(g=>(g.claimedUsers||[]).includes(currentUser)).length>0 && (()=>{
+        const myGroups = groups.filter(g=>(g.claimedUsers||[]).includes(currentUser));
+        const activeGroups = myGroups.filter(g=>g.status!=="ended");
+        const endedGroups = myGroups.filter(g=>g.status==="ended");
+        const GroupCard = ({g}) => (
+          <Card key={g.id} onClick={()=>{setCurrentGroupId(g.id);setActiveTab("expenses");setScreen("group");}} style={{display:"flex",alignItems:"center",gap:12,cursor:"pointer",opacity:g.status==="ended"?0.7:1}}>
+            <div style={{width:44,height:44,borderRadius:12,background:T.yellowLt,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,flexShrink:0}}>{g.icon||"🏝️"}</div>
+            <div style={{flex:1}}>
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:15,fontWeight:700}}>{g.name}</span>
+                {g.status==="ended" && <span style={{fontSize:10,color:"#888",background:"#eee",borderRadius:10,padding:"1px 6px"}}>已結束</span>}
+              </div>
+              <div style={{fontSize:11,color:T.textMute}}>{g.members.length} 位成員 · {g.code}{g.adminUser===currentUser?" · 👑":""}</div>
+            </div>
+            <span style={{fontSize:18,color:T.textMute}}>›</span>
+          </Card>
+        );
+        return (
+          <div style={{marginBottom:16}}>
+            {activeGroups.length>0 && (
+              <div style={{marginBottom:endedGroups.length>0?12:0}}>
+                <div style={{fontSize:12,color:T.textMute,marginBottom:10,fontWeight:700}}>我的群組</div>
+                {activeGroups.map(g=><GroupCard key={g.id} g={g}/>)}
+              </div>
+            )}
+            {endedGroups.length>0 && (
+              <div>
+                <button onClick={()=>setHomePanel(homePanel==="ended"?null:"ended")} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",marginBottom:8,padding:0,fontFamily:"inherit"}}>
+                  <span style={{fontSize:12,color:"#888",fontWeight:700}}>已結束的群組（{endedGroups.length}）</span>
+                  <span style={{fontSize:10,color:"#aaa",transition:"transform 0.2s",display:"inline-block",transform:homePanel==="ended"?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+                </button>
+                {homePanel==="ended" && endedGroups.map(g=><GroupCard key={g.id} g={g}/>)}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Accordion：建立 / 加入 ── */}
       <div style={{marginBottom:12}}>
