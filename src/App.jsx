@@ -843,7 +843,17 @@ function ConfigTab({group,setGroups,bal,me,setExportModal,onGroupDeleted,isAdmin
                 {editingGroupName ? (
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
                     {/* Icon editor */}
-                    <input value={groupIconInput} onChange={e=>{const v=e.target.value;setGroupIconInput(v.slice(-2)||v.slice(-1)||"");}} placeholder="🏝️"
+                    <input value={groupIconInput} onChange={e=>{
+                      const v=e.target.value;
+                      if(!v){setGroupIconInput("");return;}
+                      // Use Intl.Segmenter to correctly extract last grapheme cluster (handles flags, ZWJ sequences)
+                      try {
+                        const segs=[...new Intl.Segmenter().segment(v)];
+                        setGroupIconInput(segs[segs.length-1]?.segment||v.slice(-2)||v);
+                      } catch {
+                        setGroupIconInput(v.slice(-2)||v);
+                      }
+                    }} placeholder="🏝️"
                       style={{...iStyle,marginBottom:0,width:52,textAlign:"center",fontSize:22,padding:"6px 4px",flexShrink:0}}/>
                     <input value={groupNameInput} onChange={e=>setGroupNameInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&(()=>{handleSaveGroupName();handleSaveGroupIcon(groupIconInput);})()} style={{...iStyle,flex:1,marginBottom:0}}/>
                     <Btn onClick={()=>{handleSaveGroupName();handleSaveGroupIcon(groupIconInput);}} style={{flexShrink:0,padding:"9px 12px",fontSize:12}}>儲存</Btn>
@@ -1780,8 +1790,8 @@ export default function App() {
             {endedGroups.length>0 && (
               <div>
                 <button onClick={()=>setHomePanel(homePanel==="ended"?null:"ended")} style={{display:"flex",alignItems:"center",gap:6,background:"none",border:"none",cursor:"pointer",marginBottom:8,padding:0,fontFamily:"inherit"}}>
-                  <span style={{fontSize:12,color:"#888",fontWeight:700}}>已結束的群組（{endedGroups.length}）</span>
-                  <span style={{fontSize:10,color:"#aaa",transition:"transform 0.2s",display:"inline-block",transform:homePanel==="ended"?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+                  <span style={{fontSize:12,color:T.textMute,fontWeight:700}}>已結束的群組（{endedGroups.length}）</span>
+                  <span style={{fontSize:10,color:T.textMute,transition:"transform 0.2s",display:"inline-block",transform:homePanel==="ended"?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
                 </button>
                 {homePanel==="ended" && endedGroups.map(g=><GroupCard key={g.id} g={g}/>)}
               </div>
