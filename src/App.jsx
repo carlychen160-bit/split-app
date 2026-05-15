@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { db } from "./firebase";
-import { doc as fsDoc, getDoc, setDoc, onSnapshot, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { doc as fsDoc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs, deleteDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 const T = {
   bg:"#FFFDF5", bgCard:"#FFFFFF", yellow:"#FFE566", yellowDk:"#D4A017",
@@ -1323,17 +1323,44 @@ export default function App() {
         return finalGroup;
       }));
     }
+// Race-condition-safe: arrayUnion ensures concurrent writes don't overwrite each other
     function handleAddExpense(form) {
-      // form.ts 已用 localToISO 建立（本地時間），加上當下真實秒數確保同分鐘內排序正確
       const base = new Date(form.ts);
       const realNow = new Date();
       base.setSeconds(realNow.getSeconds());
       base.setMilliseconds(realNow.getMilliseconds());
       const e={id:uid(),...form, ts: base.toISOString()};
-      updateGroup(x=>({...x,expenses:[...x.expenses,e]}),{id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`});
+      const logEntry={id:uid(),ts:now(),user:me,action:"新增消費",detail:`新增「${form.name}」NT$${form.total}，${form.payers.map(p=>`${p.name}付NT$${p.amount}`).join("、")}`};
+      // Optimistic local update for instant UI feedback
+      setGroups(prev=>prev.map(x=>{
+        if(x.id!==g.id) return x;
+        return {...x, expenses:[...x.expenses,e], logs:[logEntry,...(x.logs||[])]};
+      }));
+      updateDoc(fsDoc(db,"groups",g.id), {
+        expenses: arrayUnion(e),
+        logs: arrayUnion(logEntry)
+      }).catch(err=>{
+        console.error("新增消費失敗:", err);
+        setError("⚠️ 儲存失敗，請確認網路連線後重試");
+      });
       setShowAdd(false);
     }
-    function handleEditExpense(form) {
+    function handleAddPayment(form) {
+      const p={id:uid(),ts:now(),...form};
+      const logEntry={id:uid(),ts:now(),user:me,action:"記錄轉帳",detail:`${form.from} → ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`};
+      setGroups(prev=>prev.map(x=>{
+        if(x.id!==g.id) return x;
+        return {...x, payments:[...(x.payments||[]),p], logs:[logEntry,...(x.logs||[])]};
+      }));
+      updateDoc(fsDoc(db,"groups",g.id), {
+        payments: arrayUnion(p),
+        logs: arrayUnion(logEntry)
+      }).catch(err=>{
+        console.error("記錄轉帳失敗:", err);
+        setError("⚠️ 儲存失敗，請確認網路連線後重試");
+      });
+    }
+        function handleEditExpense(form) {
       const old=expenses.find(e=>e.id===editingId);
       const diffs=[];
       if(old?.name!==form.name) diffs.push(`名稱：${old?.name} → ${form.name}`);
@@ -1345,23 +1372,40 @@ export default function App() {
       if(oldP!==newP) diffs.push(`付款：${oldP} → ${newP}`);
       if(Object.keys(old?.splits||{}).sort().join(",")!==Object.keys(form.splits||{}).sort().join(",")) diffs.push("分帳成員變更");
       const detail=diffs.length?`編輯「${old?.name}」：${diffs.join("；")}`:`編輯「${old?.name}」（無變動）`;
-      // 只有當使用者調整了時間（HH:MM）時才更新 ts，否則保留原始 ts（含秒數）
       const oldHHMM = old?.ts ? fmtTs(old.ts) : null;
       const newHHMM = form.ts ? fmtTs(form.ts) : null;
       const timeChanged = oldHHMM !== newHHMM || old?.date !== form.date;
       const finalTs = timeChanged ? form.ts : (old?.ts || form.ts);
       const preserved = {...form, ts: finalTs};
+      // Edit needs full rewrite since we're replacing one array item
       updateGroup(x=>({...x,expenses:x.expenses.map(e=>e.id!==editingId?e:{...e,...preserved})}),{id:uid(),ts:now(),user:me,action:"編輯消費",detail});
       setEditingId(null);
     }
     function handleDeleteExpense(id) {
       const e=expenses.find(x=>x.id===id);
-      updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),{id:uid(),ts:now(),user:me,action:"刪除消費",detail:`刪除「${e?.name}」NT$${e?.total}`});
+      const logEntry={id:uid(),ts:now(),user:me,action:"刪除消費",detail:`刪除「${e?.name}」NT$${e?.total}`};
+      // Use original (non-normalized) expense object for arrayRemove (must match exactly)
+      const origExp = g.expenses.find(x=>x.id===id);
+      if(origExp) {
+        updateDoc(fsDoc(db,"groups",g.id), {
+          expenses: arrayRemove(origExp),
+          logs: arrayUnion(logEntry)
+        }).catch(()=>{
+          // fallback: full rewrite if arrayRemove fails
+          updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),logEntry);
+        });
+      } else {
+        updateGroup(x=>({...x,expenses:x.expenses.filter(ex=>ex.id!==id)}),logEntry);
+      }
       setEditingId(null);
     }
     function handleAddPayment(form) {
       const p={id:uid(),ts:now(),...form};
-      updateGroup(x=>({...x,payments:[...(x.payments||[]),p]}),{id:uid(),ts:now(),user:me,action:"記錄轉帳",detail:`${form.from} → ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`});
+      const logEntry={id:uid(),ts:now(),user:me,action:"記錄轉帳",detail:`${form.from} → ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`};
+      updateDoc(fsDoc(db,"groups",g.id), {
+        payments: arrayUnion(p),
+        logs: arrayUnion(logEntry)
+      }).catch(console.error);
     }
     function handleEditPayment(form) {
       const old=payments.find(p=>p.id===editingPaymentId);
