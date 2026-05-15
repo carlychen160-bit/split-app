@@ -1399,14 +1399,6 @@ export default function App() {
       }
       setEditingId(null);
     }
-    function handleAddPayment(form) {
-      const p={id:uid(),ts:now(),...form};
-      const logEntry={id:uid(),ts:now(),user:me,action:"記錄轉帳",detail:`${form.from} → ${form.to} NT$${form.amount}${form.note?" ("+form.note+")":""}`};
-      updateDoc(fsDoc(db,"groups",g.id), {
-        payments: arrayUnion(p),
-        logs: arrayUnion(logEntry)
-      }).catch(console.error);
-    }
     function handleEditPayment(form) {
       const old=payments.find(p=>p.id===editingPaymentId);
       const diffs=[];
